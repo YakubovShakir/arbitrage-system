@@ -1,44 +1,47 @@
 use async_trait::async_trait;
 
 use crate::{
-    core::{Asks, Bids, OrderBook, fetch_data, parse_json_glass},
-    traits::ExchangeAPI,
+    core::{
+        traits::ExchangeAPI,
+        types::{Asks, Bids, OrderBook},
+    },
+    utils::{fetch_data, parse_json_glass},
 };
 use std::{collections::HashSet, error::Error};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Binance {
+pub struct Gate {
     name: String,
     api_key: String,
     secret_key: String,
     base_url: String,
-    trading_pairs: HashSet<String>,
+    excluded_trading_pairs: HashSet<String>,
 }
 
-impl Binance {
+impl Gate {
     pub fn new(
         name: &str,
         api_key: &str,
         secret_key: &str,
         base_url: &str,
-        trading_pairs: &[&str],
+        excluded_trading_pairs: &[&str],
     ) -> Self {
         let mut set: HashSet<String> = HashSet::new();
-        for pair in trading_pairs {
-            set.insert(pair.to_string());
+        for pair in excluded_trading_pairs {
+            set.insert(pair.to_string().to_uppercase());
         }
         Self {
             name: name.to_string(),
             api_key: api_key.to_string(),
             secret_key: secret_key.to_string(),
             base_url: base_url.to_string(),
-            trading_pairs: set,
+            excluded_trading_pairs: set,
         }
     }
 }
 
 #[async_trait]
-impl ExchangeAPI for Binance {
+impl ExchangeAPI for Gate {
     fn name(&self) -> &str {
         &self.name
     }
@@ -51,22 +54,32 @@ impl ExchangeAPI for Binance {
     fn base_url(&self) -> &str {
         &self.base_url
     }
-    fn is_pair_available(&self, pair: String) -> bool {
-        self.trading_pairs.contains(&pair)
+    fn is_pair_excluded(&self, quote: &str, base: &str) -> bool {
+        self.excluded_trading_pairs.contains(&format!(
+            "{}_{}",
+            quote.to_uppercase(),
+            base.to_uppercase()
+        ))
     }
     async fn fetch_order_book(&self, base: &str, quote: &str) -> Result<OrderBook, Box<dyn Error>> {
         let result = fetch_data(
-            vec![("X-MBX-APIKEY".to_string(), self.api_key().to_string())],
-            self.base_url().to_string() + "/api/v3/depth",
-            &[
-                ("symbol".to_string(), base.to_string() + quote),
-                ("limit".to_string(), "500".to_string()),
+            vec![
+                ("Accept".to_string(), "application/json".to_string()),
+                ("Content-Type".to_string(), "application/json".to_string()),
             ],
+            self.base_url().to_string() + "/spot/order_book",
+            &[(
+                "currency_pair".to_string(),
+                format!("{}_{}", base.to_string(), &quote.to_string()),
+            )],
         )
         .await?;
-
         if !result.has_key("asks") || !result.has_key("bids") {
-            return Err("Invalid response: missing 'asks' or 'bids' field".into());
+            return Err(format!(
+                "Invalid response {} : missing 'asks' or 'bids' field",
+                self.name()
+            )
+            .into());
         }
 
         let raw_asks = &result["asks"];
@@ -75,7 +88,6 @@ impl ExchangeAPI for Binance {
         if !raw_asks.is_array() || !raw_bids.is_array() {
             return Err("Invalid response: 'asks' or 'bids' is not an array".into());
         }
-
         let formated_asks: Asks = parse_json_glass(&raw_asks)?;
         let formated_bids: Bids = parse_json_glass(&raw_bids)?;
 

@@ -1,82 +1,119 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Instant};
 
 use crate::{
-    config::USDT_LIMIT, core::calc_average_price, exchanges::TradingPair, traits::ExchangeAPI,
+    config::{USDT_LIMIT, exchanges},
+    core::{
+        traits::{Exchange, Tradeble},
+        types::trading_pair::TradingPair,
+        utils::calculate_price_by_glass,
+    },
 };
 
 pub struct FetchWorker {
-    id: i16,
-    pairs: Vec<Arc<TradingPair>>,
-    exchanges: Vec<Arc<dyn ExchangeAPI>>,
+    id: usize,
+    trading_pairs: Vec<Arc<TradingPair>>,
+    exchanges: Vec<Arc<dyn Exchange>>,
 }
+
 impl FetchWorker {
+    pub fn id(&self) -> usize {
+        self.id
+    }
     pub fn new(
-        id: i16,
-        exchanges: Vec<Arc<dyn ExchangeAPI>>,
-        pairs: Vec<Arc<TradingPair>>,
+        id: usize,
+        trading_pairs: Vec<Arc<TradingPair>>,
+        exchanges: Vec<Arc<dyn Exchange>>,
     ) -> Self {
         Self {
             id,
-            pairs,
+            trading_pairs,
             exchanges,
         }
     }
     pub async fn run(&self) {
         loop {
-            for pair in &self.pairs {
-                for exchange in &self.exchanges {
-                    if exchange.is_pair_available(pair.base().to_string() + pair.quote()) {
-                        // println!(
-                        //     // "{} : Пара {}/{} -> fetching orderbook from {}",
-                        //     self.id,
-                        //     pair.base(),
-                        //     pair.quote(),
-                        //     exchange.name()
-                        // );
-                        let orderbook =
-                            match exchange.fetch_order_book(pair.base(), pair.quote()).await {
-                                Ok(book) => book,
-                                Err(e) => {
-                                    eprintln!(
-                                        "Ошибка получения стакана с {} для {}/{} - {}",
-                                        exchange.name(),
-                                        pair.base(),
-                                        pair.quote(),
-                                        e
-                                    );
-                                    continue;
-                                }
-                            };
-                        let buy_price = match calc_average_price(&USDT_LIMIT, &orderbook.0) {
-                            Some(price) => price,
-                            None => {
-                                eprintln!(
-                                    "Ошибка вычисления средней цены покупки с {} для {}/{}",
-                                    exchange.name(),
-                                    pair.base(),
-                                    pair.quote()
-                                );
-                                continue;
-                            }
-                        };
-                        let sell_price = match calc_average_price(&USDT_LIMIT, &orderbook.1) {
-                            Some(price) => price,
-                            None => {
-                                eprintln!(
-                                    "Ошибка вычисления средней цены покупки с {} для {}/{}",
-                                    exchange.name(),
-                                    pair.base(),
-                                    pair.quote()
-                                );
-                                continue;
-                            }
-                        };
-                        pair.update_buy_price(exchange.name().to_string(), buy_price);
-                        pair.update_sell_price(exchange.name().to_string(), sell_price);
-                    };
-                }
+            let start = Instant::now();
+
+            for exchange in &self.exchanges {
+                let tickets = exchange.fetch_tickets().await;
             }
+            let duration = start.elapsed();
+            println!(
+                "Фетч воркер id {} - закончил свою работу за {:?}",
+                self.id(),
+                duration
+            );
             tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
         }
     }
 }
+
+//  pub async fn run(&self) {
+//         loop {
+//             let start = Instant::now();
+//             for pair in &self.trading_pairs {
+//                 let pair_time = Instant::now();
+
+//                 for (i, exchange) in self.exchanges.iter().enumerate() {
+//                     if exchange.is_pair_excluded(pair.base(), pair.quote()) {
+//                         continue;
+//                     };
+
+//                     let orderbook = match exchange.fetch_orderbook(pair.base(), pair.quote()).await
+//                     {
+//                         Ok(book) => book,
+//                         Err(e) => {
+//                             eprintln!(
+//                                 "Ошибка получения стакана с {} для {}/{} - {}",
+//                                 exchange.name(),
+//                                 pair.base(),
+//                                 pair.quote(),
+//                                 e
+//                             );
+//                             continue;
+//                         }
+//                     };
+//                     let buy_price = match calculate_price_by_glass(&USDT_LIMIT, &orderbook.0) {
+//                         Some(price) => price,
+//                         None => {
+//                             // eprintln!(
+//                             //     "Не удалось посчитать среднюю цену покупки {}/{} на {} - возможно не хватает объема в стакане",
+//                             //     pair.base(),
+//                             //     pair.quote(),
+//                             //     exchange.name(),
+//                             // );
+//                             continue;
+//                         }
+//                     };
+//                     let sell_price = match calculate_price_by_glass(&USDT_LIMIT, &orderbook.1) {
+//                         Some(price) => price,
+//                         None => {
+//                             // eprintln!(
+//                             //     "Не удалось посчитать среднюю цену продажи {}/{} на {} - возможно не хватает объема в стакане",
+//                             //     pair.base(),
+//                             //     pair.quote(),
+//                             //     exchange.name(),
+//                             // );
+//                             continue;
+//                         }
+//                     };
+//                     pair.update_buy_price(i, buy_price);
+//                     pair.update_sell_price(i, sell_price);
+//                 }
+//                 let pair_time_elapsed = pair_time.elapsed();
+//                 println!(
+//                     "Фетч воркер id {} - обработал пару {} за {:?}",
+//                     self.id(),
+//                     pair.base(),
+//                     pair_time_elapsed
+//                 );
+//             }
+//             let duration = start.elapsed();
+//             println!(
+//                 "Фетч воркер id {} - закончил свою работу за {:?}",
+//                 self.id(),
+//                 duration
+//             );
+//             tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
+//         }
+//     }

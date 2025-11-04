@@ -1,13 +1,13 @@
-use crate::{
-    core::{Asks, Bids, HmacSha256, OrderBook, fetch_data, parse_json_glass},
-    traits::ExchangeAPI,
-};
+use std::{collections::HashSet, error::Error};
+
 use async_trait::async_trait;
-use hmac::Mac;
-use std::{
-    collections::HashSet,
-    error::Error,
-    time::{SystemTime, UNIX_EPOCH},
+
+use crate::{
+    core::{
+        traits::ExchangeAPI,
+        types::{Asks, Bids, OrderBook},
+    },
+    utils::{encrypt_hmac_sha256, fetch_data, get_current_timestamp, hex_encode, parse_json_glass},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -16,7 +16,7 @@ pub struct Bybit {
     api_key: String,
     secret_key: String,
     base_url: String,
-    trading_pairs: HashSet<String>,
+    excluded_trading_pairs: HashSet<String>,
 }
 
 impl Bybit {
@@ -25,21 +25,22 @@ impl Bybit {
         api_key: &str,
         secret_key: &str,
         base_url: &str,
-        trading_pairs: &[&str],
+        excluded_trading_pairs: &[&str],
     ) -> Self {
         let mut set: HashSet<String> = HashSet::new();
-        for pair in trading_pairs {
-            set.insert(pair.to_string());
+        for pair in excluded_trading_pairs {
+            set.insert(pair.to_string().to_uppercase());
         }
         Self {
             name: name.to_string(),
             api_key: api_key.to_string(),
             secret_key: secret_key.to_string(),
             base_url: base_url.to_string(),
-            trading_pairs: set,
+            excluded_trading_pairs: set,
         }
     }
 }
+
 #[async_trait]
 impl ExchangeAPI for Bybit {
     fn api_key(&self) -> &str {
@@ -54,8 +55,12 @@ impl ExchangeAPI for Bybit {
     fn name(&self) -> &str {
         &self.name
     }
-    fn is_pair_available(&self, pair: String) -> bool {
-        self.trading_pairs.contains(&pair)
+    fn is_pair_excluded(&self, quote: &str, base: &str) -> bool {
+        self.excluded_trading_pairs.contains(&format!(
+            "{}_{}",
+            quote.to_uppercase(),
+            base.to_uppercase()
+        ))
     }
     async fn fetch_order_book(&self, base: &str, quote: &str) -> Result<OrderBook, Box<dyn Error>> {
         let recv_window = 5000;
@@ -66,20 +71,13 @@ impl ExchangeAPI for Bybit {
             base.to_string() + quote,
             order_book_limit,
         );
-        let timestamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)?
-            .as_millis()
-            .to_string();
+        let timestamp = get_current_timestamp()?;
 
         let signature =
             timestamp.clone() + self.api_key() + &recv_window.to_string() + &query_string;
 
-        let signed_hex = hex::encode(
-            HmacSha256::new_from_slice(self.secret_key().as_bytes())?
-                .chain_update(signature.as_bytes())
-                .finalize()
-                .into_bytes(),
-        );
+        let signed_hex = hex_encode(encrypt_hmac_sha256(&self.secret_key, &signature)?);
+
         let headers = vec![
             ("X-BAPI-API-KEY".to_string(), self.api_key().to_string()),
             ("X-BAPI-RECV-WINDOW".to_string(), recv_window.to_string()),
@@ -98,7 +96,7 @@ impl ExchangeAPI for Bybit {
         .await?;
 
         if result["retMsg"] != "OK" {
-            return Err("Fail fetch bybit order book".into());
+            return Err(format!("Fail fetch {} order book", self.name()).into());
         }
 
         let raw_asks = &result["result"]["a"];
