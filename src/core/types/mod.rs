@@ -1,5 +1,9 @@
+use std::collections::HashMap;
+
 use hmac::Hmac;
 use sha2::Sha256;
+
+use crate::core::types::trading_pair::{PriceData, TradingPair};
 
 pub mod trading_pair;
 
@@ -24,3 +28,7 @@ pub type Value = String;
 pub type KeyValue = (Key, Value);
 
 pub type HmacSha256 = Hmac<Sha256>;
+
+pub type ExchangeName = String;
+
+pub type TradingPairs = HashMap<TradingPair, PriceData>;

@@ -1,15 +1,29 @@
+use std::{collections::HashMap, time::Duration};
+
 use arbitrage_system::{
-    config::PAIRS_PER_THREAD,
-    core::utils::print_dashboard,
-    init::{exchanges::get_exchanges, trading_pairs::get_trading_pairs},
-    workers::{FetchWorker, comput_worker::ComputWorker},
+    core::traits::Workable, init::exchanges::get_exchanges, workers::ticker_worker::TickerWorker,
 };
+
+// use arbitrage_system::{
+//     // config::PAIRS_PER_THREAD, core::types::trading_pair::{PriceData, TradingPair}, init::exchanges::get_exchanges
+//     // core::{net::websocket::WebSocketClient, utils::print_dashboard},
+//     // init::{exchanges::get_exchanges, trading_pairs::get_trading_pairs},
+//     // workers::{FetchWorker, comput_worker::ComputWorker, ticker_worker::TickerWorker},
+// };
 
 #[tokio::main]
 async fn main() {
     let exchanges = get_exchanges().await;
-    let trading_pairs = get_trading_pairs();
+    // let trading_pairs = get_trading_pairs();
 
+    let mut tasks = Vec::new();
+
+    let ticker_task = tokio::spawn(async move {
+        let worker = TickerWorker::new(0, exchanges);
+        worker.run().await;
+    });
+
+    tasks.push(ticker_task);
     // let mut tasks = Vec::new();
 
     // let exchanges_clone = exchanges.clone();
@@ -62,7 +76,7 @@ async fn main() {
     //     PAIRS_PER_THREAD
     // );
 
-    // for task in tasks {
-    //     task.await.unwrap();
-    // }
+    for task in tasks {
+        task.await.unwrap();
+    }
 }

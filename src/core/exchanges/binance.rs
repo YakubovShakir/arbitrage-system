@@ -1,12 +1,22 @@
 use async_trait::async_trait;
+use json::JsonValue;
 
 use crate::core::{
     net::{http::HttpClient, websocket::WebSocketClient},
-    traits::exchange_service::{Exchange, ExchangeService, ExchangeStatic},
-    types::{Asks, Bids, OrderBook},
+    traits::{ExchangeService, ExchangeStatic},
+    types::{
+        Asks, Bids, OrderBook, TradingPairs,
+        trading_pair::{PriceData, TradingPair},
+    },
     utils::parse_string_typed_glass,
 };
-use std::{collections::HashSet, error::Error};
+use core::f64;
+use std::{
+    collections::{HashMap, HashSet},
+    error::Error,
+    hash::Hash,
+    time::Duration,
+};
 
 #[derive(Debug)]
 pub struct Binance {
@@ -16,7 +26,7 @@ pub struct Binance {
     base_url: String,
     excluded_trading_pairs: HashSet<String>,
     http_client: HttpClient,
-    ws_client: WebSocketClient,
+    websocket_client: WebSocketClient,
 }
 
 impl Binance {
@@ -32,11 +42,6 @@ impl Binance {
         for excluded_pair in excluded_trading_pairs {
             set.insert(excluded_pair.to_string().to_uppercase());
         }
-        let mut ws_client = WebSocketClient::new(websocket_url);
-        let _ = ws_client.connect().await;
-
-        let subscribe_msg = r#"{"method":"SUBSCRIBE","params":["!ticker@arr"],"id":1}"#;
-        ws_client.send_message(subscribe_msg).await;
 
         Ok(Self {
             name: name.to_string(),
@@ -45,7 +50,7 @@ impl Binance {
             base_url: base_url.to_string(),
             excluded_trading_pairs: set,
             http_client: HttpClient::new(base_url)?,
-            ws_client,
+            websocket_client: WebSocketClient::new(websocket_url),
         })
     }
 }
@@ -63,9 +68,7 @@ impl ExchangeStatic for Binance {
     fn base_url(&self) -> &str {
         &self.base_url
     }
-    fn tickets(&self) -> &str {
-        &self.tickets
-    }
+
     fn is_pair_excluded(&self, quote: &str, base: &str) -> bool {
         self.excluded_trading_pairs.contains(&format!(
             "{}_{}",
@@ -77,13 +80,42 @@ impl ExchangeStatic for Binance {
 
 #[async_trait]
 impl ExchangeService for Binance {
-    async fn fetch_tickets(&self) {
-        match self.ws_client.read_message().await {
-            Some(tickets) => {
-                println!("{}", tickets)
+    async fn fetch_tickers(&self) -> Option<TradingPairs> {
+        // Просто запускаем, игнорируем ошибки соединения
+        match self.websocket_client.get_state().await {
+            None => {
+                let client = self.websocket_client.clone();
+                tokio::spawn(async move {
+                    client
+                        .run_with_reconnect(Some(
+                            r#"{"method":"SUBSCRIBE","params":["!ticker@arr"],"id":1}"#,
+                        ))
+                        .await;
+                });
+                None
             }
-            None => (),
-        };
+            Some(state) => {
+                let parsed_tickers =
+                    json::parse(&state).expect("Cannot parse ticker response from BINANCE to JSON");
+                let mut trading_pairs: TradingPairs = HashMap::new();
+                for ticker in parsed_tickers.members() {
+                    let symbol = &ticker["s"];
+                    let last_price = &ticker["c"];
+                    if let Some(trading_pair) = TradingPair::from_str(&symbol.to_string()) {
+                        if let Ok(price) = last_price.as_str()?.parse::<f64>() {
+                            trading_pairs.insert(
+                                trading_pair,
+                                PriceData::new(
+                                    (self.name.clone(), price),
+                                    (self.name.clone(), price),
+                                ),
+                            );
+                        }
+                    }
+                }
+                return Some(trading_pairs);
+            }
+        }
     }
 
     async fn fetch_orderbook(&self, base: &str, quote: &str) -> Result<OrderBook, Box<dyn Error>> {
