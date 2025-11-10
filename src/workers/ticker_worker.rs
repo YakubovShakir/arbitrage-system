@@ -44,11 +44,16 @@ impl Workable for TickerWorker {
                     println!("❌ Не получили тикеры от биржи {}", exchange.name());
                     continue;
                 };
-
                 let mut global_pairs = self.trading_pairs.write().await;
 
                 for (new_trading_pair, new_price_data) in new_tickers {
                     let Some(existing_price) = global_pairs.get(&new_trading_pair) else {
+                        // println!(
+                        //     "Пара {}/{} с биржи {} добавлена в глобальную хеш мапу",
+                        //     new_trading_pair.base,
+                        //     new_trading_pair.quote,
+                        //     exchange.name(),
+                        // );
                         global_pairs.insert(new_trading_pair, new_price_data);
                         continue;
                     };

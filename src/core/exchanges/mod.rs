@@ -1,6 +1,6 @@
 pub mod binance;
 // pub mod bitget;
-// pub mod bybit;
+pub mod bybit;
 // pub mod gate;
 // pub mod huobi;
 // pub mod kucoin;
@@ -8,7 +8,7 @@ pub mod binance;
 // pub mod mexc;
 pub use binance::Binance;
 // pub use bitget::Bitget;
-// pub use bybit::Bybit;
+pub use bybit::Bybit;
 // pub use huobi::Huobi;
 // pub use kucoin::Kucoin;
 // pub use lbank::Lbank;

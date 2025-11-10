@@ -2,6 +2,7 @@ pub const NAME: &str = "Bybit";
 pub const API_KEY: &str = "HoQkNAtdKqhZMCs5Q8";
 pub const SECRET_KEY: &str = "40HqerA7FQqTLbmGhw8egR9jjIMIR60xn8vo";
 pub const BASE_URL: &str = "https://api.bybit.com";
+pub const WEBSOCKET_URL: &str = "wss://stream.bybit.com/v5/public/spot";
 pub const EXCLUDED_PAIRS: &[&str] = &[
     "LEO_USDT",
     "PAXG_USDT",

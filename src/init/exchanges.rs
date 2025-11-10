@@ -1,5 +1,5 @@
 use crate::config;
-use crate::core::exchanges::Binance;
+use crate::core::exchanges::{Binance, Bybit};
 use crate::core::traits::Exchange;
 // use crate::core::exchanges::gate::Gate;
 // use crate::core::exchanges::{Bitget, Kucoin, Lbank};
@@ -23,13 +23,18 @@ pub async fn get_exchanges() -> Vec<Arc<dyn Exchange>> {
         },
     );
 
-    // let bybit: Arc<dyn ExchangeAPI> = Arc::new(Bybit::new(
-    //     config::bybit::NAME,
-    //     config::bybit::API_KEY,
-    //     config::bybit::SECRET_KEY,
-    //     config::bybit::BASE_URL,
-    //     config::bybit::EXCLUDED_PAIRS,
-    // ));
+    let bybit: Arc<Bybit> = Arc::new(
+        match Bybit::new(
+            config::bybit::NAME,
+            config::bybit::API_KEY,
+            config::bybit::SECRET_KEY,
+            config::bybit::BASE_URL,
+            config::bybit::EXCLUDED_PAIRS,
+        ) {
+            Ok(bybit) => bybit,
+            _ => panic!(),
+        },
+    );
 
     // let mexc: Arc<dyn ExchangeAPI> = Arc::new(Mexc::new(
     //     config::mexc::NAME,
@@ -77,5 +82,5 @@ pub async fn get_exchanges() -> Vec<Arc<dyn Exchange>> {
     //     config::gate::EXCLUDED_PAIRS,
     // ));
     // vec![binance, bybit, mexc, huobi, bitget, lbank, kucoin, gate]
-    vec![binance]
+    vec![binance, bybit]
 }
