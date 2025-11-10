@@ -99,7 +99,6 @@ impl WebSocketClient {
                     Ok(Message::Text(text)) => {
                         let mut state_guard = state.write().await;
                         *state_guard = Some(text.to_string());
-                        println!("💾 [WebSocket] State обновлен");
                     }
                     Ok(Message::Ping(data)) => {
                         if let Err(e) = write_clone.send(Message::Pong(data)).await {

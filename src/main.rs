@@ -1,8 +1,11 @@
-use std::{collections::HashMap, time::Duration};
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use arbitrage_system::{
-    core::traits::Workable, init::exchanges::get_exchanges, workers::ticker_worker::TickerWorker,
+    core::{traits::Workable, types::TradingPairs},
+    init::exchanges::get_exchanges,
+    workers::ticker_worker::TickerWorker,
 };
+use tokio::sync::RwLock;
 
 // use arbitrage_system::{
 //     // config::PAIRS_PER_THREAD, core::types::trading_pair::{PriceData, TradingPair}, init::exchanges::get_exchanges
@@ -15,11 +18,12 @@ use arbitrage_system::{
 async fn main() {
     let exchanges = get_exchanges().await;
     // let trading_pairs = get_trading_pairs();
+    let trading_pairs = Arc::new(RwLock::new(TradingPairs::new()));
 
     let mut tasks = Vec::new();
 
     let ticker_task = tokio::spawn(async move {
-        let worker = TickerWorker::new(0, exchanges);
+        let worker = TickerWorker::new(0, trading_pairs, exchanges);
         worker.run().await;
     });
 

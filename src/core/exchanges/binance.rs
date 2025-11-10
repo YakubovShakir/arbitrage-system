@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use json::JsonValue;
 
 use crate::core::{
     net::{http::HttpClient, websocket::WebSocketClient},
@@ -14,8 +13,6 @@ use core::f64;
 use std::{
     collections::{HashMap, HashSet},
     error::Error,
-    hash::Hash,
-    time::Duration,
 };
 
 #[derive(Debug)]
