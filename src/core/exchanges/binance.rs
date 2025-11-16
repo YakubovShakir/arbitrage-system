@@ -15,6 +15,8 @@ use std::{
     error::Error,
 };
 
+use tokio::sync::RwLock;
+
 #[derive(Debug)]
 pub struct Binance {
     name: String,
@@ -27,7 +29,7 @@ pub struct Binance {
 }
 
 impl Binance {
-    pub async fn new(
+    pub fn new(
         name: &str,
         api_key: &str,
         secret_key: &str,

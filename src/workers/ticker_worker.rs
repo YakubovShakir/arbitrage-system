@@ -1,24 +1,23 @@
-use crate::{
-    core::{
-        traits::{Exchange, Workable},
-        types::trading_pair::{PriceData, TradingPair},
-    },
-    init::trading_pairs,
-};
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
+
 use tokio::sync::RwLock;
+
+use crate::core::{
+    traits::Workable,
+    types::{Exchanges, TradingPairs},
+};
 
 pub struct TickerWorker {
     id: usize,
-    trading_pairs: Arc<RwLock<HashMap<TradingPair, PriceData>>>,
-    exchanges: Vec<Arc<dyn Exchange>>,
+    trading_pairs: Arc<RwLock<TradingPairs>>,
+    exchanges: Arc<Exchanges>,
 }
 
 impl TickerWorker {
     pub fn new(
         id: usize,
-        trading_pairs: Arc<RwLock<HashMap<TradingPair, PriceData>>>,
-        exchanges: Vec<Arc<dyn Exchange>>,
+        trading_pairs: Arc<RwLock<TradingPairs>>,
+        exchanges: Arc<Exchanges>,
     ) -> Self {
         Self {
             id,
@@ -35,13 +34,9 @@ impl Workable for TickerWorker {
 
     async fn run(&self) -> ! {
         loop {
-            println!(
-                "Глобальная хеш-мапа торговых пар насчитывает {} пар",
-                self.trading_pairs.read().await.len()
-            );
-            for exchange in &self.exchanges {
+            for (exchange_name, exchange) in &*self.exchanges {
                 let Some(new_tickers) = exchange.fetch_tickers().await else {
-                    println!("❌ Не получили тикеры от биржи {}", exchange.name());
+                    println!("❌ Не получили тикеры от биржи {}", exchange_name);
                     continue;
                 };
                 let mut global_pairs = self.trading_pairs.write().await;
@@ -58,12 +53,16 @@ impl Workable for TickerWorker {
                         continue;
                     };
 
-                    if let Some((_, new_buy_price)) = new_price_data.min_buy_price() {
-                        existing_price.update_buy_price(exchange.name().to_string(), new_buy_price);
-                    }
-                    if let Some((_, new_sell_price)) = new_price_data.max_sell_price() {
+                    if let Some(new_buy_price_quard) = &*new_price_data.min_buy_price.read().await {
                         existing_price
-                            .update_sell_price(exchange.name().to_string(), new_sell_price);
+                            .update_buy_price(exchange_name.clone(), new_buy_price_quard.1)
+                            .await;
+                    };
+                    if let Some(new_sell_price_quard) = &*new_price_data.max_sell_price.read().await
+                    {
+                        existing_price
+                            .update_sell_price(exchange_name.clone(), new_sell_price_quard.1)
+                            .await;
                     }
                 }
             }

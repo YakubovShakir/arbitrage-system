@@ -1,70 +1,82 @@
-// use std::sync::Arc;
+use crate::core::{
+    traits::Workable,
+    types::{Exchanges, TradingPairs},
+};
+use std::{sync::Arc, time::Instant};
+use tokio::sync::RwLock;
 
-// use crate::core::{
-//     traits::{Exchange, Tradeble, Workable},
-//     types::trading_pair::TradingPair,
-// };
+pub struct ComputWorker {
+    id: usize,
+    trading_pairs: Arc<RwLock<TradingPairs>>,
+    spread_pairs: Arc<RwLock<TradingPairs>>,
+    exchanges: Arc<Exchanges>,
+}
 
-// pub struct ComputWorker {
-//     id: usize,
-//     trading_pairs: Vec<Arc<TradingPair>>,
-//     exchanges: Vec<Arc<dyn Exchange>>,
-// }
+impl ComputWorker {
+    pub fn new(
+        id: usize,
+        trading_pairs: Arc<RwLock<TradingPairs>>,
+        spread_pairs: Arc<RwLock<TradingPairs>>,
+        exchanges: Arc<Exchanges>,
+    ) -> Self {
+        Self {
+            id,
+            trading_pairs,
+            spread_pairs,
+            exchanges,
+        }
+    }
+}
 
-// impl ComputWorker {
-//     pub fn new(
-//         id: usize,
-//         trading_pairs: Vec<Arc<TradingPair>>,
-//         exchanges: Vec<Arc<dyn Exchange>>,
-//     ) -> Self {
-//         Self {
-//             id,
-//             trading_pairs,
-//             exchanges,
-//         }
-//     }
-// }
+impl Workable for ComputWorker {
+    fn id(&self) -> usize {
+        self.id
+    }
 
-// impl Workable for ComputWorker {
-//     fn id(&self) -> usize {
-//         self.id
-//     }
+    async fn run(&self) -> ! {
+        loop {
+            let start = Instant::now();
 
-//     async fn run(&self) -> ! {
-//         loop {
-//             for pair in &self.trading_pairs {
-//                 let buy_price = match pair.min_buy_price() {
-//                     Some((_, price)) => price,
-//                     None => break,
-//                 };
-//                 let sell_price = match pair.max_sell_price() {
-//                     Some((_, price)) => price,
-//                     None => break,
-//                 };
+            let global_pairs = self.trading_pairs.read().await;
+            let global_spreads = self.spread_pairs.write().await;
 
-//                 let buy_exchange = match pair.min_buy_price() {
-//                     Some((exchange, _)) => exchange,
-//                     None => 0,
-//                 };
-//                 let sell_exchange = match pair.max_sell_price() {
-//                     Some((exchange, _)) => exchange,
-//                     None => 0,
-//                 };
+            for trading_pair in &*global_pairs {
+                if global_spreads.contains_key(trading_pair.0) {
+                    continue;
+                }
 
-//                 let spread = (sell_price / buy_price - 1.0) * 100.0;
+                let base = &trading_pair.0.base;
+                let quote = &trading_pair.0.quote;
 
-//                 if spread >= 1.0 && spread <= 40.0 {
-//                     println!(
-//                         "{}/{} Buy on {} Sell on {}. Spread = {:.2}",
-//                         pair.base(),
-//                         pair.quote(),
-//                         self.exchanges[buy_exchange].name(),
-//                         self.exchanges[sell_exchange].name(),
-//                         spread,
-//                     )
-//                 }
-//             }
-//             // tokio::time::sleep(std::time::Duration::from_millis(12000)).await;
-//         }
-//     }
-// }
+                let (Some(buy_price), Some(sell_price)) = (
+                    &*trading_pair.1.min_buy_price.read().await,
+                    &*trading_pair.1.max_sell_price.read().await,
+                ) else {
+                    continue;
+                };
+
+                let spread = (sell_price.1 / buy_price.1 - 1.0) * 100.0;
+
+                if spread < 0.5 {
+                    continue;
+                }
+
+                println!(
+                    "{}/{}. spread is {:.2}% buy: {} sell: {}",
+                    base, quote, spread, buy_price.0, sell_price.0
+                );
+
+                // let_buy_book = buy_price.0
+            }
+
+            let elapsed = start.elapsed();
+
+            println!(
+                "Просмотр {} торговых пар занял {:?}\n",
+                global_pairs.len(),
+                elapsed
+            );
+            tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
+        }
+    }
+}

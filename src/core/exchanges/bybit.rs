@@ -14,7 +14,7 @@ use crate::core::{
     },
     utils::{encrypt_hmac_sha256, get_current_timestamp, hex_encode, parse_string_typed_glass},
 };
-
+use tokio::sync::RwLock;
 #[derive(Debug)]
 pub struct Bybit {
     name: String,

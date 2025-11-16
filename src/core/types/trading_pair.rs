@@ -1,6 +1,6 @@
-use std::sync::RwLock;
-
 use crate::{config::QUOTE_LIST, core::types::ExchangeName};
+use futures_util::future::OkInto;
+use tokio::sync::RwLock;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct TradingPair {
@@ -32,8 +32,8 @@ impl TradingPair {
 
 #[derive(Debug)]
 pub struct PriceData {
-    min_buy_price: RwLock<Option<(ExchangeName, f64)>>,
-    max_sell_price: RwLock<Option<(ExchangeName, f64)>>,
+    pub min_buy_price: RwLock<Option<(ExchangeName, f64)>>,
+    pub max_sell_price: RwLock<Option<(ExchangeName, f64)>>,
 }
 
 impl PriceData {
@@ -46,47 +46,30 @@ impl PriceData {
 }
 
 impl PriceData {
-    pub fn min_buy_price(&self) -> Option<(String, f64)> {
-        match self.min_buy_price.read() {
-            Ok(quard) => quard.clone(),
-            Err(_) => None,
-        }
-    }
-    pub fn max_sell_price(&self) -> Option<(String, f64)> {
-        match self.max_sell_price.read() {
-            Ok(quard) => quard.clone(),
-            Err(_) => None,
-        }
-    }
+    pub async fn update_buy_price(&self, exchange_name: String, price: f64) {
+        let mut quard = self.min_buy_price.write().await;
 
-    pub fn update_buy_price(&self, exchange_name: String, price: f64) {
-        match self.min_buy_price.write() {
-            Ok(mut quard) => match &*quard {
-                None => *quard = Some((exchange_name, price)),
-                Some((current_name, current_min))
-                    if price < *current_min
-                        || (*current_name == exchange_name && *current_min != price) =>
+        match &*quard {
+            None => *quard = Some((exchange_name, price)),
+            Some((current_name, current_min)) => {
+                if price < *current_min || (*current_name == exchange_name && *current_min != price)
                 {
                     *quard = Some((exchange_name, price));
                 }
-                _ => {}
-            },
-            Err(_) => {}
+            }
         }
     }
-    pub fn update_sell_price(&self, exchange_name: String, price: f64) {
-        match self.max_sell_price.write() {
-            Ok(mut quard) => match &*quard {
-                None => *quard = Some((exchange_name, price)),
-                Some((current_name, current_max))
-                    if price > *current_max
-                        || (*current_name == exchange_name && *current_max != price) =>
+    pub async fn update_sell_price(&self, exchange_name: String, price: f64) {
+        let mut quard = self.max_sell_price.write().await;
+
+        match &*quard {
+            None => *quard = Some((exchange_name, price)),
+            Some((current_name, current_max)) => {
+                if price > *current_max || (*current_name == exchange_name && *current_max != price)
                 {
                     *quard = Some((exchange_name, price))
                 }
-                _ => {}
-            },
-            Err(_) => {}
+            }
         }
     }
 }

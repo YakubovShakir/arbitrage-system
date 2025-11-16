@@ -1,9 +1,15 @@
-use std::collections::HashMap;
-
 use hmac::Hmac;
 use sha2::Sha256;
+use std::{
+    collections::{HashMap, HashSet},
+    sync::Arc,
+};
+use tokio::sync::RwLock;
 
-use crate::core::types::trading_pair::{PriceData, TradingPair};
+use crate::core::{
+    traits::Exchange,
+    types::trading_pair::{PriceData, TradingPair},
+};
 
 pub mod trading_pair;
 
@@ -30,5 +36,7 @@ pub type KeyValue = (Key, Value);
 pub type HmacSha256 = Hmac<Sha256>;
 
 pub type ExchangeName = String;
+
+pub type Exchanges = HashMap<ExchangeName, Box<dyn Exchange>>;
 
 pub type TradingPairs = HashMap<TradingPair, PriceData>;

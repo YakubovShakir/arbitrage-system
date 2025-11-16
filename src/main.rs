@@ -1,9 +1,9 @@
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{collections::HashMap, hash::Hash, sync::Arc, time::Duration};
 
 use arbitrage_system::{
     core::{traits::Workable, types::TradingPairs},
     init::exchanges::get_exchanges,
-    workers::ticker_worker::TickerWorker,
+    workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
 };
 use tokio::sync::RwLock;
 
@@ -16,10 +16,14 @@ use tokio::sync::RwLock;
 
 #[tokio::main]
 async fn main() {
-    let exchanges = get_exchanges().await;
+    let exchanges = Arc::new(get_exchanges().await);
     // let trading_pairs = get_trading_pairs();
     let trading_pairs = Arc::new(RwLock::new(TradingPairs::new()));
 
+    let spread_pairs = Arc::new(RwLock::new(TradingPairs::new()));
+
+    let comput_exchanges = exchanges.clone();
+    let comput_trading_pairs = trading_pairs.clone();
     let mut tasks = Vec::new();
 
     let ticker_task = tokio::spawn(async move {
@@ -27,7 +31,13 @@ async fn main() {
         worker.run().await;
     });
 
-    tasks.push(ticker_task);
+    let comput_task = tokio::spawn(async move {
+        let computer = ComputWorker::new(1, comput_trading_pairs, spread_pairs, comput_exchanges);
+        computer.run().await;
+    });
+
+    tasks.extend([ticker_task, comput_task]);
+
     // let mut tasks = Vec::new();
 
     // let exchanges_clone = exchanges.clone();

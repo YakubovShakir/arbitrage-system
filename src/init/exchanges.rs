@@ -1,40 +1,37 @@
 use crate::config;
 use crate::core::exchanges::{Binance, Bybit};
-use crate::core::traits::Exchange;
+use crate::core::traits::ExchangeStatic;
+use crate::core::types::Exchanges;
 // use crate::core::exchanges::gate::Gate;
 // use crate::core::exchanges::{Bitget, Kucoin, Lbank};
 
 use std::sync::Arc;
 
-pub async fn get_exchanges() -> Vec<Arc<dyn Exchange>> {
-    let binance: Arc<Binance> = Arc::new(
-        match Binance::new(
-            config::binance::NAME,
-            config::binance::API_KEY,
-            config::binance::SECRET_KEY,
-            config::binance::BASE_URL,
-            config::binance::WEBSOCKET_URL,
-            config::binance::EXCLUDED_PAIRS,
-        )
-        .await
-        {
-            Ok(binance) => binance,
-            _ => panic!(),
-        },
-    );
+pub async fn get_exchanges() -> Exchanges {
+    let mut exchanges = Exchanges::new();
 
-    let bybit: Arc<Bybit> = Arc::new(
-        match Bybit::new(
-            config::bybit::NAME,
-            config::bybit::API_KEY,
-            config::bybit::SECRET_KEY,
-            config::bybit::BASE_URL,
-            config::bybit::EXCLUDED_PAIRS,
-        ) {
-            Ok(bybit) => bybit,
-            _ => panic!(),
-        },
-    );
+    let Ok(binance) = Binance::new(
+        config::binance::NAME,
+        config::binance::API_KEY,
+        config::binance::SECRET_KEY,
+        config::binance::BASE_URL,
+        config::binance::WEBSOCKET_URL,
+        config::binance::EXCLUDED_PAIRS,
+    ) else {
+        panic!()
+    };
+    exchanges.insert(binance.name().to_string(), Box::new(binance));
+
+    let Ok(bybit) = Bybit::new(
+        config::bybit::NAME,
+        config::bybit::API_KEY,
+        config::bybit::SECRET_KEY,
+        config::bybit::BASE_URL,
+        config::bybit::EXCLUDED_PAIRS,
+    ) else {
+        panic!();
+    };
+    exchanges.insert(bybit.name().to_string(), Box::new(bybit));
 
     // let mexc: Arc<dyn ExchangeAPI> = Arc::new(Mexc::new(
     //     config::mexc::NAME,
@@ -82,5 +79,5 @@ pub async fn get_exchanges() -> Vec<Arc<dyn Exchange>> {
     //     config::gate::EXCLUDED_PAIRS,
     // ));
     // vec![binance, bybit, mexc, huobi, bitget, lbank, kucoin, gate]
-    vec![binance, bybit]
+    exchanges
 }
