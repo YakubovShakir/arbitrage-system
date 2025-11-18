@@ -1,6 +1,10 @@
-use crate::core::{
-    traits::Workable,
-    types::{Exchanges, TradingPairs},
+use crate::{
+    config::{USDT_LIMIT, parameters::REQUIRED_SPREAD_PERCENT},
+    core::{
+        traits::Workable,
+        types::{Exchanges, OrderBook, TradingPairs},
+        utils::calculate_price_by_glass,
+    },
 };
 use std::{sync::Arc, time::Instant};
 use tokio::sync::RwLock;
@@ -55,18 +59,51 @@ impl Workable for ComputWorker {
                     continue;
                 };
 
-                let spread = (sell_price.1 / buy_price.1 - 1.0) * 100.0;
+                let mut spread = (sell_price.1 / buy_price.1 - 1.0) * 100.0;
 
-                if spread < 0.5 {
+                if spread < REQUIRED_SPREAD_PERCENT {
+                    continue;
+                }
+
+                // println!(
+                //     "{}/{}. spread is {:.2}% buy: {} sell: {}",
+                //     base, quote, spread, buy_price.0, sell_price.0
+                // );
+
+                let Some(buy_exchange) = self.exchanges.get(&buy_price.0) else {
+                    continue;
+                };
+                let Some(sell_exchange) = self.exchanges.get(&sell_price.0) else {
+                    continue;
+                };
+
+                let Ok(buy_book) = buy_exchange.fetch_orderbook(&base, &quote).await else {
+                    continue;
+                };
+
+                let Ok(sell_book) = sell_exchange.fetch_orderbook(&base, &quote).await else {
+                    continue;
+                };
+
+                let Some(buy_price_from_book) = calculate_price_by_glass(&USDT_LIMIT, &buy_book.0)
+                else {
+                    continue;
+                };
+                let Some(sell_price_from_book) =
+                    calculate_price_by_glass(&USDT_LIMIT, &sell_book.1)
+                else {
+                    continue;
+                };
+                spread = (sell_price_from_book / buy_price_from_book - 1.0) * 100.0;
+
+                if spread < REQUIRED_SPREAD_PERCENT {
                     continue;
                 }
 
                 println!(
-                    "{}/{}. spread is {:.2}% buy: {} sell: {}",
-                    base, quote, spread, buy_price.0, sell_price.0
+                    "{:?} {:?} {}%",
+                    buy_price_from_book, sell_price_from_book, spread
                 );
-
-                // let_buy_book = buy_price.0
             }
 
             let elapsed = start.elapsed();

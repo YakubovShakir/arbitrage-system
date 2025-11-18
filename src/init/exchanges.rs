@@ -5,8 +5,6 @@ use crate::core::types::Exchanges;
 // use crate::core::exchanges::gate::Gate;
 // use crate::core::exchanges::{Bitget, Kucoin, Lbank};
 
-use std::sync::Arc;
-
 pub async fn get_exchanges() -> Exchanges {
     let mut exchanges = Exchanges::new();
 

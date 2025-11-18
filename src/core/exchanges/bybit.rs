@@ -7,14 +7,13 @@ use async_trait::async_trait;
 
 use crate::core::{
     net::http::HttpClient,
-    traits::{Exchange, ExchangeService, ExchangeStatic},
+    traits::{ExchangeService, ExchangeStatic},
     types::{
         Asks, Bids, OrderBook, TradingPairs,
         trading_pair::{PriceData, TradingPair},
     },
     utils::{encrypt_hmac_sha256, get_current_timestamp, hex_encode, parse_string_typed_glass},
 };
-use tokio::sync::RwLock;
 #[derive(Debug)]
 pub struct Bybit {
     name: String,
@@ -50,6 +49,10 @@ impl Bybit {
 
 #[async_trait]
 impl ExchangeService for Bybit {
+    async fn is_margin_available(&self, asset: &str) -> bool {
+        true
+    }
+
     async fn fetch_tickers(&self) -> Option<TradingPairs> {
         let Ok(response) = self
             .http_client

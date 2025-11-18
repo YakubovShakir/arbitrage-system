@@ -1,19 +1,10 @@
-use std::{
-    sync::Arc,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use data_encoding::BASE64;
 use hmac::Mac;
 use json::JsonValue;
 
-use crate::{
-    config::QUOTE_LIST,
-    core::{
-        traits::Exchange,
-        types::{Glass, HmacSha256, Price, Quantity, trading_pair::TradingPair},
-    },
-};
+use crate::core::types::{Glass, HmacSha256, Price, Quantity};
 
 pub fn calculate_price_by_glass(quote_limit: &f64, glass: &Glass) -> Option<f64> {
     let mut total_quantity: f64 = 0.0;

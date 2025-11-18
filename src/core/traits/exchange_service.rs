@@ -19,6 +19,8 @@ pub trait ExchangeService {
     ) -> Result<OrderBook, Box<dyn std::error::Error>>;
 
     async fn fetch_tickers(&self) -> Option<TradingPairs>;
+
+    async fn is_margin_available(&self, asset: &str) -> bool;
 }
 
 pub trait Exchange: ExchangeStatic + ExchangeService + Send + Sync {}

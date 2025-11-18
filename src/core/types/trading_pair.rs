@@ -1,5 +1,4 @@
 use crate::{config::QUOTE_LIST, core::types::ExchangeName};
-use futures_util::future::OkInto;
 use tokio::sync::RwLock;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
@@ -25,7 +24,7 @@ impl TradingPair {
                 }
             }
         }
-        println!("Не удалось распарсить пару {}", symbol);
+        // println!("Не удалось распарсить пару {}", symbol);
         None
     }
 }

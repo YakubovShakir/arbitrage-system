@@ -4,18 +4,16 @@ use crate::core::{
     net::{http::HttpClient, websocket::WebSocketClient},
     traits::{ExchangeService, ExchangeStatic},
     types::{
-        Asks, Bids, OrderBook, TradingPairs,
+        Asks, Bids, OrderBook, RestEndPoint, TradingPairs,
         trading_pair::{PriceData, TradingPair},
     },
     utils::parse_string_typed_glass,
 };
-use core::f64;
+use core::{f64, str};
 use std::{
     collections::{HashMap, HashSet},
     error::Error,
 };
-
-use tokio::sync::RwLock;
 
 #[derive(Debug)]
 pub struct Binance {
@@ -79,6 +77,9 @@ impl ExchangeStatic for Binance {
 
 #[async_trait]
 impl ExchangeService for Binance {
+    async fn is_margin_available(&self, asset: &str) -> bool {
+        true
+    }
     async fn fetch_tickers(&self) -> Option<TradingPairs> {
         // Просто запускаем, игнорируем ошибки соединения
         match self.websocket_client.get_state().await {
