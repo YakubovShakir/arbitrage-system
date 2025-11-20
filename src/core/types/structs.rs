@@ -1,6 +1,48 @@
 use crate::{config::QUOTE_LIST, core::types::ExchangeName};
 use tokio::sync::RwLock;
 
+#[derive(Debug)]
+pub struct Network {
+    pub name: String,
+    pub full_name: String,
+    pub coin_name: String,
+    pub contract_address: Option<String>,
+    pub memo: Option<String>,
+    pub deposit_address: Option<String>,
+}
+
+impl Network {
+    pub fn new(
+        name: String,
+        full_name: String,
+        coin_name: String,
+        contract_address: Option<String>,
+        memo: Option<String>,
+        deposit_address: Option<String>,
+    ) -> Self {
+        let contract_address = if contract_address.is_some() {
+            contract_address
+        } else {
+            None
+        };
+
+        let memo = if memo.is_some() { memo } else { None };
+        let deposit_address = if deposit_address.is_some() {
+            deposit_address
+        } else {
+            None
+        };
+
+        Network {
+            name,
+            full_name,
+            coin_name,
+            contract_address,
+            memo: memo,
+            deposit_address,
+        }
+    }
+}
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct TradingPair {
     pub base: String,

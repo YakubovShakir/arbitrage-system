@@ -10,7 +10,7 @@ use crate::core::{
     traits::{ExchangeService, ExchangeStatic},
     types::{
         Asks, Bids, OrderBook, TradingPairs,
-        trading_pair::{PriceData, TradingPair},
+        structs::{Network, PriceData, TradingPair},
     },
     utils::{encrypt_hmac_sha256, get_current_timestamp, hex_encode, parse_string_typed_glass},
 };
@@ -49,8 +49,12 @@ impl Bybit {
 
 #[async_trait]
 impl ExchangeService for Bybit {
-    async fn is_margin_available(&self, asset: &str) -> bool {
-        true
+    async fn fetch_networks(&self, coin: &str) -> Result<Vec<Network>, Box<dyn Error>> {
+        let networks: Vec<Network> = Vec::new();
+        Ok(networks)
+    }
+    async fn is_margin_available(&self, asset: &str) -> Result<bool, Box<dyn Error>> {
+        Ok(true)
     }
 
     async fn fetch_tickers(&self) -> Option<TradingPairs> {

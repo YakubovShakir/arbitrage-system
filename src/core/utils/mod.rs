@@ -4,7 +4,54 @@ use data_encoding::BASE64;
 use hmac::Mac;
 use json::JsonValue;
 
-use crate::core::types::{Glass, HmacSha256, Price, Quantity};
+use crate::core::{
+    traits::Exchange,
+    types::{Glass, HmacSha256, Price, Quantity, structs::TradingPair},
+};
+
+pub async fn verify_arbitrage_conditions(
+    buy_exchange: &Box<dyn Exchange>,
+    sell_exchange: &Box<dyn Exchange>,
+    trading_pair_name: &TradingPair,
+) -> bool {
+    let Ok(is_margin_available) = sell_exchange
+        .is_margin_available(&trading_pair_name.base)
+        .await
+    else {
+        println!(
+            "Не удалось выяснить существует ли маржинальная торговля на монету {} на бирже {}",
+            trading_pair_name.base,
+            sell_exchange.name()
+        );
+        return false;
+    };
+
+    if !is_margin_available {
+        println!(
+            "Нет маржинальной торговли на монету {} на бирже {}",
+            trading_pair_name.base,
+            sell_exchange.name()
+        );
+        return false;
+    }
+    let Ok(buy_networks) = buy_exchange.fetch_networks(&trading_pair_name.base).await else {
+        return false;
+    };
+    let Ok(sell_networks) = sell_exchange.fetch_networks(&trading_pair_name.base).await else {
+        return false;
+    };
+
+    println!(
+        "{}\nbuy networks {:?} \nsell networks {:?}",
+        trading_pair_name.base, buy_networks, sell_networks
+    );
+
+    true
+}
+
+pub fn comput_spread_percent(buy_price: &f64, sell_price: &f64) -> f64 {
+    return (*sell_price / *buy_price - 1.0) * 100.0;
+}
 
 pub fn calculate_price_by_glass(quote_limit: &f64, glass: &Glass) -> Option<f64> {
     let mut total_quantity: f64 = 0.0;

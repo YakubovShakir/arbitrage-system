@@ -4,10 +4,10 @@ use std::collections::HashMap;
 
 use crate::core::{
     traits::Exchange,
-    types::trading_pair::{PriceData, TradingPair},
+    types::structs::{PriceData, TradingPair},
 };
 
-pub mod trading_pair;
+pub mod structs;
 
 pub type Price = f64;
 

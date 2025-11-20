@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash::Hash, sync::Arc, time::Duration};
+use std::sync::Arc;
 
 use arbitrage_system::{
     core::{traits::Workable, types::TradingPairs},

@@ -3,7 +3,7 @@ use crate::{
     core::{
         traits::Workable,
         types::{Exchanges, OrderBook, TradingPairs},
-        utils::calculate_price_by_glass,
+        utils::{calculate_price_by_glass, comput_spread_percent, verify_arbitrage_conditions},
     },
 };
 use std::{sync::Arc, time::Instant};
@@ -52,6 +52,7 @@ impl Workable for ComputWorker {
                 let base = &trading_pair.0.base;
                 let quote = &trading_pair.0.quote;
 
+                // Получение тикер цену покупки и продажи
                 let (Some(buy_price), Some(sell_price)) = (
                     &*trading_pair.1.min_buy_price.read().await,
                     &*trading_pair.1.max_sell_price.read().await,
@@ -59,8 +60,8 @@ impl Workable for ComputWorker {
                     continue;
                 };
 
-                let mut spread = (sell_price.1 / buy_price.1 - 1.0) * 100.0;
-
+                // Вычисление тикер-спреда
+                let mut spread = comput_spread_percent(&buy_price.1, &sell_price.1);
                 if spread < REQUIRED_SPREAD_PERCENT {
                     continue;
                 }
@@ -76,6 +77,21 @@ impl Workable for ComputWorker {
                 let Some(sell_exchange) = self.exchanges.get(&sell_price.0) else {
                     continue;
                 };
+
+                let arbitrage_verificated =
+                    verify_arbitrage_conditions(&buy_exchange, &sell_exchange, trading_pair.0)
+                        .await;
+
+                println!(
+                    "Итог арбитраж верификации {} {} {}",
+                    trading_pair.0.base,
+                    sell_exchange.name(),
+                    arbitrage_verificated
+                );
+
+                if !arbitrage_verificated {
+                    continue;
+                }
 
                 let Ok(buy_book) = buy_exchange.fetch_orderbook(&base, &quote).await else {
                     continue;
@@ -99,11 +115,6 @@ impl Workable for ComputWorker {
                 if spread < REQUIRED_SPREAD_PERCENT {
                     continue;
                 }
-
-                println!(
-                    "{:?} {:?} {}%",
-                    buy_price_from_book, sell_price_from_book, spread
-                );
             }
 
             let elapsed = start.elapsed();

@@ -31,7 +31,7 @@ const FETCH_DEPOSIT_ADDRESS_WITH_NETWORKS: &str = "/sapi/v1/capital/deposit/addr
 //     "isDefault": 1  //'isDefault' is 1 means the address is default, same as shown in the app.
 //   }
 // ]
-const FETCH_ASSET_TRANSFER_INFORMATION: &str = "/sapi/v1/capital/config/getall";
+pub const FETCH_ASSET_TRANSFER_INFORMATION: &str = "/sapi/v1/capital/config/getall";
 // REQUEST
 // Name                 Type                Mandatory               Description
 // recvWindow	        LONG	            NO
@@ -246,7 +246,7 @@ const MAKE_REPAY_ASSET: &str = "/sapi/v1/margin/borrow-repay"; //POST
 //   //transaction id
 //   "tranId": 100000001
 // }
-const FETCH_ASSET_MARGIN_INFO: &str = "/sapi/v1/margin/allAssets";
+pub const FETCH_ASSET_MARGIN_INFO: &str = "/sapi/v1/margin/allAssets";
 // REQUEST
 // Name	                Type            	Mandatory           	Description
 // asset	            STRING          	NO

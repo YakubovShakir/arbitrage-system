@@ -1,4 +1,6 @@
-use crate::core::types::{OrderBook, TradingPairs};
+use std::error::Error;
+
+use crate::core::types::{OrderBook, TradingPairs, structs::Network};
 use async_trait::async_trait;
 
 pub trait ExchangeStatic {
@@ -20,7 +22,8 @@ pub trait ExchangeService {
 
     async fn fetch_tickers(&self) -> Option<TradingPairs>;
 
-    async fn is_margin_available(&self, asset: &str) -> bool;
+    async fn is_margin_available(&self, asset: &str) -> Result<bool, Box<dyn std::error::Error>>;
+    async fn fetch_networks(&self, coin: &str) -> Result<Vec<Network>, Box<dyn std::error::Error>>;
 }
 
 pub trait Exchange: ExchangeStatic + ExchangeService + Send + Sync {}

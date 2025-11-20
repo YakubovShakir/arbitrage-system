@@ -1,13 +1,16 @@
 use async_trait::async_trait;
 
-use crate::core::{
-    net::{http::HttpClient, websocket::WebSocketClient},
-    traits::{ExchangeService, ExchangeStatic},
-    types::{
-        Asks, Bids, OrderBook, RestEndPoint, TradingPairs,
-        trading_pair::{PriceData, TradingPair},
+use crate::{
+    config,
+    core::{
+        net::{http::HttpClient, websocket::WebSocketClient},
+        traits::{ExchangeService, ExchangeStatic},
+        types::{
+            Asks, Bids, OrderBook, TradingPairs,
+            structs::{Network, PriceData, TradingPair},
+        },
+        utils::{encrypt_hmac_sha256, get_current_timestamp, hex_encode, parse_string_typed_glass},
     },
-    utils::parse_string_typed_glass,
 };
 use core::{f64, str};
 use std::{
@@ -77,9 +80,98 @@ impl ExchangeStatic for Binance {
 
 #[async_trait]
 impl ExchangeService for Binance {
-    async fn is_margin_available(&self, asset: &str) -> bool {
-        true
+    async fn fetch_networks(&self, coin: &str) -> Result<Vec<Network>, Box<dyn std::error::Error>> {
+        let timestamp = get_current_timestamp()?;
+        let query_string = format!("coin={}&timestamp={}", coin, timestamp);
+        let signature = encrypt_hmac_sha256(&self.secret_key, &query_string)?;
+
+        let response = self
+            .http_client
+            .get(
+                config::binance::FETCH_ASSET_TRANSFER_INFORMATION,
+                Some(&[
+                    ("coin".to_string(), coin.to_string()),
+                    ("timestamp".to_string(), timestamp),
+                    ("signature".to_string(), hex_encode(signature)),
+                ]),
+                Some(&[("X-MBX-APIKEY".to_string(), self.api_key().to_string())]),
+            )
+            .await?;
+        let mut fetched_networks: Vec<Network> = Vec::new();
+
+        for item in response.members() {
+            if !item.has_key("coin") {
+                continue;
+            }
+
+            if item["coin"] != coin {
+                continue;
+            }
+
+            if !item.has_key("networkList") {
+                return Err(format!(
+                    "Binance not found [networkList] property in response for {}",
+                    coin
+                )
+                .into());
+            }
+
+            let (Some(deposit_enabled), Some(withdraw_enabled)) = (
+                item["depositAllEnable"].as_bool(),
+                item["withdrawAllEnable"].as_bool(),
+            ) else {
+                break;
+            };
+
+            if !deposit_enabled || !withdraw_enabled {
+                break;
+            }
+
+            let networks = &item["networkList"];
+
+            for network in networks.members() {
+                let network_name = &network["network"];
+                let coin_name = &network["coin"];
+                let full_name = &network["name"];
+                let contract_address = if network.has_key("contractAddress") {
+                    Some(network["contractAddress"].to_string())
+                } else {
+                    None
+                };
+
+                let parsed_network: Network = Network::new(
+                    network_name.to_string(),
+                    full_name.to_string(),
+                    coin_name.to_string(),
+                    contract_address,
+                    None,
+                    None,
+                );
+                fetched_networks.push(parsed_network);
+            }
+        }
+        // println!("Network response is {:?}", response[0]["coin"]);
+
+        Ok(fetched_networks)
     }
+
+    async fn is_margin_available(&self, asset: &str) -> Result<bool, Box<dyn Error>> {
+        let response = self
+            .http_client
+            .get(
+                config::binance::FETCH_ASSET_MARGIN_INFO,
+                Some(&[("asset".to_string(), asset.to_string())]),
+                Some(&[("X-MBX-APIKEY".to_string(), self.api_key().to_string())]),
+            )
+            .await?;
+        if asset == "EUR" {
+            println!("{:?}", response);
+        }
+        Ok(response[0]["isBorrowable"]
+            .as_bool()
+            .ok_or("Не удалось распарсить ответ is_margin_available с биржи Binance в bool-тип")?)
+    }
+
     async fn fetch_tickers(&self) -> Option<TradingPairs> {
         // Просто запускаем, игнорируем ошибки соединения
         match self.websocket_client.get_state().await {
