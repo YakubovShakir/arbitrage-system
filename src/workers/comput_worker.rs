@@ -66,10 +66,10 @@ impl Workable for ComputWorker {
                     continue;
                 }
 
-                // println!(
-                //     "{}/{}. spread is {:.2}% buy: {} sell: {}",
-                //     base, quote, spread, buy_price.0, sell_price.0
-                // );
+                println!(
+                    "{}/{}. spread is {:.2}% buy: {} sell: {}",
+                    base, quote, spread, buy_price.0, sell_price.0
+                );
 
                 let Some(buy_exchange) = self.exchanges.get(&buy_price.0) else {
                     continue;
@@ -81,13 +81,6 @@ impl Workable for ComputWorker {
                 let arbitrage_verificated =
                     verify_arbitrage_conditions(&buy_exchange, &sell_exchange, trading_pair.0)
                         .await;
-
-                println!(
-                    "Итог арбитраж верификации {} {} {}",
-                    trading_pair.0.base,
-                    sell_exchange.name(),
-                    arbitrage_verificated
-                );
 
                 if !arbitrage_verificated {
                     continue;

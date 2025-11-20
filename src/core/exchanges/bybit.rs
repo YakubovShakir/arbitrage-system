@@ -5,14 +5,17 @@ use std::{
 
 use async_trait::async_trait;
 
-use crate::core::{
-    net::http::HttpClient,
-    traits::{ExchangeService, ExchangeStatic},
-    types::{
-        Asks, Bids, OrderBook, TradingPairs,
-        structs::{Network, PriceData, TradingPair},
+use crate::{
+    config,
+    core::{
+        net::http::HttpClient,
+        traits::{ExchangeService, ExchangeStatic},
+        types::{
+            Asks, Bids, OrderBook, TradingPairs,
+            structs::{Network, PriceData, TradingPair},
+        },
+        utils::{encrypt_hmac_sha256, get_current_timestamp, hex_encode, parse_string_typed_glass},
     },
-    utils::{encrypt_hmac_sha256, get_current_timestamp, hex_encode, parse_string_typed_glass},
 };
 #[derive(Debug)]
 pub struct Bybit {
@@ -45,16 +48,122 @@ impl Bybit {
             excluded_trading_pairs: set,
         })
     }
+    pub fn get_auth_headers(
+        &self,
+        query_string: String,
+    ) -> Result<[(String, String); 4], Box<dyn std::error::Error>> {
+        let recv_window = 5000;
+        let timestamp = get_current_timestamp()?;
+        let signature =
+            timestamp.clone() + self.api_key() + &recv_window.to_string() + &query_string;
+        let signed_hex = hex_encode(encrypt_hmac_sha256(&self.secret_key, &signature)?);
+
+        Ok([
+            ("X-BAPI-API-KEY".to_string(), self.api_key().to_string()),
+            ("X-BAPI-RECV-WINDOW".to_string(), recv_window.to_string()),
+            ("X-BAPI-TIMESTAMP".to_string(), timestamp),
+            ("X-BAPI-SIGN".to_string(), signed_hex),
+        ])
+    }
 }
 
 #[async_trait]
 impl ExchangeService for Bybit {
     async fn fetch_networks(&self, coin: &str) -> Result<Vec<Network>, Box<dyn Error>> {
-        let networks: Vec<Network> = Vec::new();
-        Ok(networks)
+        let query_string = format!("coin={}", coin);
+        let auth_headers = self.get_auth_headers(query_string)?;
+
+        let response = self
+            .http_client
+            .get(
+                config::bybit::FETCH_NETWORKS,
+                Some(&[("coin".to_string(), coin.to_string())]),
+                Some(&auth_headers),
+            )
+            .await?;
+
+        if !response.has_key("retCode") {
+            return Err(format!("Ошибка получения данных {} в fetch_networks", self.name).into());
+        }
+        if response["retCode"] != 0 {
+            return Err(format!("Неуспешный запрос данных {} в fetch_networks", self.name).into());
+        }
+        if !response["result"].has_key("rows") {
+            return Err(format!(
+                "Нет параметра rows в ответе от {} в fetch_networks",
+                self.name
+            )
+            .into());
+        }
+        let networks = &response["result"]["rows"][0]["chains"];
+
+        let mut fetched_networks: Vec<Network> = Vec::new();
+
+        for network in networks.members() {
+            if network["chainDeposit"] != "1" || network["chainWithdraw"] != "1" {
+                println!("Что-то не так с сетью на байбите");
+                continue;
+            }
+            let network_name = &network["chain"];
+            let full_name = &network["chainType"];
+            let contract_address = Some(network["contractAddress"].to_string());
+            let coin_name = coin;
+
+            let parserd_network: Network = Network::new(
+                network_name.to_string(),
+                full_name.to_string(),
+                coin_name.to_string(),
+                contract_address,
+                None,
+                None,
+            );
+            fetched_networks.push(parserd_network);
+        }
+
+        Ok(fetched_networks)
     }
+
     async fn is_margin_available(&self, asset: &str) -> Result<bool, Box<dyn Error>> {
-        Ok(true)
+        let response = self
+            .http_client
+            .get(
+                config::bybit::FETCH_MARGIN_INFO,
+                Some(&[("currency".to_string(), asset.to_string())]),
+                None,
+            )
+            .await?;
+        if !response.has_key("retCode") {
+            return Err(format!(
+                "Ошибка получения данных {} в is_margin_available",
+                self.name
+            )
+            .into());
+        }
+        if response["retCode"] != 0 {
+            return Err(format!(
+                "Неуспешный запрос данных {} в is_margin_available",
+                self.name
+            )
+            .into());
+        }
+        if !response["result"].has_key("vipCoinList") {
+            return Err(format!(
+                "Ошибка получения данных {} в is_margin_available",
+                self.name
+            )
+            .into());
+        }
+        if let Some(borrowable) =
+            response["result"]["vipCoinList"][0]["list"][0]["borrowable"].as_bool()
+        {
+            return Ok(borrowable);
+        } else {
+            return Err(format!(
+                "Не удалось распарсить ответ is_margin_available с биржи {} в bool-тип",
+                self.name
+            )
+            .into());
+        }
     }
 
     async fn fetch_tickers(&self) -> Option<TradingPairs> {
@@ -100,7 +209,6 @@ impl ExchangeService for Bybit {
         Some(trading_pairs)
     }
     async fn fetch_orderbook(&self, base: &str, quote: &str) -> Result<OrderBook, Box<dyn Error>> {
-        let recv_window = 5000;
         let order_book_limit = 500;
         let query_string = format!(
             "category={}&symbol={}&limit={}",
@@ -108,13 +216,7 @@ impl ExchangeService for Bybit {
             base.to_string() + quote,
             order_book_limit,
         );
-        let timestamp = get_current_timestamp()?;
-
-        let signature =
-            timestamp.clone() + self.api_key() + &recv_window.to_string() + &query_string;
-
-        let signed_hex = hex_encode(encrypt_hmac_sha256(&self.secret_key, &signature)?);
-
+        let auth_headers = self.get_auth_headers(query_string)?;
         let result = self
             .http_client
             .get(
@@ -124,12 +226,7 @@ impl ExchangeService for Bybit {
                     ("symbol".to_string(), base.to_string() + quote),
                     ("limit".to_string(), order_book_limit.to_string()),
                 ]),
-                Some(&[
-                    ("X-BAPI-API-KEY".to_string(), self.api_key().to_string()),
-                    ("X-BAPI-RECV-WINDOW".to_string(), recv_window.to_string()),
-                    ("X-BAPI-TIMESTAMP".to_string(), timestamp),
-                    ("X-BAPI-SIGN".to_string(), signed_hex),
-                ]),
+                Some(&auth_headers),
             )
             .await?;
 

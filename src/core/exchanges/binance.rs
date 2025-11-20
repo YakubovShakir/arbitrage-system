@@ -88,7 +88,7 @@ impl ExchangeService for Binance {
         let response = self
             .http_client
             .get(
-                config::binance::FETCH_ASSET_TRANSFER_INFORMATION,
+                config::binance::FETCH_NETWORKS,
                 Some(&[
                     ("coin".to_string(), coin.to_string()),
                     ("timestamp".to_string(), timestamp),
@@ -159,17 +159,16 @@ impl ExchangeService for Binance {
         let response = self
             .http_client
             .get(
-                config::binance::FETCH_ASSET_MARGIN_INFO,
+                config::binance::FETCH_MARGIN_INFO,
                 Some(&[("asset".to_string(), asset.to_string())]),
                 Some(&[("X-MBX-APIKEY".to_string(), self.api_key().to_string())]),
             )
             .await?;
-        if asset == "EUR" {
-            println!("{:?}", response);
-        }
-        Ok(response[0]["isBorrowable"]
-            .as_bool()
-            .ok_or("Не удалось распарсить ответ is_margin_available с биржи Binance в bool-тип")?)
+
+        Ok(response[0]["isBorrowable"].as_bool().ok_or(format!(
+            "Не удалось распарсить ответ is_margin_available с биржи {} в bool-тип",
+            self.name
+        ))?)
     }
 
     async fn fetch_tickers(&self) -> Option<TradingPairs> {

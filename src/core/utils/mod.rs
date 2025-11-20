@@ -14,16 +14,20 @@ pub async fn verify_arbitrage_conditions(
     sell_exchange: &Box<dyn Exchange>,
     trading_pair_name: &TradingPair,
 ) -> bool {
-    let Ok(is_margin_available) = sell_exchange
+    let is_margin_available = match sell_exchange
         .is_margin_available(&trading_pair_name.base)
         .await
-    else {
-        println!(
-            "Не удалось выяснить существует ли маржинальная торговля на монету {} на бирже {}",
-            trading_pair_name.base,
-            sell_exchange.name()
-        );
-        return false;
+    {
+        Ok(result) => result,
+        Err(e) => {
+            println!(
+                "Не удалось выяснить существует ли маржинальная торговля на монету {} на бирже {} -  {}",
+                trading_pair_name.base,
+                sell_exchange.name(),
+                e
+            );
+            return false;
+        }
     };
 
     if !is_margin_available {
@@ -35,15 +39,23 @@ pub async fn verify_arbitrage_conditions(
         return false;
     }
     let Ok(buy_networks) = buy_exchange.fetch_networks(&trading_pair_name.base).await else {
+        println!(
+            "Не удалось получить сети с биржи покупки, {}",
+            buy_exchange.name()
+        );
         return false;
     };
     let Ok(sell_networks) = sell_exchange.fetch_networks(&trading_pair_name.base).await else {
+        println!(
+            "Не удалось получить сети с биржи продажи, {}",
+            sell_exchange.name()
+        );
         return false;
     };
 
     println!(
-        "{}\nbuy networks {:?} \nsell networks {:?}",
-        trading_pair_name.base, buy_networks, sell_networks
+        "buy networks {:?} \nsell networks {:?}",
+        buy_networks, sell_networks
     );
 
     true
