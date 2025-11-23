@@ -1,7 +1,7 @@
 use crate::{config::QUOTE_LIST, core::types::ExchangeName};
 use tokio::sync::RwLock;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Network {
     pub name: String,
     pub full_name: String,
@@ -20,18 +20,9 @@ impl Network {
         memo: Option<String>,
         deposit_address: Option<String>,
     ) -> Self {
-        let contract_address = if contract_address.is_some() {
-            contract_address
-        } else {
-            None
-        };
-
-        let memo = if memo.is_some() { memo } else { None };
-        let deposit_address = if deposit_address.is_some() {
-            deposit_address
-        } else {
-            None
-        };
+        let contract_address = contract_address.filter(|addr| !addr.is_empty());
+        let memo = memo.filter(|m| !m.is_empty());
+        let deposit_address = deposit_address.filter(|addr| !addr.is_empty());
 
         Network {
             name,

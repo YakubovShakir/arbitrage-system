@@ -6,59 +6,106 @@ use json::JsonValue;
 
 use crate::core::{
     traits::Exchange,
-    types::{Glass, HmacSha256, Price, Quantity, structs::TradingPair},
+    types::{
+        Glass, HmacSha256, Price, Quantity,
+        structs::{Network, TradingPair},
+    },
 };
 
-pub async fn verify_arbitrage_conditions(
+pub fn find_value_from_json_key(
+    json: &JsonValue,
+    key_order: &[&str],
+) -> Result<JsonValue, Box<dyn std::error::Error>> {
+    let mut value = json;
+    for key in key_order {
+        if value.has_key(key) {
+            value = &value[*key];
+        } else {
+            return Err(format!(
+                "Could not find Key<{:?}> because Key<{}> was not found in path",
+                key_order.last(),
+                key,
+            )
+            .into());
+        }
+    }
+    Ok(value.clone())
+}
+pub fn find_intersection_from_networks(
+    v1: &Vec<Network>,
+    v2: &Vec<Network>,
+) -> Option<Vec<Network>> {
+    let mut intersection: Vec<Network> = Vec::new();
+
+    for network_1 in v1 {
+        for network_2 in v2 {
+            if network_1.name.to_uppercase() == network_2.name.to_uppercase() {
+                intersection.push(network_1.clone());
+                break;
+            }
+
+            if let (Some(addr1), Some(addr2)) =
+                (&network_1.contract_address, &network_2.contract_address)
+            {
+                if addr1 == addr2 {
+                    intersection.push(network_1.clone());
+                    break;
+                }
+            }
+        }
+    }
+    if intersection.len() == 0 {
+        return None;
+    };
+    Some(intersection)
+}
+pub async fn verify_arbitrage_conditions_and_get_networks(
     buy_exchange: &Box<dyn Exchange>,
     sell_exchange: &Box<dyn Exchange>,
     trading_pair_name: &TradingPair,
-) -> bool {
+) -> Option<Vec<Network>> {
     let is_margin_available = match sell_exchange
         .is_margin_available(&trading_pair_name.base)
         .await
     {
         Ok(result) => result,
         Err(e) => {
-            println!(
-                "Не удалось выяснить существует ли маржинальная торговля на монету {} на бирже {} -  {}",
-                trading_pair_name.base,
-                sell_exchange.name(),
-                e
-            );
-            return false;
+            println!("Ошибка вызова is_margin_available {}", e);
+            return None;
         }
     };
 
     if !is_margin_available {
-        println!(
-            "Нет маржинальной торговли на монету {} на бирже {}",
-            trading_pair_name.base,
-            sell_exchange.name()
-        );
-        return false;
+        return None;
     }
+
     let Ok(buy_networks) = buy_exchange.fetch_networks(&trading_pair_name.base).await else {
         println!(
             "Не удалось получить сети с биржи покупки, {}",
             buy_exchange.name()
         );
-        return false;
+        return None;
     };
     let Ok(sell_networks) = sell_exchange.fetch_networks(&trading_pair_name.base).await else {
         println!(
             "Не удалось получить сети с биржи продажи, {}",
             sell_exchange.name()
         );
-        return false;
+        return None;
     };
 
-    println!(
-        "buy networks {:?} \nsell networks {:?}",
-        buy_networks, sell_networks
-    );
+    let Some(networks) = find_intersection_from_networks(&buy_networks, &sell_networks) else {
+        println!(
+            "No network intersection beetween {} and {} at {}/{}",
+            buy_exchange.name(),
+            sell_exchange.name(),
+            trading_pair_name.base,
+            trading_pair_name.quote,
+        );
+        return None;
+    };
 
-    true
+    Some(networks)
 }
 
 pub fn comput_spread_percent(buy_price: &f64, sell_price: &f64) -> f64 {
@@ -89,6 +136,13 @@ pub fn calculate_price_by_glass(quote_limit: &f64, glass: &Glass) -> Option<f64>
         return None;
     };
     Some(quote_limit / total_quantity)
+}
+
+pub fn parse_json_value_as_f64(value: &JsonValue) -> Result<f64, Box<dyn std::error::Error>> {
+    Ok(value
+        .as_str()
+        .ok_or("Could not parse json value as f64 price")?
+        .parse::<f64>()?)
 }
 
 // В нулевом индексе пары должна быть цена, а в первом количество

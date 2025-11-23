@@ -13,10 +13,7 @@ use crate::{
     },
 };
 use core::{f64, str};
-use std::{
-    collections::{HashMap, HashSet},
-    error::Error,
-};
+use std::{collections::HashMap, error::Error};
 
 #[derive(Debug)]
 pub struct Binance {
@@ -24,7 +21,6 @@ pub struct Binance {
     api_key: String,
     secret_key: String,
     base_url: String,
-    excluded_trading_pairs: HashSet<String>,
     http_client: HttpClient,
     websocket_client: WebSocketClient,
 }
@@ -36,19 +32,12 @@ impl Binance {
         secret_key: &str,
         base_url: &str,
         websocket_url: &str,
-        excluded_trading_pairs: &[&str],
     ) -> Result<Self, Box<dyn Error>> {
-        let mut set: HashSet<String> = HashSet::new();
-        for excluded_pair in excluded_trading_pairs {
-            set.insert(excluded_pair.to_string().to_uppercase());
-        }
-
         Ok(Self {
             name: name.to_string(),
             api_key: api_key.to_string(),
             secret_key: secret_key.to_string(),
             base_url: base_url.to_string(),
-            excluded_trading_pairs: set,
             http_client: HttpClient::new(base_url)?,
             websocket_client: WebSocketClient::new(websocket_url),
         })
@@ -67,14 +56,6 @@ impl ExchangeStatic for Binance {
     }
     fn base_url(&self) -> &str {
         &self.base_url
-    }
-
-    fn is_pair_excluded(&self, quote: &str, base: &str) -> bool {
-        self.excluded_trading_pairs.contains(&format!(
-            "{}_{}",
-            quote.to_uppercase(),
-            base.to_uppercase()
-        ))
     }
 }
 
@@ -100,28 +81,16 @@ impl ExchangeService for Binance {
         let mut fetched_networks: Vec<Network> = Vec::new();
 
         for item in response.members() {
-            if !item.has_key("coin") {
-                continue;
-            }
-
             if item["coin"] != coin {
                 continue;
             }
+            let deposit_enabled = item["depositAllEnable"]
+                .as_bool()
+                .ok_or("Could not parse depositAllEnable as bool")?;
 
-            if !item.has_key("networkList") {
-                return Err(format!(
-                    "Binance not found [networkList] property in response for {}",
-                    coin
-                )
-                .into());
-            }
-
-            let (Some(deposit_enabled), Some(withdraw_enabled)) = (
-                item["depositAllEnable"].as_bool(),
-                item["withdrawAllEnable"].as_bool(),
-            ) else {
-                break;
-            };
+            let withdraw_enabled = item["withdrawAllEnable"]
+                .as_bool()
+                .ok_or("Could not parse withdrawAllEnable as bool")?;
 
             if !deposit_enabled || !withdraw_enabled {
                 break;
@@ -171,7 +140,7 @@ impl ExchangeService for Binance {
         ))?)
     }
 
-    async fn fetch_tickers(&self) -> Option<TradingPairs> {
+    async fn fetch_tickers(&self) -> Result<TradingPairs, Box<dyn Error>> {
         // Просто запускаем, игнорируем ошибки соединения
         match self.websocket_client.get_state().await {
             None => {
@@ -183,7 +152,7 @@ impl ExchangeService for Binance {
                         ))
                         .await;
                 });
-                None
+                Err("Subscribe to Binance ticker updates".into())
             }
             Some(state) => {
                 let parsed_tickers =
@@ -193,7 +162,11 @@ impl ExchangeService for Binance {
                     let symbol = &ticker["s"];
                     let last_price = &ticker["c"];
                     if let Some(trading_pair) = TradingPair::from_str(&symbol.to_string()) {
-                        if let Ok(price) = last_price.as_str()?.parse::<f64>() {
+                        if let Ok(price) = last_price
+                            .as_str()
+                            .ok_or("Could not parse price as str")?
+                            .parse::<f64>()
+                        {
                             trading_pairs.insert(
                                 trading_pair,
                                 PriceData::new(
@@ -204,7 +177,7 @@ impl ExchangeService for Binance {
                         }
                     }
                 }
-                return Some(trading_pairs);
+                return Ok(trading_pairs);
             }
         }
     }

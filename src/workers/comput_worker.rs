@@ -3,7 +3,10 @@ use crate::{
     core::{
         traits::Workable,
         types::{Exchanges, OrderBook, TradingPairs},
-        utils::{calculate_price_by_glass, comput_spread_percent, verify_arbitrage_conditions},
+        utils::{
+            calculate_price_by_glass, comput_spread_percent, verify_arbitrage_conditions,
+            verify_arbitrage_conditions_and_get_networks,
+        },
     },
 };
 use std::{sync::Arc, time::Instant};
@@ -66,11 +69,6 @@ impl Workable for ComputWorker {
                     continue;
                 }
 
-                println!(
-                    "{}/{}. spread is {:.2}% buy: {} sell: {}",
-                    base, quote, spread, buy_price.0, sell_price.0
-                );
-
                 let Some(buy_exchange) = self.exchanges.get(&buy_price.0) else {
                     continue;
                 };
@@ -78,13 +76,15 @@ impl Workable for ComputWorker {
                     continue;
                 };
 
-                let arbitrage_verificated =
-                    verify_arbitrage_conditions(&buy_exchange, &sell_exchange, trading_pair.0)
-                        .await;
-
-                if !arbitrage_verificated {
+                let Some(networks) = verify_arbitrage_conditions_and_get_networks(
+                    &buy_exchange,
+                    &sell_exchange,
+                    trading_pair.0,
+                )
+                .await
+                else {
                     continue;
-                }
+                };
 
                 let Ok(buy_book) = buy_exchange.fetch_orderbook(&base, &quote).await else {
                     continue;
@@ -108,6 +108,11 @@ impl Workable for ComputWorker {
                 if spread < REQUIRED_SPREAD_PERCENT {
                     continue;
                 }
+
+                println!(
+                    "{}/{}. spread is {:.2}% buy: {} sell: {}",
+                    base, quote, spread, buy_price.0, sell_price.0
+                );
             }
 
             let elapsed = start.elapsed();

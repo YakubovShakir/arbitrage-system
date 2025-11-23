@@ -14,7 +14,6 @@ pub async fn get_exchanges() -> Exchanges {
         config::binance::SECRET_KEY,
         config::binance::BASE_URL,
         config::binance::WEBSOCKET_URL,
-        config::binance::EXCLUDED_PAIRS,
     ) else {
         panic!()
     };
@@ -25,7 +24,6 @@ pub async fn get_exchanges() -> Exchanges {
         config::bybit::API_KEY,
         config::bybit::SECRET_KEY,
         config::bybit::BASE_URL,
-        config::bybit::EXCLUDED_PAIRS,
     ) else {
         panic!();
     };

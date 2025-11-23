@@ -1,27 +1,21 @@
-use std::sync::Arc;
-
 use arbitrage_system::{
     core::{traits::Workable, types::TradingPairs},
     init::exchanges::get_exchanges,
     workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
 };
+use std::sync::Arc;
 use tokio::sync::RwLock;
-
-// use arbitrage_system::{
-//     // config::PAIRS_PER_THREAD, core::types::trading_pair::{PriceData, TradingPair}, init::exchanges::get_exchanges
-//     // core::{net::websocket::WebSocketClient, utils::print_dashboard},
-//     // init::{exchanges::get_exchanges, trading_pairs::get_trading_pairs},
-//     // workers::{FetchWorker, comput_worker::ComputWorker, ticker_worker::TickerWorker},
-// };
 
 #[tokio::main]
 async fn main() {
+    // Получаем список бирж из init
     let exchanges = Arc::new(get_exchanges().await);
-    // let trading_pairs = get_trading_pairs();
-    let trading_pairs = Arc::new(RwLock::new(TradingPairs::new()));
 
+    // Определяем список торговых пар и спред-пар
+    let trading_pairs = Arc::new(RwLock::new(TradingPairs::new()));
     let spread_pairs = Arc::new(RwLock::new(TradingPairs::new()));
 
+    // ------------
     let comput_exchanges = exchanges.clone();
     let comput_trading_pairs = trading_pairs.clone();
     let mut tasks = Vec::new();

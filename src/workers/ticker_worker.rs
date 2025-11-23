@@ -35,10 +35,17 @@ impl Workable for TickerWorker {
     async fn run(&self) -> ! {
         loop {
             for (exchange_name, exchange) in &*self.exchanges {
-                let Some(new_tickers) = exchange.fetch_tickers().await else {
-                    println!("❌ Не получили тикеры от биржи {}", exchange_name);
-                    continue;
+                let new_tickers = match exchange.fetch_tickers().await {
+                    Ok(tickers) => tickers,
+                    Err(e) => {
+                        println!(
+                            "❌ Не получили тикеры от биржи {}, ошибка - {}",
+                            exchange_name, e
+                        );
+                        continue;
+                    }
                 };
+
                 let mut global_pairs = self.trading_pairs.write().await;
 
                 for (new_trading_pair, new_price_data) in new_tickers {
