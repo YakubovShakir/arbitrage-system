@@ -2,9 +2,9 @@ use crate::{
     config::{USDT_LIMIT, parameters::REQUIRED_SPREAD_PERCENT},
     core::{
         traits::Workable,
-        types::{Exchanges, OrderBook, TradingPairs},
+        types::{Exchanges, TradingPairs},
         utils::{
-            calculate_price_by_glass, comput_spread_percent, verify_arbitrage_conditions,
+            calculate_price_by_glass, comput_spread_percent,
             verify_arbitrage_conditions_and_get_networks,
         },
     },
