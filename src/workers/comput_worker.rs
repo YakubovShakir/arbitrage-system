@@ -110,8 +110,8 @@ impl Workable for ComputWorker {
                 }
 
                 println!(
-                    "{}/{}. spread is {:.2}% buy: {} sell: {}",
-                    base, quote, spread, buy_price.0, sell_price.0
+                    "{}/{}. spread is {:.2}% buy: {} sell: {} Networks {:?}",
+                    base, quote, spread, buy_price.0, sell_price.0, networks
                 );
             }
 

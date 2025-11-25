@@ -102,6 +102,10 @@ impl ExchangeService for Binance {
                 let network_name = &network["network"];
                 let coin_name = &network["coin"];
                 let full_name = &network["name"];
+                let withdraw_fee = *&network["withdrawFee"]
+                    .as_str()
+                    .and_then(|s| s.parse::<f64>().ok());
+
                 let contract_address = if network.has_key("contractAddress") {
                     Some(network["contractAddress"].to_string())
                 } else {
@@ -112,14 +116,15 @@ impl ExchangeService for Binance {
                     network_name.to_string(),
                     full_name.to_string(),
                     coin_name.to_string(),
+                    withdraw_fee,
                     contract_address,
                     None,
                     None,
                 );
+                println!("{:?}", parsed_network);
                 fetched_networks.push(parsed_network);
             }
         }
-        // println!("Network response is {:?}", response[0]["coin"]);
 
         Ok(fetched_networks)
     }

@@ -104,20 +104,28 @@ impl ExchangeService for Bybit {
             if network["chainDeposit"] != "1" || network["chainWithdraw"] != "1" {
                 continue;
             }
+
             let network_name = &network["chain"];
             let full_name = &network["chainType"];
+            let withdraw_fee = *&network["withdrawFee"]
+                .as_str()
+                .and_then(|s| s.parse::<f64>().ok());
+
             let contract_address = Some(network["contractAddress"].to_string());
             let coin_name = coin;
 
-            let parserd_network: Network = Network::new(
+            let parsed_network: Network = Network::new(
                 network_name.to_string(),
                 full_name.to_string(),
                 coin_name.to_string(),
+                withdraw_fee,
                 contract_address,
                 None,
                 None,
             );
-            fetched_networks.push(parserd_network);
+            println!("{:?}", parsed_network);
+
+            fetched_networks.push(parsed_network);
         }
 
         Ok(fetched_networks)

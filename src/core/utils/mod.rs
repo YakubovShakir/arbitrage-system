@@ -31,26 +31,33 @@ pub fn find_value_from_json_key(
     }
     Ok(value.clone())
 }
+
+// pub fn find_best_network_by_fee()
+
 pub fn find_intersection_from_networks(
-    v1: &Vec<Network>,
-    v2: &Vec<Network>,
+    withdraw_networks: &Vec<Network>,
+    deposit_networks: &Vec<Network>,
 ) -> Option<Vec<Network>> {
     let mut intersection: Vec<Network> = Vec::new();
 
-    for network_1 in v1 {
-        for network_2 in v2 {
-            if network_1.name.to_uppercase() == network_2.name.to_uppercase() {
-                intersection.push(network_1.clone());
+    for w_network in withdraw_networks {
+        for d_network in deposit_networks {
+            if w_network.name.to_uppercase() == d_network.name.to_uppercase() {
+                intersection.push(w_network.clone());
                 break;
             }
 
             if let (Some(addr1), Some(addr2)) =
-                (&network_1.contract_address, &network_2.contract_address)
+                (&w_network.contract_address, &d_network.contract_address)
             {
                 if addr1 == addr2 {
-                    intersection.push(network_1.clone());
+                    intersection.push(w_network.clone());
                     break;
                 }
+            }
+            if w_network.full_name.to_uppercase() == d_network.full_name.to_uppercase() {
+                intersection.push(w_network.clone());
+                break;
             }
         }
     }
@@ -78,20 +85,28 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     if !is_margin_available {
         return None;
     }
-
-    let Ok(buy_networks) = buy_exchange.fetch_networks(&trading_pair_name.base).await else {
-        println!(
-            "Не удалось получить сети с биржи покупки, {}",
-            buy_exchange.name()
-        );
-        return None;
+    let buy_networks = match buy_exchange.fetch_networks(&trading_pair_name.base).await {
+        Ok(networks) => networks,
+        Err(e) => {
+            println!(
+                "Не удалось получить сети с биржи покупки, {} - {}",
+                buy_exchange.name(),
+                e
+            );
+            return None;
+        }
     };
-    let Ok(sell_networks) = sell_exchange.fetch_networks(&trading_pair_name.base).await else {
-        println!(
-            "Не удалось получить сети с биржи продажи, {}",
-            sell_exchange.name()
-        );
-        return None;
+
+    let sell_networks = match sell_exchange.fetch_networks(&trading_pair_name.base).await {
+        Ok(networks) => networks,
+        Err(e) => {
+            println!(
+                "Не удалось получить сети с биржи продажи, {} - {}",
+                sell_exchange.name(),
+                e
+            );
+            return None;
+        }
     };
 
     let Some(networks) = find_intersection_from_networks(&buy_networks, &sell_networks) else {
