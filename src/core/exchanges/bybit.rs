@@ -123,7 +123,6 @@ impl ExchangeService for Bybit {
                 None,
                 None,
             );
-            println!("{:?}", parsed_network);
 
             fetched_networks.push(parsed_network);
         }

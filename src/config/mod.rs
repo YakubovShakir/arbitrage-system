@@ -1,4 +1,5 @@
 pub mod exchanges;
+pub mod mexc_protocol_buffers;
 pub mod parameters;
 
 pub use exchanges::{binance, bitget, bybit, gate, huobi, kucoin, lbank, mexc};

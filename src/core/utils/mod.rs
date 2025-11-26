@@ -66,6 +66,7 @@ pub fn find_intersection_from_networks(
     };
     Some(intersection)
 }
+
 pub async fn verify_arbitrage_conditions_and_get_networks(
     buy_exchange: &Box<dyn Exchange>,
     sell_exchange: &Box<dyn Exchange>,
@@ -77,7 +78,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     {
         Ok(result) => result,
         Err(e) => {
-            println!("Ошибка вызова is_margin_available {}", e);
+            // println!("Ошибка вызова is_margin_available {}", e);
             return None;
         }
     };
@@ -154,10 +155,10 @@ pub fn calculate_price_by_glass(quote_limit: &f64, glass: &Glass) -> Option<f64>
 }
 
 pub fn parse_json_value_as_f64(value: &JsonValue) -> Result<f64, Box<dyn std::error::Error>> {
-    Ok(value
-        .as_str()
-        .ok_or("Could not parse json value as f64 price")?
-        .parse::<f64>()?)
+    value
+        .to_string()
+        .parse::<f64>()
+        .map_err(|e| format!("Failed to parse '{}' as f64: {}", value, e).into())
 }
 
 // В нулевом индексе пары должна быть цена, а в первом количество

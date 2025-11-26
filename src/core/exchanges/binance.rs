@@ -15,7 +15,6 @@ use crate::{
 use core::{f64, str};
 use std::{collections::HashMap, error::Error};
 
-#[derive(Debug)]
 pub struct Binance {
     name: String,
     api_key: String,
@@ -121,7 +120,6 @@ impl ExchangeService for Binance {
                     None,
                     None,
                 );
-                println!("{:?}", parsed_network);
                 fetched_networks.push(parsed_network);
             }
         }
@@ -160,8 +158,11 @@ impl ExchangeService for Binance {
                 Err("Subscribe to Binance ticker updates".into())
             }
             Some(state) => {
-                let parsed_tickers =
-                    json::parse(&state).expect("Cannot parse ticker response from BINANCE to JSON");
+                let parsed_tickers = json::parse(&state).or(Err(format!(
+                    "Cannot parse ticker response from {} to JSON",
+                    self.name
+                )))?;
+
                 let mut trading_pairs: TradingPairs = HashMap::new();
                 for ticker in parsed_tickers.members() {
                     let symbol = &ticker["s"];

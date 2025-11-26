@@ -1,9 +1,7 @@
 use crate::config;
-use crate::core::exchanges::{Binance, Bybit};
+use crate::core::exchanges::{Binance, Bybit, Mexc};
 use crate::core::traits::ExchangeStatic;
 use crate::core::types::Exchanges;
-// use crate::core::exchanges::gate::Gate;
-// use crate::core::exchanges::{Bitget, Kucoin, Lbank};
 
 pub async fn get_exchanges() -> Exchanges {
     let mut exchanges = Exchanges::new();
@@ -29,13 +27,16 @@ pub async fn get_exchanges() -> Exchanges {
     };
     exchanges.insert(bybit.name().to_string(), Box::new(bybit));
 
-    // let mexc: Arc<dyn ExchangeAPI> = Arc::new(Mexc::new(
-    //     config::mexc::NAME,
-    //     config::mexc::API_KEY,
-    //     config::mexc::SECRET_KEY,
-    //     config::mexc::BASE_URL,
-    //     config::mexc::EXCLUDED_PAIRS,
-    // ));
+    let Ok(mexc) = Mexc::new(
+        config::mexc::NAME,
+        config::mexc::API_KEY,
+        config::mexc::SECRET_KEY,
+        config::mexc::BASE_URL,
+        config::mexc::WEBSOCKET_URL,
+    ) else {
+        panic!();
+    };
+    exchanges.insert(mexc.name().to_string(), Box::new(mexc));
 
     // let huobi: Arc<dyn ExchangeAPI> = Arc::new(Huobi::new(
     //     config::huobi::NAME,

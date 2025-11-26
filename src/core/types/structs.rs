@@ -36,6 +36,17 @@ impl Network {
             deposit_address,
         }
     }
+    pub fn create_test() -> Network {
+        Network::new(
+            "Test Network name".to_string(),
+            "Test Network full_name".to_string(),
+            "Test Network coin".to_string(),
+            None,
+            None,
+            None,
+            None,
+        )
+    }
 }
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct TradingPair {
@@ -62,6 +73,15 @@ impl TradingPair {
         }
         // println!("Не удалось распарсить пару {}", symbol);
         None
+    }
+    pub fn from_str_with_separator(symbol: &str, separator: char) -> Option<Self> {
+        symbol.split_once(separator).and_then(|(base, quote)| {
+            if !base.is_empty() && !quote.is_empty() {
+                Some(Self::new(base, quote))
+            } else {
+                None
+            }
+        })
     }
 }
 
