@@ -60,17 +60,18 @@ impl Workable for TickerWorker {
                         continue;
                     };
 
-                    if let Some(new_buy_price_quard) = &*new_price_data.min_buy_price.read().await {
-                        existing_price
-                            .update_buy_price(exchange_name.clone(), new_buy_price_quard.1)
-                            .await;
+                    let (buy_price, sell_price) = {
+                        let buy_guard = new_price_data.min_buy_price.read().await;
+                        let sell_guard = new_price_data.max_sell_price.read().await;
+                        (buy_guard.1, sell_guard.1)
                     };
-                    if let Some(new_sell_price_quard) = &*new_price_data.max_sell_price.read().await
-                    {
-                        existing_price
-                            .update_sell_price(exchange_name.clone(), new_sell_price_quard.1)
-                            .await;
-                    }
+
+                    existing_price
+                        .update_buy_price(exchange_name.clone(), buy_price)
+                        .await;
+                    existing_price
+                        .update_sell_price(exchange_name.clone(), sell_price)
+                        .await;
                 }
             }
             tokio::time::sleep(std::time::Duration::from_millis(5000)).await;

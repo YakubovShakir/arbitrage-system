@@ -51,17 +51,20 @@ impl Workable for ComputWorker {
                 if global_spreads.contains_key(trading_pair.0) {
                     continue;
                 }
+                let is_checked = trading_pair.1.check_if_not_checked().await;
+
+                if is_checked {
+                    continue;
+                }
 
                 let base = &trading_pair.0.base;
                 let quote = &trading_pair.0.quote;
 
                 // Получение тикер цену покупки и продажи
-                let (Some(buy_price), Some(sell_price)) = (
-                    &*trading_pair.1.min_buy_price.read().await,
-                    &*trading_pair.1.max_sell_price.read().await,
-                ) else {
-                    continue;
-                };
+                let (buy_price, sell_price) = (
+                    trading_pair.1.min_buy_price.read().await,
+                    trading_pair.1.max_sell_price.read().await,
+                );
 
                 // Вычисление тикер-спреда
                 let mut spread = comput_spread_percent(&buy_price.1, &sell_price.1);
