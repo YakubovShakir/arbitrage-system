@@ -1,19 +1,24 @@
 use std::{collections::HashMap, error::Error, sync::Arc, time::Duration};
 
 use async_trait::async_trait;
-use json::parse;
 
-use crate::core::{
-    net::{
-        http::HttpClient,
-        websocket::{BinaryMessageHandler, WebSocketClient},
+use crate::{
+    config::mexc::FETCH_NETWORKS,
+    core::{
+        net::{
+            http::HttpClient,
+            websocket::{BinaryMessageHandler, WebSocketClient},
+        },
+        traits::{ExchangeService, ExchangeStatic},
+        types::{
+            Asks, Bids, OrderBook, TradingPairs,
+            structs::{Network, PriceData, TradingPair},
+        },
+        utils::{
+            encrypt_hmac_sha256, find_value_from_json_key, get_current_timestamp, hex_encode,
+            parse_json_value_as_f64, parse_string_typed_glass,
+        },
     },
-    traits::{ExchangeService, ExchangeStatic},
-    types::{
-        Asks, Bids, OrderBook, TradingPairs,
-        structs::{Network, PriceData, TradingPair},
-    },
-    utils::{find_value_from_json_key, parse_json_value_as_f64, parse_string_typed_glass},
 };
 
 pub struct Mexc {
@@ -68,6 +73,21 @@ impl Mexc {
                 .with_binary_handler(binary_handler),
         })
     }
+    pub fn get_signature(
+        &self,
+        query_string: String,
+        body_string: Option<String>,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        let body_string = match body_string {
+            Some(str) => str,
+            None => "".to_string(),
+        };
+
+        let signature = query_string.to_string() + &body_string;
+        let signed_hex = hex_encode(encrypt_hmac_sha256(&self.secret_key, &signature)?);
+
+        Ok(signed_hex)
+    }
 }
 
 impl ExchangeStatic for Mexc {
@@ -88,9 +108,68 @@ impl ExchangeStatic for Mexc {
 #[async_trait]
 impl ExchangeService for Mexc {
     async fn fetch_networks(&self, coin: &str) -> Result<Vec<Network>, Box<dyn Error>> {
-        Ok(vec![Network::create_test()])
+        let recv_window = 5000;
+        let timestamp = get_current_timestamp()?;
+        let query_string = format!("recvWindow={}&timestamp={}", recv_window, timestamp);
+        let sign = self.get_signature(query_string, None)?;
+
+        let response = self
+            .http_client
+            .get(
+                FETCH_NETWORKS,
+                Some(&[
+                    ("recvWindow".to_string(), recv_window.to_string()),
+                    ("timestamp".to_string(), timestamp),
+                    ("signature".to_string(), sign),
+                ]),
+                Some(&[
+                    ("X-MEXC-APIKEY".to_string(), self.api_key().to_string()),
+                    ("Content-Type".to_string(), "application/json".to_string()),
+                ]),
+            )
+            .await?;
+
+        let mut fetched_networks: Vec<Network> = Vec::new();
+
+        for item in response.members() {
+            if item["coin"] != coin {
+                continue;
+            }
+            let networks = find_value_from_json_key(item, &["networkList"])?;
+            for network in networks.members() {
+                let withdraw_enabled = network["withdrawEnable"]
+                    .as_bool()
+                    .ok_or("Could not parse withdrawEnable as bool")?;
+
+                if !withdraw_enabled {
+                    continue;
+                }
+
+                let network_name = &network["netWork"];
+                let network_full_name = &network["network"];
+                let withdraw_fee = network["withdrawFee"]
+                    .as_str()
+                    .and_then(|s| s.parse::<f64>().ok());
+
+                let contract_address = Some(network["contract"].to_string());
+
+                let parsed_network: Network = Network::new(
+                    network_name.to_string(),
+                    network_full_name.to_string(),
+                    coin.to_string(),
+                    withdraw_fee,
+                    contract_address,
+                    None,
+                    None,
+                );
+
+                fetched_networks.push(parsed_network);
+            }
+        }
+        Ok(fetched_networks)
     }
 
+    // Mexc close their margin interface
     async fn is_margin_available(&self, asset: &str) -> Result<bool, Box<dyn Error>> {
         Ok(false)
     }

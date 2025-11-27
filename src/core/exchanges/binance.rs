@@ -101,7 +101,7 @@ impl ExchangeService for Binance {
                 let network_name = &network["network"];
                 let coin_name = &network["coin"];
                 let full_name = &network["name"];
-                let withdraw_fee = *&network["withdrawFee"]
+                let withdraw_fee = network["withdrawFee"]
                     .as_str()
                     .and_then(|s| s.parse::<f64>().ok());
 

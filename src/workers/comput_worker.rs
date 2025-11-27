@@ -75,6 +75,7 @@ impl Workable for ComputWorker {
                 let Some(sell_exchange) = self.exchanges.get(&sell_price.0) else {
                     continue;
                 };
+                // println!("{:#?}, {:#?}", trading_pair.0, trading_pair.1);
                 let Some(networks) = verify_arbitrage_conditions_and_get_networks(
                     &buy_exchange,
                     &sell_exchange,
