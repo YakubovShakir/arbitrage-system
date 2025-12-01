@@ -1,19 +1,44 @@
 use futures_util::{SinkExt, StreamExt};
+use std::collections::VecDeque;
+use std::pin::Pin;
 use std::{sync::Arc, time::Duration};
+use tokio::net::TcpStream;
 use tokio::sync::{Mutex, RwLock};
 use tokio::task::JoinHandle;
+use tokio_tungstenite::tungstenite::http::Response;
+use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 
 pub type BinaryMessageHandler = Arc<dyn Fn(prost::bytes::Bytes) -> Option<String> + Send + Sync>;
+
+pub type ConnectionHandler = Arc<
+    dyn Fn() -> Pin<
+            Box<
+                dyn Future<
+                        Output = Result<
+                            (
+                                WebSocketStream<MaybeTlsStream<TcpStream>>,
+                                Response<Option<Vec<u8>>>,
+                            ),
+                            Box<dyn std::error::Error + Send + Sync>,
+                        >,
+                    > + Send,
+            >,
+        > + Send
+        + Sync,
+>;
 
 #[derive(Clone)]
 pub struct WebSocketClient {
     connection_url: String,
     state: Arc<RwLock<Option<String>>>,
+    pub state_is_streamed: bool,
+    streamed_state: Arc<RwLock<Option<VecDeque<String>>>>,
     listen_handle: Arc<Mutex<Option<JoinHandle<()>>>>,
     ping_interval: Option<Duration>,
     ping_message: Option<String>,
     binary_handler: Option<BinaryMessageHandler>, // ← новый параметр
+    connection_handler: Option<ConnectionHandler>,
 }
 
 impl WebSocketClient {
@@ -21,10 +46,13 @@ impl WebSocketClient {
         WebSocketClient {
             connection_url: url.to_string(),
             state: Arc::new(RwLock::new(None)),
+            state_is_streamed: false,
+            streamed_state: Arc::new(RwLock::new(None)),
             listen_handle: Arc::new(Mutex::new(None)),
             ping_interval: None,
             ping_message: None,
             binary_handler: None,
+            connection_handler: None,
         }
     }
     // Метод для установки ping интервала
@@ -35,6 +63,15 @@ impl WebSocketClient {
     }
     pub fn with_binary_handler(mut self, handler: BinaryMessageHandler) -> Self {
         self.binary_handler = Some(handler);
+        self
+    }
+    pub fn with_connection_handler(mut self, handler: ConnectionHandler) -> Self {
+        self.connection_handler = Some(handler);
+        self
+    }
+
+    pub fn with_streamed_state(mut self) -> Self {
+        self.state_is_streamed = true;
         self
     }
 
@@ -94,8 +131,14 @@ impl WebSocketClient {
     ) -> Result<JoinHandle<()>, Box<dyn std::error::Error + Send + Sync>> {
         println!("Подключаемся к {}", self.connection_url);
 
-        let (ws_stream, _) = connect_async(&self.connection_url).await?;
-        println!("WebSocket соединение c {} установлено", self.connection_url);
+        let (ws_stream, _) = match &self.connection_handler {
+            Some(handler) => handler().await?,
+            None => {
+                let con = connect_async(&self.connection_url).await?;
+                println!("WebSocket соединение c {} установлено", self.connection_url);
+                con
+            }
+        };
 
         let (mut write, mut read) = ws_stream.split();
 
@@ -108,9 +151,11 @@ impl WebSocketClient {
         }
 
         let state = self.state.clone();
+        let streamed_state = self.streamed_state.clone();
         let ping_interval = self.ping_interval;
         let ping_message = self.ping_message.clone();
 
+        let state_is_streamed = self.state_is_streamed;
         let con_url = self.connection_url.clone();
 
         let binary_handler = self.binary_handler.clone();
@@ -147,8 +192,17 @@ impl WebSocketClient {
             while let Some(message_result) = read.next().await {
                 match message_result {
                     Ok(Message::Text(text)) => {
-                        let mut state_guard = state.write().await;
-                        *state_guard = Some(text.to_string());
+                        if state_is_streamed {
+                            let mut state_guard = streamed_state.write().await;
+                            let vec = state_guard.get_or_insert_with(VecDeque::new);
+                            vec.push_back(text.to_string());
+                            if vec.len() > 500 {
+                                vec.clear();
+                            }
+                        } else {
+                            let mut state_guard = state.write().await;
+                            *state_guard = Some(text.to_string());
+                        }
                     }
                     Ok(Message::Ping(data)) => {
                         let mut write_guard = write.lock().await;
@@ -188,9 +242,11 @@ impl WebSocketClient {
 
         Ok(handle)
     }
-
     pub async fn get_state(&self) -> Option<String> {
-        let state_guard = self.state.read().await;
-        state_guard.clone()
+        self.state.read().await.as_ref().cloned()
+    }
+
+    pub async fn get_streamed_state(&self) -> Option<VecDeque<String>> {
+        self.streamed_state.read().await.as_ref().cloned()
     }
 }

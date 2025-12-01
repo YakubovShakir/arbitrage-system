@@ -76,11 +76,15 @@ impl TradingPair {
     }
     pub fn from_str_with_separator(symbol: &str, separator: char) -> Option<Self> {
         symbol.split_once(separator).and_then(|(base, quote)| {
-            if !base.is_empty() && !quote.is_empty() {
-                Some(Self::new(base, quote))
-            } else {
-                None
+            if base.is_empty() || quote.is_empty() {
+                return None;
             }
+            for q in QUOTE_LIST {
+                if quote.to_uppercase() == *q {
+                    return Some(Self::new(base, quote));
+                }
+            }
+            None
         })
     }
 }

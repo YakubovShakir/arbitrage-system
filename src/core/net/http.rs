@@ -23,7 +23,7 @@ pub async fn get_global_client() -> &'static Arc<Client> {
         })
         .await
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct HttpClient {
     _base_url: String,
 }
@@ -58,6 +58,65 @@ impl HttpClient {
         let req_builder = get_global_client()
             .await
             .get(format!("{}{}", self._base_url, endpoint))
+            .headers(formated_headers)
+            .query(query);
+
+        // Отправляем запрос с полной обработкой ошибок
+        let response = match req_builder.send().await {
+            Ok(resp) => resp,
+            Err(e) => {
+                if e.is_timeout() {
+                    eprintln!(
+                        "Timeout error - увеличьте таймаут - {}{}",
+                        self._base_url, endpoint
+                    );
+                }
+                return Err(Box::new(e));
+            }
+        };
+
+        if !response.status().is_success() {
+            let status = response.status();
+            // Пытаемся прочитать тело ошибки
+            let error_body = response.text().await.unwrap_or_default();
+
+            return Err(format!("Error status code HTTP {}: {}", status, error_body).into());
+        }
+
+        // Читаем ответ
+        let text = response.text().await?;
+
+        // Парсим JSON
+        match json::parse(&text) {
+            Ok(parsed) => Ok(parsed),
+            Err(e) => Err(Box::new(e)),
+        }
+    }
+
+    pub async fn post(
+        &self,
+        endpoint: &str,
+        query: Option<&[KeyValue]>,
+        headers: Option<&[KeyValue]>,
+    ) -> Result<JsonValue, Box<dyn std::error::Error>> {
+        let query = query.unwrap_or(&[]);
+        let mut formated_headers = HeaderMap::new();
+
+        match headers {
+            Some(pairs) => {
+                for pair in pairs {
+                    formated_headers.insert(
+                        HeaderName::from_str(pair.0.as_str())?,
+                        HeaderValue::from_str(pair.1.as_str())?,
+                    );
+                }
+            }
+            None => (),
+        };
+
+        let req_builder = get_global_client()
+            .await
+            .post(format!("{}{}", self._base_url, endpoint))
             .headers(formated_headers)
             .query(query);
 

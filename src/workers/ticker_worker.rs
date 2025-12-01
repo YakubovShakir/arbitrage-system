@@ -2,9 +2,12 @@ use std::sync::Arc;
 
 use tokio::sync::RwLock;
 
-use crate::core::{
-    traits::Workable,
-    types::{Exchanges, TradingPairs},
+use crate::{
+    core::{
+        traits::Workable,
+        types::{Exchanges, TradingPairs},
+    },
+    workers::ticker_worker,
 };
 
 pub struct TickerWorker {

@@ -170,7 +170,7 @@ impl ExchangeService for Mexc {
     }
 
     // Mexc close their margin interface
-    async fn is_margin_available(&self, asset: &str) -> Result<bool, Box<dyn Error>> {
+    async fn is_margin_available(&self, pair: &TradingPair) -> Result<bool, Box<dyn Error>> {
         Ok(false)
     }
 

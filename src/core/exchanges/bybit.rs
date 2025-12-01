@@ -130,12 +130,12 @@ impl ExchangeService for Bybit {
         Ok(fetched_networks)
     }
 
-    async fn is_margin_available(&self, asset: &str) -> Result<bool, Box<dyn Error>> {
+    async fn is_margin_available(&self, pair: &TradingPair) -> Result<bool, Box<dyn Error>> {
         let response = self
             .http_client
             .get(
                 config::bybit::FETCH_MARGIN_INFO,
-                Some(&[("currency".to_string(), asset.to_string())]),
+                Some(&[("currency".to_string(), pair.base.to_string())]),
                 None,
             )
             .await?;

@@ -127,12 +127,12 @@ impl ExchangeService for Binance {
         Ok(fetched_networks)
     }
 
-    async fn is_margin_available(&self, asset: &str) -> Result<bool, Box<dyn Error>> {
+    async fn is_margin_available(&self, pair: &TradingPair) -> Result<bool, Box<dyn Error>> {
         let response = self
             .http_client
             .get(
                 config::binance::FETCH_MARGIN_INFO,
-                Some(&[("asset".to_string(), asset.to_string())]),
+                Some(&[("asset".to_string(), pair.base.to_string())]),
                 Some(&[("X-MBX-APIKEY".to_string(), self.api_key().to_string())]),
             )
             .await?;

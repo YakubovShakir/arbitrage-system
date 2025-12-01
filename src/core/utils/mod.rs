@@ -72,10 +72,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     sell_exchange: &Box<dyn Exchange>,
     trading_pair_name: &TradingPair,
 ) -> Option<Vec<Network>> {
-    let is_margin_available = match sell_exchange
-        .is_margin_available(&trading_pair_name.base)
-        .await
-    {
+    let is_margin_available = match sell_exchange.is_margin_available(&trading_pair_name).await {
         Ok(result) => result,
         Err(e) => {
             // println!("Ошибка вызова is_margin_available {}", e);
@@ -112,9 +109,11 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
 
     let Some(networks) = find_intersection_from_networks(&buy_networks, &sell_networks) else {
         println!(
-            "No network intersection beetween {} and {} at {}/{}",
+            "No network intersection beetween {}:{:#?} and {}:{:#?} at {}/{}",
             buy_exchange.name(),
+            buy_networks,
             sell_exchange.name(),
+            sell_networks,
             trading_pair_name.base,
             trading_pair_name.quote,
         );
@@ -160,7 +159,9 @@ pub fn parse_json_value_as_f64(value: &JsonValue) -> Result<f64, Box<dyn std::er
         .parse::<f64>()
         .map_err(|e| format!("Failed to parse '{}' as f64: {}", value, e).into())
 }
-
+pub fn parse_json_value_as_bool(value: &JsonValue) -> Result<bool, Box<dyn std::error::Error>> {
+    Ok(value.as_bool().ok_or("Could not parse jsonValue as bool")?)
+}
 // В нулевом индексе пары должна быть цена, а в первом количество
 pub fn parse_string_typed_glass(
     glass: &JsonValue,

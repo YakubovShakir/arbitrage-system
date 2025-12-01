@@ -1,5 +1,5 @@
 use crate::config;
-use crate::core::exchanges::{Binance, Bybit, Mexc};
+use crate::core::exchanges::{Binance, Bybit, Kucoin, Mexc};
 use crate::core::traits::ExchangeStatic;
 use crate::core::types::Exchanges;
 
@@ -61,13 +61,17 @@ pub async fn get_exchanges() -> Exchanges {
     //     config::lbank::BASE_URL,
     //     config::lbank::EXCLUDED_PAIRS,
     // ));
-    // let kucoin: Arc<dyn ExchangeAPI> = Arc::new(Kucoin::new(
-    //     config::kucoin::NAME,
-    //     config::kucoin::API_KEY,
-    //     config::kucoin::SECRET_KEY,
-    //     config::kucoin::BASE_URL,
-    //     config::kucoin::EXCLUDED_PAIRS,
-    // ));
+    let Ok(kucoin) = Kucoin::new(
+        config::kucoin::NAME,
+        config::kucoin::API_KEY,
+        config::kucoin::SECRET_KEY,
+        config::kucoin::BASE_URL,
+        config::kucoin::BASE_URL,
+    ) else {
+        panic!()
+    };
+    exchanges.insert(kucoin.name().to_string(), Box::new(kucoin));
+
     // let gate: Arc<dyn ExchangeAPI> = Arc::new(Gate::new(
     //     config::gate::NAME,
     //     config::gate::API_KEY,
