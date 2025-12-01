@@ -1,5 +1,7 @@
+use core::panic;
+
 use crate::config;
-use crate::core::exchanges::{Binance, Bybit, Kucoin, Mexc};
+use crate::core::exchanges::{Binance, Bitget, Bybit, Kucoin, Mexc};
 use crate::core::traits::ExchangeStatic;
 use crate::core::types::Exchanges;
 
@@ -46,13 +48,16 @@ pub async fn get_exchanges() -> Exchanges {
     //     config::huobi::EXCLUDED_PAIRS,
     // ));
 
-    // let bitget: Arc<dyn ExchangeAPI> = Arc::new(Bitget::new(
-    //     config::bitget::NAME,
-    //     config::bitget::API_KEY,
-    //     config::bitget::SECRET_KEY,
-    //     config::bitget::BASE_URL,
-    //     config::bitget::EXCLUDED_PAIRS,
-    // ));
+    let Ok(bitget) = Bitget::new(
+        config::bitget::NAME,
+        config::bitget::API_KEY,
+        config::bitget::SECRET_KEY,
+        config::bitget::BASE_URL,
+        // config::bitget::WEBSOCKET_URL,
+    ) else {
+        panic!();
+    };
+    exchanges.insert(bitget.name().to_string(), Box::new(bitget));
 
     // let lbank: Arc<dyn ExchangeAPI> = Arc::new(Lbank::new(
     //     config::lbank::NAME,

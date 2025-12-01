@@ -96,9 +96,9 @@ impl Kucoin {
                     };
 
                     let url = format!("{}?token={}", endpoint, token);
-                    println!("WebSocket соединение c {} установлено", endpoint);
 
                     let result = connect_async(&url).await?;
+                    println!("WebSocket соединение c {} установлено", endpoint);
 
                     Ok(result)
                 })

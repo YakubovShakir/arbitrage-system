@@ -117,6 +117,13 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
             trading_pair_name.base,
             trading_pair_name.quote,
         );
+        // println!(
+        //     "No network intersection beetween {} and {} at {}/{}",
+        //     buy_exchange.name(),
+        //     sell_exchange.name(),
+        //     trading_pair_name.base,
+        //     trading_pair_name.quote,
+        // );
         return None;
     };
 
@@ -160,7 +167,17 @@ pub fn parse_json_value_as_f64(value: &JsonValue) -> Result<f64, Box<dyn std::er
         .map_err(|e| format!("Failed to parse '{}' as f64: {}", value, e).into())
 }
 pub fn parse_json_value_as_bool(value: &JsonValue) -> Result<bool, Box<dyn std::error::Error>> {
-    Ok(value.as_bool().ok_or("Could not parse jsonValue as bool")?)
+    // Пытаемся получить значение как строку
+    let str_val = value
+        .as_str()
+        .ok_or("Could not parse jsonValue as string")?;
+
+    // Сравниваем содержимое строки
+    match str_val {
+        "true" => Ok(true),
+        "false" => Ok(false),
+        _ => Err(format!("String '{}' is not a valid boolean", str_val).into()),
+    }
 }
 // В нулевом индексе пары должна быть цена, а в первом количество
 pub fn parse_string_typed_glass(
@@ -224,55 +241,3 @@ pub fn hex_encode<T: AsRef<[u8]>>(data: T) -> String {
 pub fn base64_encode(data: &[u8]) -> String {
     BASE64.encode(data)
 }
-
-// pub fn print_dashboard(trading_pairs: Vec<Arc<TradingPair>>, exchanges: Vec<Arc<dyn Exchange>>) {
-//     println!(
-//         "\n{}\n| {:<4} | {:<14} | {:<14} | {:<14} | {:<14} | {:<14} |",
-//         "-".repeat(86),
-//         "No.",
-//         "TRADING PAIR",
-//         "BUY EXCHANGE",
-//         "BUY PRICE",
-//         "SELL EXCHANGE",
-//         "SELL PRICE"
-//     );
-//     let mut dashboard = format!("\n{}\n", "-".repeat(86));
-//     let mut no = 0;
-//     for pair in trading_pairs {
-//         no += 1;
-//         let pair_buy = match pair.min_buy_price() {
-//             Some((exchange_index, price)) => {
-//                 let exchange_name = match exchanges.get(exchange_index) {
-//                     Some(exchange) => exchange.name(),
-//                     None => "None",
-//                 };
-//                 (exchange_name, price)
-//             }
-//             None => ("None", 0.0),
-//         };
-
-//         let pair_sell = match pair.max_sell_price() {
-//             Some((exchange_index, price)) => {
-//                 let exchange_name = match exchanges.get(exchange_index) {
-//                     Some(exchange) => exchange.name(),
-//                     None => "None",
-//                 };
-//                 (exchange_name, price)
-//             }
-//             None => ("None", 0.0),
-//         };
-
-//         dashboard += &format!(
-//             "\n| {:<4} | {:<6}/{:<7} | {:<14} | {:<14.8} | {:<14} | {:<14.8} |",
-//             no,
-//             pair.base(),
-//             pair.quote(),
-//             pair_buy.0,
-//             pair_buy.1,
-//             pair_sell.0,
-//             pair_sell.1
-//         );
-//     }
-
-//     println!("{}", dashboard);
-// }

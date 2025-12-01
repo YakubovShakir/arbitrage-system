@@ -155,7 +155,7 @@ impl ExchangeService for Binance {
                         ))
                         .await;
                 });
-                Err("Subscribe to Binance ticker updates".into())
+                Err(format!("Subscribe to {} ticker updates", self.name).into())
             }
             Some(state) => {
                 let parsed_tickers = json::parse(&state).or(Err(format!(
