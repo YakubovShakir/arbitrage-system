@@ -13,7 +13,7 @@ use crate::{
         },
         utils::{
             encrypt_hmac_sha256, find_value_from_json_key, get_current_timestamp, hex_encode,
-            parse_json_value_as_f64, parse_string_typed_glass,
+            parse_json_as_f64, parse_string_typed_glass,
         },
     },
 };
@@ -104,27 +104,17 @@ impl ExchangeService for Bybit {
             if network["chainDeposit"] != "1" || network["chainWithdraw"] != "1" {
                 continue;
             }
-
-            let network_name = &network["chain"];
-            let full_name = &network["chainType"];
-            let withdraw_fee = *&network["withdrawFee"]
-                .as_str()
-                .and_then(|s| s.parse::<f64>().ok());
-
-            let contract_address = Some(network["contractAddress"].to_string());
-            let coin_name = coin;
-
-            let parsed_network: Network = Network::new(
-                network_name.to_string(),
-                full_name.to_string(),
-                coin_name.to_string(),
-                withdraw_fee,
-                contract_address,
+            if let Ok(network) = Network::parse_json(
+                &network["chain"],
+                &network["chainType"],
+                coin.to_string(),
+                Some(&network["withdrawFee"]),
+                &network["contractAddress"],
                 None,
                 None,
-            );
-
-            fetched_networks.push(parsed_network);
+            ) {
+                fetched_networks.push(network);
+            }
         }
 
         Ok(fetched_networks)
@@ -176,8 +166,8 @@ impl ExchangeService for Bybit {
 
         for ticker in tickers.members() {
             let (Ok(parsed_ask_price), Ok(parsed_bid_price)) = (
-                parse_json_value_as_f64(&ticker["ask1Price"]),
-                parse_json_value_as_f64(&ticker["bid1Price"]),
+                parse_json_as_f64(&ticker["ask1Price"]),
+                parse_json_as_f64(&ticker["bid1Price"]),
             ) else {
                 continue;
             };

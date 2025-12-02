@@ -1,5 +1,5 @@
 use hmac::Hmac;
-use sha2::Sha256;
+use sha2::{Sha256, Sha512};
 use std::collections::HashMap;
 
 use crate::core::{
@@ -23,7 +23,7 @@ pub type Value = String;
 pub type KeyValue = (Key, Value);
 
 pub type HmacSha256 = Hmac<Sha256>;
-
+pub type HmacSha512 = Hmac<Sha512>;
 pub type ExchangeName = String;
 pub type Exchanges = HashMap<ExchangeName, Box<dyn Exchange>>;
 

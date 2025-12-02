@@ -17,7 +17,7 @@ use crate::{
         },
         utils::{
             base64_encode, encrypt_hmac_sha256, find_value_from_json_key, get_current_timestamp,
-            parse_json_value_as_bool, parse_json_value_as_f64, parse_string_typed_glass,
+            parse_json_as_bool, parse_json_as_f64, parse_string_typed_glass,
         },
     },
 };
@@ -165,7 +165,7 @@ impl ExchangeService for Bitget {
 
         let data = find_value_from_json_key(&response, &["data"])?;
         if !data.is_array() {
-            return Err(format!("{} Invalid response: 'data'is not an array", self.name).into());
+            return Err(format!("{} Invalid response: 'data' is not an array", self.name).into());
         }
         let mut trading_pairs: TradingPairs = HashMap::new();
 
@@ -175,8 +175,8 @@ impl ExchangeService for Bitget {
             };
 
             let (Ok(ask_price), Ok(bid_price)) = (
-                parse_json_value_as_f64(&ticker["askPr"]),
-                parse_json_value_as_f64(&ticker["bidPr"]),
+                parse_json_as_f64(&ticker["askPr"]),
+                parse_json_as_f64(&ticker["bidPr"]),
             ) else {
                 continue;
             };
@@ -218,7 +218,7 @@ impl ExchangeService for Bitget {
             if item["baseCoin"] != trading_pair_name.base {
                 continue;
             }
-            let borrowable = parse_json_value_as_bool(&item["isBorrowable"])?;
+            let borrowable = parse_json_as_bool(&item["isBorrowable"])?;
             return Ok(borrowable);
         }
         Ok(false)
@@ -251,43 +251,28 @@ impl ExchangeService for Bitget {
         let mut fetched_networks: Vec<Network> = Vec::new();
 
         for chain in chains.members() {
-            let (Ok(withrawable), Ok(rechargeable)) = (
-                parse_json_value_as_bool(&chain["withdrawable"]),
-                parse_json_value_as_bool(&chain["rechargeable"]),
-            ) else {
-                continue;
-            };
-
-            if !withrawable || !rechargeable {
-                continue;
-            }
-            let chain_name = &chain["chain"];
-            let chain_full_name = &chain["chain"];
-            let withdraw_fee = chain["withdrawFee"]
-                .as_str()
-                .and_then(|s| s.parse::<f64>().ok());
-
-            let contract = if !chain["contractAddress"].to_string().is_empty() {
-                if chain["contractAddress"].to_string() != "null" {
-                    Some(chain["contractAddress"].to_string())
-                } else {
-                    None
+            if let (Ok(withrawable), Ok(rechargeable)) = (
+                parse_json_as_bool(&chain["withdrawable"]),
+                parse_json_as_bool(&chain["rechargeable"]),
+            ) {
+                if !withrawable || !rechargeable {
+                    continue;
                 }
             } else {
-                None
+                continue;
             };
 
-            let parsed_network: Network = Network::new(
-                chain_name.to_string(),
-                chain_full_name.to_string(),
+            if let Ok(network) = Network::parse_json(
+                &chain["chain"],
+                &chain["chain"],
                 coin.to_string(),
-                withdraw_fee,
-                contract,
+                Some(&chain["withdrawFee"]),
+                &chain["contractAddress"],
                 None,
                 None,
-            );
-
-            fetched_networks.push(parsed_network);
+            ) {
+                fetched_networks.push(network);
+            }
         }
         Ok(fetched_networks)
     }

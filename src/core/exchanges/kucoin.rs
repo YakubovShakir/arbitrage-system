@@ -1,8 +1,6 @@
 use async_trait::async_trait;
 use tokio::net::TcpStream;
-use tokio_tungstenite::{
-    MaybeTlsStream, WebSocketStream, connect_async, tungstenite::http::Response,
-};
+use tokio_tungstenite::connect_async;
 
 use crate::{
     config,
@@ -18,7 +16,7 @@ use crate::{
         },
         utils::{
             base64_encode, encrypt_hmac_sha256, find_value_from_json_key, get_current_timestamp,
-            parse_json_value_as_bool, parse_string_typed_glass,
+            parse_json_as_bool, parse_string_typed_glass,
         },
     },
 };
@@ -53,7 +51,9 @@ impl Kucoin {
 
                 Box::pin(async move {
                     // Вся логика подключения
-                    let response = match http_client.post("/api/v1/bullet-public", None, None).await
+                    let response = match http_client
+                        .post("/api/v1/bullet-public", None, None, None)
+                        .await
                     {
                         Ok(res) => res,
                         Err(e) => {
@@ -248,7 +248,7 @@ impl ExchangeService for Kucoin {
             )
             .await?;
 
-        let margin_enabled = parse_json_value_as_bool(&find_value_from_json_key(
+        let margin_enabled = parse_json_as_bool(&find_value_from_json_key(
             &response,
             &["data", "isMarginEnabled"],
         )?)?;
@@ -266,41 +266,32 @@ impl ExchangeService for Kucoin {
         let mut fetched_networks: Vec<Network> = Vec::new();
 
         for chain in chains.members() {
-            let (Ok(withdraw_enabled), Ok(deposit_enabled)) = (
-                parse_json_value_as_bool(&chain["isWithdrawEnabled"]),
-                parse_json_value_as_bool(&chain["isDepositEnabled"]),
-            ) else {
-                continue;
-            };
-            if !withdraw_enabled || !deposit_enabled {
-                continue;
-            }
-
-            let chain_name = &chain["chainId"];
-            let chain_full_name = &chain["chainName"];
-            let withdraw_fee = chain["withdrawMinFee"]
-                .as_str()
-                .and_then(|s| s.parse::<f64>().ok());
-
-            let contract = if !chain["contractAddress"].to_string().is_empty() {
-                Some(chain["contractAddress"].to_string())
+            if let (Ok(withdraw_enabled), Ok(deposit_enabled)) = (
+                parse_json_as_bool(&chain["isWithdrawEnabled"]),
+                parse_json_as_bool(&chain["isDepositEnabled"]),
+            ) {
+                if !withdraw_enabled || !deposit_enabled {
+                    continue;
+                }
             } else {
-                None
+                continue;
             };
 
-            let parsed_network: Network = Network::new(
-                chain_name.to_string(),
-                chain_full_name.to_string(),
+            if let Ok(network) = Network::parse_json(
+                &chain["chainId"],
+                &chain["chainName"],
                 coin.to_string(),
-                withdraw_fee,
-                contract,
+                Some(&chain["withdrawMinFee"]),
+                &chain["contractAddress"],
                 None,
                 None,
-            );
-            fetched_networks.push(parsed_network);
+            ) {
+                fetched_networks.push(network);
+            }
         }
         Ok(fetched_networks)
     }
+
     async fn fetch_orderbook(
         &self,
         base: &str,

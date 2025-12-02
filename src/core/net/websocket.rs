@@ -10,6 +10,7 @@ use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 
 pub type BinaryMessageHandler = Arc<dyn Fn(prost::bytes::Bytes) -> Option<String> + Send + Sync>;
+pub type PingPongHandler = Arc<dyn Fn(&str) -> Option<String> + Send + Sync>;
 
 pub type ConnectionHandler = Arc<
     dyn Fn() -> Pin<
@@ -37,8 +38,9 @@ pub struct WebSocketClient {
     listen_handle: Arc<Mutex<Option<JoinHandle<()>>>>,
     ping_interval: Option<Duration>,
     ping_message: Option<String>,
-    binary_handler: Option<BinaryMessageHandler>, // ← новый параметр
+    binary_handler: Option<BinaryMessageHandler>,
     connection_handler: Option<ConnectionHandler>,
+    ping_pong_handler: Option<PingPongHandler>, // ← новый обработчик ping/pong
 }
 
 impl WebSocketClient {
@@ -53,18 +55,22 @@ impl WebSocketClient {
             ping_message: None,
             binary_handler: None,
             connection_handler: None,
+            ping_pong_handler: None,
         }
     }
+
     // Метод для установки ping интервала
     pub fn with_ping_interval(mut self, interval: Duration, ping_message: String) -> Self {
         self.ping_interval = Some(interval);
         self.ping_message = Some(ping_message);
         self
     }
+
     pub fn with_binary_handler(mut self, handler: BinaryMessageHandler) -> Self {
         self.binary_handler = Some(handler);
         self
     }
+
     pub fn with_connection_handler(mut self, handler: ConnectionHandler) -> Self {
         self.connection_handler = Some(handler);
         self
@@ -72,6 +78,12 @@ impl WebSocketClient {
 
     pub fn with_streamed_state(mut self) -> Self {
         self.state_is_streamed = true;
+        self
+    }
+
+    // Новый метод для установки обработчика ping/pong
+    pub fn with_ping_pong_handler(mut self, handler: PingPongHandler) -> Self {
+        self.ping_pong_handler = Some(handler);
         self
     }
 
@@ -159,6 +171,8 @@ impl WebSocketClient {
         let con_url = self.connection_url.clone();
 
         let binary_handler = self.binary_handler.clone();
+        let ping_pong_handler = self.ping_pong_handler.clone();
+
         // Запускаем задачу слушателя
         let handle = tokio::spawn(async move {
             // Используем Arc и Mutex для разделения write между задачами
@@ -174,7 +188,6 @@ impl WebSocketClient {
                         loop {
                             interval_timer.tick().await;
                             let mut write_guard = write_for_ping.lock().await;
-                            // println!("Sending ping..");
                             if let Err(e) = write_guard
                                 .send(Message::Text(ping_message.clone().into()))
                                 .await
@@ -192,16 +205,37 @@ impl WebSocketClient {
             while let Some(message_result) = read.next().await {
                 match message_result {
                     Ok(Message::Text(text)) => {
-                        if state_is_streamed {
-                            let mut state_guard = streamed_state.write().await;
-                            let vec = state_guard.get_or_insert_with(VecDeque::new);
-                            vec.push_back(text.to_string());
-                            if vec.len() > 500 {
-                                vec.clear();
+                        // Проверяем, не является ли это ping-сообщением
+                        let mut is_ping_pong = false;
+
+                        if let Some(handler) = &ping_pong_handler {
+                            if let Some(response) = handler(&text) {
+                                // Отправляем ответный pong
+                                let mut write_guard = write.lock().await;
+                                println!("Получили ping от {} отпраляем ответку", con_url);
+                                if let Err(e) =
+                                    write_guard.send(Message::Text(response.into())).await
+                                {
+                                    eprintln!("Failed to send pong response: {}", e);
+                                    break;
+                                }
+                                is_ping_pong = true;
                             }
-                        } else {
-                            let mut state_guard = state.write().await;
-                            *state_guard = Some(text.to_string());
+                        }
+
+                        // Если это было ping/pong сообщение, не сохраняем его в state
+                        if !is_ping_pong {
+                            if state_is_streamed {
+                                let mut state_guard = streamed_state.write().await;
+                                let vec = state_guard.get_or_insert_with(VecDeque::new);
+                                vec.push_back(text.to_string());
+                                if vec.len() > 500 {
+                                    vec.clear();
+                                }
+                            } else {
+                                let mut state_guard = state.write().await;
+                                *state_guard = Some(text.to_string());
+                            }
                         }
                     }
                     Ok(Message::Ping(data)) => {
@@ -242,6 +276,7 @@ impl WebSocketClient {
 
         Ok(handle)
     }
+
     pub async fn get_state(&self) -> Option<String> {
         self.state.read().await.as_ref().cloned()
     }

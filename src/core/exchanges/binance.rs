@@ -9,7 +9,10 @@ use crate::{
             Asks, Bids, OrderBook, TradingPairs,
             structs::{Network, PriceData, TradingPair},
         },
-        utils::{encrypt_hmac_sha256, get_current_timestamp, hex_encode, parse_string_typed_glass},
+        utils::{
+            encrypt_hmac_sha256, get_current_timestamp, hex_encode, parse_json_as_bool,
+            parse_string_typed_glass,
+        },
     },
 };
 use core::{f64, str};
@@ -77,50 +80,32 @@ impl ExchangeService for Binance {
                 Some(&[("X-MBX-APIKEY".to_string(), self.api_key().to_string())]),
             )
             .await?;
+
         let mut fetched_networks: Vec<Network> = Vec::new();
 
         for item in response.members() {
             if item["coin"] != coin {
                 continue;
             }
-            let deposit_enabled = item["depositAllEnable"]
-                .as_bool()
-                .ok_or("Could not parse depositAllEnable as bool")?;
-
-            let withdraw_enabled = item["withdrawAllEnable"]
-                .as_bool()
-                .ok_or("Could not parse withdrawAllEnable as bool")?;
-
+            let deposit_enabled = parse_json_as_bool(&item["depositAllEnable"])?;
+            let withdraw_enabled = parse_json_as_bool(&item["withdrawAllEnable"])?;
             if !deposit_enabled || !withdraw_enabled {
                 break;
             }
 
             let networks = &item["networkList"];
-
             for network in networks.members() {
-                let network_name = &network["network"];
-                let coin_name = &network["coin"];
-                let full_name = &network["name"];
-                let withdraw_fee = network["withdrawFee"]
-                    .as_str()
-                    .and_then(|s| s.parse::<f64>().ok());
-
-                let contract_address = if network.has_key("contractAddress") {
-                    Some(network["contractAddress"].to_string())
-                } else {
-                    None
-                };
-
-                let parsed_network: Network = Network::new(
-                    network_name.to_string(),
-                    full_name.to_string(),
-                    coin_name.to_string(),
-                    withdraw_fee,
-                    contract_address,
+                if let Ok(network) = Network::parse_json(
+                    &network["network"],
+                    &network["name"],
+                    coin.to_string(),
+                    Some(&network["withdrawFee"]),
+                    &network["contractAddress"],
                     None,
                     None,
-                );
-                fetched_networks.push(parsed_network);
+                ) {
+                    fetched_networks.push(network);
+                }
             }
         }
 

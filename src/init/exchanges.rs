@@ -1,7 +1,7 @@
 use core::panic;
 
 use crate::config;
-use crate::core::exchanges::{Binance, Bitget, Bybit, Kucoin, Mexc};
+use crate::core::exchanges::{Binance, Bitget, Bybit, Gate, Kucoin, Lbank, Mexc};
 use crate::core::traits::ExchangeStatic;
 use crate::core::types::Exchanges;
 
@@ -59,13 +59,16 @@ pub async fn get_exchanges() -> Exchanges {
     };
     exchanges.insert(bitget.name().to_string(), Box::new(bitget));
 
-    // let lbank: Arc<dyn ExchangeAPI> = Arc::new(Lbank::new(
+    // let Ok(lbank) = Lbank::new(
     //     config::lbank::NAME,
     //     config::lbank::API_KEY,
     //     config::lbank::SECRET_KEY,
     //     config::lbank::BASE_URL,
-    //     config::lbank::EXCLUDED_PAIRS,
-    // ));
+    // ) else {
+    //     panic!()
+    // };
+    // exchanges.insert(lbank.name().to_string(), Box::new(lbank));
+
     let Ok(kucoin) = Kucoin::new(
         config::kucoin::NAME,
         config::kucoin::API_KEY,
@@ -77,13 +80,15 @@ pub async fn get_exchanges() -> Exchanges {
     };
     exchanges.insert(kucoin.name().to_string(), Box::new(kucoin));
 
-    // let gate: Arc<dyn ExchangeAPI> = Arc::new(Gate::new(
-    //     config::gate::NAME,
-    //     config::gate::API_KEY,
-    //     config::gate::SECRET_KEY,
-    //     config::gate::BASE_URL,
-    //     config::gate::EXCLUDED_PAIRS,
-    // ));
-    // vec![binance, bybit, mexc, huobi, bitget, lbank, kucoin, gate]
+    let Ok(gate) = Gate::new(
+        config::gate::NAME,
+        config::gate::API_KEY,
+        config::gate::SECRET_KEY,
+        config::gate::BASE_URL,
+    ) else {
+        panic!()
+    };
+    exchanges.insert(gate.name().to_string(), Box::new(gate));
+
     exchanges
 }

@@ -16,7 +16,7 @@ use crate::{
         },
         utils::{
             encrypt_hmac_sha256, find_value_from_json_key, get_current_timestamp, hex_encode,
-            parse_json_value_as_f64, parse_string_typed_glass,
+            parse_json_as_bool, parse_string_typed_glass,
         },
     },
 };
@@ -137,33 +137,22 @@ impl ExchangeService for Mexc {
             }
             let networks = find_value_from_json_key(item, &["networkList"])?;
             for network in networks.members() {
-                let withdraw_enabled = network["withdrawEnable"]
-                    .as_bool()
-                    .ok_or("Could not parse withdrawEnable as bool")?;
-
+                let withdraw_enabled = parse_json_as_bool(&network["withdrawEnable"])?;
                 if !withdraw_enabled {
                     continue;
                 }
 
-                let network_name = &network["netWork"];
-                let network_full_name = &network["network"];
-                let withdraw_fee = network["withdrawFee"]
-                    .as_str()
-                    .and_then(|s| s.parse::<f64>().ok());
-
-                let contract_address = Some(network["contract"].to_string());
-
-                let parsed_network: Network = Network::new(
-                    network_name.to_string(),
-                    network_full_name.to_string(),
+                if let Ok(network) = Network::parse_json(
+                    &network["netWork"],
+                    &network["netWork"],
                     coin.to_string(),
-                    withdraw_fee,
-                    contract_address,
+                    Some(&network["withdrawFee"]),
+                    &network["contract"],
                     None,
                     None,
-                );
-
-                fetched_networks.push(parsed_network);
+                ) {
+                    fetched_networks.push(network);
+                };
             }
         }
         Ok(fetched_networks)

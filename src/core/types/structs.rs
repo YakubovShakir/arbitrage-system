@@ -1,4 +1,11 @@
-use crate::{config::QUOTE_LIST, core::types::ExchangeName};
+use crate::{
+    config::QUOTE_LIST,
+    core::{
+        types::ExchangeName,
+        utils::{parse_json_as_f64, parse_json_as_str},
+    },
+};
+use json::JsonValue;
 use tokio::sync::RwLock;
 
 #[derive(Debug, Clone)]
@@ -46,6 +53,32 @@ impl Network {
             None,
             None,
         )
+    }
+    pub fn parse_json(
+        name: &JsonValue,
+        full_name: &JsonValue,
+        coin_name: String,
+        withdraw_fee: Option<&JsonValue>,
+        contract_address: &JsonValue,
+        memo: Option<JsonValue>,
+        deposit_address: Option<JsonValue>,
+    ) -> Result<Network, Box<dyn std::error::Error>> {
+        let name = parse_json_as_str(name)?;
+        let full_name = parse_json_as_str(full_name)?;
+        let withdraw_fee = withdraw_fee.and_then(|fee| parse_json_as_f64(fee).ok());
+        let contract_address = parse_json_as_str(contract_address).ok();
+        let memo = memo.and_then(|memo| parse_json_as_str(&memo).ok());
+        let deposit_address = deposit_address.and_then(|addr| parse_json_as_str(&addr).ok());
+
+        Ok(Self {
+            name,
+            full_name,
+            coin_name,
+            withdraw_fee,
+            contract_address,
+            memo,
+            deposit_address,
+        })
     }
 }
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
