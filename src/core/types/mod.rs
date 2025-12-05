@@ -1,33 +1,12 @@
-use hmac::Hmac;
-use sha2::{Sha256, Sha512};
-use std::collections::HashMap;
-
-use crate::core::{
-    traits::Exchange,
-    types::structs::{PriceData, TradingPair},
+pub mod api;
+pub mod exchanges;
+pub mod network;
+pub mod price_data;
+pub mod sys_primitive;
+pub mod trading_pair;
+pub use {
+    api::API, network::Network, price_data::PriceData, sys_primitive::*, trading_pair::TradingPair,
 };
-
-pub mod structs;
-
-pub type Price = f64;
-pub type Quantity = f64;
-pub type OrderBookLevel = (Price, Quantity);
-pub type Glass = Vec<OrderBookLevel>;
-
-pub type Asks = Glass;
-pub type Bids = Glass;
-pub type OrderBook = (Asks, Bids);
-
-pub type Key = String;
-pub type Value = String;
-pub type KeyValue = (Key, Value);
-
-pub type HmacSha256 = Hmac<Sha256>;
-pub type HmacSha512 = Hmac<Sha512>;
-pub type ExchangeName = String;
-pub type Exchanges = HashMap<ExchangeName, Box<dyn Exchange>>;
-
-pub type TradingPairs = HashMap<TradingPair, PriceData>;
 
 pub enum RestEndPoint {
     // Получить информацию об адресе депозита по сети

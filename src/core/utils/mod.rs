@@ -12,10 +12,7 @@ use sha2::{Digest, Sha256};
 
 use crate::core::{
     traits::Exchange,
-    types::{
-        Glass, HmacSha256, HmacSha512, Price, Quantity,
-        structs::{Network, TradingPair},
-    },
+    types::{Glass, HmacSha256, HmacSha512, Network, Price, Quantity, TradingPair},
 };
 
 pub fn find_value_from_json_key(

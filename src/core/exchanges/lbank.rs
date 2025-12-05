@@ -10,10 +10,7 @@ use crate::core::{
         websocket::{PingPongHandler, WebSocketClient},
     },
     traits::{ExchangeService, ExchangeStatic},
-    types::{
-        Asks, Bids, OrderBook, TradingPairs,
-        structs::{Network, PriceData, TradingPair},
-    },
+    types::{Asks, Bids, Network, OrderBook, PriceData, TradingPair, TradingPairs},
     utils::{
         base64_encode, encrypt_hmac_sha256, find_value_from_json_key, get_current_timestamp,
         hex_encode, parse_json_as_f64, parse_string_typed_glass, sign_rsa_sha256,

@@ -3,14 +3,10 @@ use async_trait::async_trait;
 use crate::core::{
     net::http::HttpClient,
     traits::{ExchangeService, ExchangeStatic},
-    types::{
-        Asks, Bids, OrderBook, TradingPairs,
-        structs::{Network, PriceData, TradingPair},
-    },
+    types::{Asks, Bids, Network, OrderBook, PriceData, TradingPair, TradingPairs},
     utils::{
-        encrypt_hmac_sha512, get_current_timestamp_secs, hex_encode, parse_json_as_bool,
-        parse_json_as_f64, parse_json_as_str, parse_string_typed_glass,
-        sha512_with_ring_return_hex,
+        encrypt_hmac_sha512, hex_encode, parse_json_as_bool, parse_json_as_f64, parse_json_as_str,
+        parse_string_typed_glass, sha512_with_ring_return_hex,
     },
 };
 use std::{collections::HashMap, error::Error};

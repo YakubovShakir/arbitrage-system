@@ -11,10 +11,7 @@ use crate::{
             websocket::{ConnectionHandler, WebSocketClient},
         },
         traits::{ExchangeService, ExchangeStatic},
-        types::{
-            Asks, Bids, OrderBook, Price, TradingPairs,
-            structs::{Network, PriceData, TradingPair},
-        },
+        types::{Asks, Bids, Network, OrderBook, Price, PriceData, TradingPair, TradingPairs},
         utils::{
             base64_encode, encrypt_hmac_sha256, find_value_from_json_key, get_current_timestamp,
             parse_json_as_bool, parse_json_as_f64, parse_string_typed_glass,
@@ -138,7 +135,6 @@ impl Bitget {
     }
 }
 
-#[async_trait]
 impl ExchangeStatic for Bitget {
     fn name(&self) -> &str {
         &self.name

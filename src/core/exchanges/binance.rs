@@ -5,10 +5,7 @@ use crate::{
     core::{
         net::{http::HttpClient, websocket::WebSocketClient},
         traits::{ExchangeService, ExchangeStatic},
-        types::{
-            Asks, Bids, OrderBook, TradingPairs,
-            structs::{Network, PriceData, TradingPair},
-        },
+        types::{Asks, Bids, Network, OrderBook, PriceData, TradingPair, TradingPairs},
         utils::{
             encrypt_hmac_sha256, get_current_timestamp, hex_encode, parse_json_as_bool,
             parse_string_typed_glass,
@@ -73,11 +70,11 @@ impl ExchangeService for Binance {
             .get(
                 config::binance::FETCH_NETWORKS,
                 Some(&[
-                    ("coin".to_string(), coin.to_string()),
-                    ("timestamp".to_string(), timestamp),
-                    ("signature".to_string(), hex_encode(signature)),
+                    ("coin", coin),
+                    ("timestamp", &timestamp),
+                    ("signature", &hex_encode(signature)),
                 ]),
-                Some(&[("X-MBX-APIKEY".to_string(), self.api_key().to_string())]),
+                Some(&[("X-MBX-APIKEY", self.api_key())]),
             )
             .await?;
 
@@ -117,8 +114,8 @@ impl ExchangeService for Binance {
             .http_client
             .get(
                 config::binance::FETCH_MARGIN_INFO,
-                Some(&[("asset".to_string(), pair.base.to_string())]),
-                Some(&[("X-MBX-APIKEY".to_string(), self.api_key().to_string())]),
+                Some(&[("asset", &pair.base)]),
+                Some(&[("X-MBX-APIKEY", self.api_key())]),
             )
             .await?;
 
@@ -179,10 +176,10 @@ impl ExchangeService for Binance {
             .get(
                 "/api/v3/depth",
                 Some(&[
-                    ("symbol".to_string(), format!("{}{}", base, quote)),
-                    ("limit".to_string(), "500".to_string()),
+                    ("symbol", format!("{}{}", base, quote).as_str()),
+                    ("limit", "500"),
                 ]),
-                Some(&[("X-MBX-APIKEY".to_string(), self.api_key().to_string())]),
+                Some(&[("X-MBX-APIKEY", self.api_key())]),
             )
             .await?;
 

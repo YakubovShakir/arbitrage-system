@@ -37,8 +37,8 @@ impl HttpClient {
     pub async fn get(
         &self,
         endpoint: &str,
-        query: Option<&[KeyValue]>,
-        headers: Option<&[KeyValue]>,
+        query: Option<&[(&str, &str)]>,
+        headers: Option<&[(&str, &str)]>,
     ) -> Result<JsonValue, Box<dyn std::error::Error>> {
         let query = query.unwrap_or(&[]);
         let mut formated_headers = HeaderMap::new();
@@ -47,8 +47,8 @@ impl HttpClient {
             Some(pairs) => {
                 for pair in pairs {
                     formated_headers.insert(
-                        HeaderName::from_str(pair.0.as_str())?,
-                        HeaderValue::from_str(pair.1.as_str())?,
+                        HeaderName::from_str(pair.0)?,
+                        HeaderValue::from_str(pair.1)?,
                     );
                 }
             }
