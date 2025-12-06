@@ -9,7 +9,7 @@ use tokio::sync::RwLock;
 #[tokio::main]
 async fn main() {
     // Получаем список бирж из init
-    let exchanges = Arc::new(get_exchanges().await);
+    let exchanges = Arc::new(get_exchanges().await.unwrap());
 
     // Определяем список торговых пар и спред-пар
     let trading_pairs = Arc::new(RwLock::new(TradingPairs::new()));

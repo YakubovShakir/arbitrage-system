@@ -1,12 +1,20 @@
-use crate::core::net::{http::HttpClient, websocket::WebSocketClient};
+use std::error::Error;
+
+use crate::core::{
+    net::{http::HttpClient, websocket::WebSocketClient},
+    types::signature_params::SignatureParams,
+    utils::{
+        base64_encode, encrypt_hmac_sha256, encrypt_hmac_sha512, hex_encode,
+        sha512_with_ring_return_hex,
+    },
+};
 
 pub struct ExchangeConfig {
-    name: String,
-    api_key: String,
-    secret_key: String,
-    base_url: String,
-    http_client: HttpClient,
-    websocket_client: Option<WebSocketClient>,
+    pub name: String,
+    pub api_key: String,
+    pub secret_key: String,
+    pub http_client: HttpClient,
+    pub websocket_client: Option<WebSocketClient>,
 }
 
 pub enum Exchange {
@@ -28,22 +36,92 @@ impl Exchange {
             Exchange::Mexc(config) => config,
         }
     }
-    pub fn get_name(&self) -> &str {
-        &self.config().name
-    }
-    pub fn get_api_key(&self) -> &str {
-        &self.config().api_key
-    }
-    pub fn get_secret_key(&self) -> &str {
-        &self.config().secret_key
-    }
-    pub fn get_base_url(&self) -> &str {
-        &self.config().base_url
-    }
-    pub fn get_http_client(&self) -> &HttpClient {
-        &self.config().http_client
-    }
-    pub fn get_socket_client(&self) -> &Option<WebSocketClient> {
-        &self.config().websocket_client
+
+    pub fn generate_signature(&self, params: SignatureParams) -> Result<String, Box<dyn Error>> {
+        match (self, params) {
+            // Binance
+            (Self::Binance(cfg), SignatureParams::Binance { query }) => {
+                let signature = encrypt_hmac_sha256(&cfg.secret_key, query)?;
+                Ok(hex_encode(signature))
+            }
+
+            // Bybit
+            (
+                Self::Bybit(cfg),
+                SignatureParams::Bybit {
+                    query,
+                    timestamp,
+                    recv_window,
+                },
+            ) => {
+                let ak = &cfg.api_key;
+                let sk = &cfg.secret_key;
+                let signature = timestamp.to_owned() + ak + recv_window + query;
+                let encrypted = encrypt_hmac_sha256(sk, &signature)?;
+                Ok(hex_encode(encrypted))
+            }
+
+            // Bitget
+            (
+                Self::Bitget(cfg),
+                SignatureParams::Bitget {
+                    query,
+                    method,
+                    endpoint,
+                    timestamp,
+                },
+            ) => {
+                let signature = timestamp.to_owned() + method + endpoint + "?" + query;
+                let encrypted = encrypt_hmac_sha256(&cfg.secret_key, &signature)?;
+                Ok(base64_encode(&encrypted))
+            }
+
+            // Gate.io
+            (
+                Self::Gate(cfg),
+                SignatureParams::Gate {
+                    query,
+                    method,
+                    endpoint,
+                    timestamp,
+                    json_body,
+                },
+            ) => {
+                let hashed_payload = sha512_with_ring_return_hex(json_body);
+                let prepared_str = format!(
+                    "{}\n{}\n{}\n{}\n{}",
+                    method, endpoint, query, hashed_payload, timestamp
+                );
+                let signed = encrypt_hmac_sha512(&cfg.secret_key, &prepared_str)?;
+                Ok(hex_encode(signed))
+            }
+
+            // Kucoin
+            (
+                Self::Kucoin(cfg),
+                SignatureParams::Kucoin {
+                    query,
+                    method,
+                    endpoint,
+                    timestamp,
+                },
+            ) => {
+                let signature = timestamp.to_owned() + method + endpoint + "?" + query;
+                let encrypted = encrypt_hmac_sha256(&cfg.secret_key, &signature)?;
+                Ok(base64_encode(&encrypted))
+            }
+
+            // Mexc
+            (Self::Mexc(cfg), SignatureParams::Mexc { query, string_body }) => {
+                let signature = query.to_string() + string_body;
+                let encrypted = encrypt_hmac_sha256(&cfg.secret_key, &signature)?;
+                Ok(hex_encode(encrypted))
+            }
+
+            _ => Err(format!(
+                "Cannot generate Signature - method not implemented for this Exchange",
+            )
+            .into()),
+        }
     }
 }

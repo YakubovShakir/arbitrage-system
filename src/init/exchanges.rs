@@ -1,94 +1,174 @@
-use core::panic;
+use std::collections::HashMap;
+use std::error::Error;
+use std::sync::Arc;
+use std::time::Duration;
+
+use tokio_tungstenite::connect_async;
 
 use crate::config;
-use crate::core::exchanges::{Binance, Bitget, Bybit, Gate, Kucoin, Lbank, Mexc};
-use crate::core::traits::ExchangeStatic;
+use crate::core::net::http::HttpClient;
+use crate::core::net::websocket::{BinaryMessageHandler, ConnectionHandler, WebSocketClient};
 use crate::core::types::Exchanges;
+use crate::core::types::exchanges::{Exchange, ExchangeConfig};
+use crate::core::utils::find_value_from_json_key;
 
-pub async fn get_exchanges() -> Exchanges {
-    let mut exchanges = Exchanges::new();
+pub async fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
+    let mut exchanges: Exchanges = HashMap::new();
 
-    let Ok(binance) = Binance::new(
-        config::binance::NAME,
-        config::binance::API_KEY,
-        config::binance::SECRET_KEY,
-        config::binance::BASE_URL,
-        config::binance::WEBSOCKET_URL,
-    ) else {
-        panic!()
-    };
-    exchanges.insert(binance.name().to_string(), Box::new(binance));
+    // Binance
+    let binance = Exchange::Binance(ExchangeConfig {
+        name: config::binance::NAME.to_owned(),
+        api_key: config::binance::API_KEY.to_owned(),
+        secret_key: config::binance::SECRET_KEY.to_owned(),
+        http_client: HttpClient::new(config::binance::BASE_URL)?,
+        websocket_client: Some(WebSocketClient::new(config::binance::WEBSOCKET_URL)),
+    });
+    exchanges.insert(config::binance::NAME.to_owned(), binance);
 
-    let Ok(bybit) = Bybit::new(
-        config::bybit::NAME,
-        config::bybit::API_KEY,
-        config::bybit::SECRET_KEY,
-        config::bybit::BASE_URL,
-    ) else {
-        panic!();
-    };
-    exchanges.insert(bybit.name().to_string(), Box::new(bybit));
+    // Bybit
+    let bybit = Exchange::Bybit(ExchangeConfig {
+        name: config::bybit::NAME.to_owned(),
+        api_key: config::bybit::API_KEY.to_owned(),
+        secret_key: config::bybit::SECRET_KEY.to_owned(),
+        http_client: HttpClient::new(config::bybit::BASE_URL)?,
+        websocket_client: None,
+    });
+    exchanges.insert(config::bybit::NAME.to_owned(), bybit);
 
-    let Ok(mexc) = Mexc::new(
-        config::mexc::NAME,
-        config::mexc::API_KEY,
-        config::mexc::SECRET_KEY,
-        config::mexc::BASE_URL,
-        config::mexc::WEBSOCKET_URL,
-    ) else {
-        panic!();
-    };
-    exchanges.insert(mexc.name().to_string(), Box::new(mexc));
+    // Mexc
+    // Обработчик для protobuf сообщений MEXC
+    let mexc_binary_handler: BinaryMessageHandler = Arc::new(|data: prost::bytes::Bytes| {
+        match crate::config::mexc_protocol_buffers::decode_message(&data) {
+            Ok(message) => {
+                let tickers =
+                    crate::config::mexc_protocol_buffers::handle_protobuf_message(message);
 
-    // let huobi: Arc<dyn ExchangeAPI> = Arc::new(Huobi::new(
-    //     config::huobi::NAME,
-    //     config::huobi::API_KEY,
-    //     config::huobi::SECRET_KEY,
-    //     config::huobi::BASE_URL,
-    //     config::huobi::EXCLUDED_PAIRS,
-    // ));
+                // Преобразуем тикеры в строку для состояния
+                if !tickers.is_empty() {
+                    let ticker_strings: Vec<String> = tickers
+                        .iter()
+                        .map(|t| format!("{}:{}", t.symbol, t.price))
+                        .collect();
+                    Some(ticker_strings.join("|"))
+                } else {
+                    None
+                }
+            }
+            Err(e) => {
+                eprintln!("Ошибка декодирования protobuf MEXC: {}", e);
+                None
+            }
+        }
+    });
+    let mexc = Exchange::Mexc(ExchangeConfig {
+        name: config::mexc::NAME.to_owned(),
+        api_key: config::mexc::API_KEY.to_owned(),
+        secret_key: config::mexc::SECRET_KEY.to_owned(),
+        http_client: HttpClient::new(config::mexc::BASE_URL)?,
+        websocket_client: Some(
+            WebSocketClient::new(config::mexc::WEBSOCKET_URL)
+                .with_ping_interval(Duration::from_secs(20), r#"{"method": "PING"}"#.to_string())
+                .with_binary_handler(mexc_binary_handler),
+        ),
+    });
+    exchanges.insert(config::mexc::NAME.to_owned(), mexc);
 
-    let Ok(bitget) = Bitget::new(
-        config::bitget::NAME,
-        config::bitget::API_KEY,
-        config::bitget::SECRET_KEY,
-        config::bitget::BASE_URL,
-        // config::bitget::WEBSOCKET_URL,
-    ) else {
-        panic!();
-    };
-    exchanges.insert(bitget.name().to_string(), Box::new(bitget));
+    // Bitget
+    let bitget = Exchange::Bitget(ExchangeConfig {
+        name: config::bitget::NAME.to_owned(),
+        api_key: config::bitget::API_KEY.to_owned(),
+        secret_key: config::bitget::SECRET_KEY.to_owned(),
+        http_client: HttpClient::new(config::bitget::BASE_URL)?,
+        websocket_client: None,
+    });
+    exchanges.insert(config::bitget::NAME.to_owned(), bitget);
 
-    // let Ok(lbank) = Lbank::new(
-    //     config::lbank::NAME,
-    //     config::lbank::API_KEY,
-    //     config::lbank::SECRET_KEY,
-    //     config::lbank::BASE_URL,
-    // ) else {
-    //     panic!()
-    // };
-    // exchanges.insert(lbank.name().to_string(), Box::new(lbank));
+    // Kucoin
+    let kucoin_http_client = HttpClient::new(config::kucoin::BASE_URL)?;
+    let kucoin_name = config::kucoin::NAME;
+    let kucoin_connection_handler: ConnectionHandler = Arc::new({
+        let http_client = kucoin_http_client.clone();
+        let name = kucoin_name.to_string();
 
-    let Ok(kucoin) = Kucoin::new(
-        config::kucoin::NAME,
-        config::kucoin::API_KEY,
-        config::kucoin::SECRET_KEY,
-        config::kucoin::BASE_URL,
-        config::kucoin::BASE_URL,
-    ) else {
-        panic!()
-    };
-    exchanges.insert(kucoin.name().to_string(), Box::new(kucoin));
+        move || {
+            let http_client = http_client.clone();
+            let name = name.clone();
 
-    let Ok(gate) = Gate::new(
-        config::gate::NAME,
-        config::gate::API_KEY,
-        config::gate::SECRET_KEY,
-        config::gate::BASE_URL,
-    ) else {
-        panic!()
-    };
-    exchanges.insert(gate.name().to_string(), Box::new(gate));
+            Box::pin(async move {
+                // Вся логика подключения
+                let response = match http_client
+                    .post("/api/v1/bullet-public", None, None, None)
+                    .await
+                {
+                    Ok(res) => res,
+                    Err(e) => {
+                        return Err(format!("{} error in ConnectionHandler - {}", name, e).into());
+                    }
+                };
 
-    exchanges
+                if response["code"] != "200000" {
+                    return Err(format!("API error from {}", name).into());
+                }
+
+                let token = match find_value_from_json_key(&response, &["data", "token"]) {
+                    Ok(token) => token,
+                    Err(e) => {
+                        return Err(format!("{} error in ConnectionHandler - {}", name, e).into());
+                    }
+                };
+
+                let servers =
+                    match find_value_from_json_key(&response, &["data", "instanceServers"]) {
+                        Ok(servers) => servers,
+                        Err(e) => {
+                            return Err(
+                                format!("{} error in ConnectionHandler - {}", name, e).into()
+                            );
+                        }
+                    };
+
+                let endpoint = match find_value_from_json_key(&servers[0], &["endpoint"]) {
+                    Ok(endpoint) => endpoint,
+                    Err(e) => {
+                        return Err(format!("{} error in ConnectionHandler - {}", name, e).into());
+                    }
+                };
+
+                let url = format!("{}?token={}", endpoint, token);
+
+                let result = connect_async(&url).await?;
+                println!("WebSocket соединение c {} установлено", endpoint);
+
+                Ok(result)
+            })
+        }
+    });
+    let kucoin = Exchange::Kucoin(ExchangeConfig {
+        name: kucoin_name.to_owned(),
+        api_key: config::kucoin::API_KEY.to_owned(),
+        secret_key: config::kucoin::SECRET_KEY.to_owned(),
+        http_client: kucoin_http_client,
+        websocket_client: Some(
+            WebSocketClient::new(config::kucoin::BASE_URL)
+                .with_ping_interval(
+                    Duration::from_secs(20),
+                    r#"{"id": "123","type": "ping"}"#.to_string(),
+                )
+                .with_connection_handler(kucoin_connection_handler) // ← просто передаем замыкание
+                .with_streamed_state(),
+        ),
+    });
+    exchanges.insert(config::kucoin::NAME.to_owned(), kucoin);
+
+    // Gate.io
+    let gate = Exchange::Gate(ExchangeConfig {
+        name: config::gate::NAME.to_owned(),
+        api_key: config::gate::API_KEY.to_owned(),
+        secret_key: config::gate::SECRET_KEY.to_owned(),
+        http_client: HttpClient::new(config::gate::BASE_URL)?,
+        websocket_client: None,
+    });
+    exchanges.insert(config::gate::NAME.to_owned(), gate);
+
+    Ok(exchanges)
 }

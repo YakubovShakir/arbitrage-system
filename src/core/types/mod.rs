@@ -2,6 +2,7 @@ pub mod api;
 pub mod exchanges;
 pub mod network;
 pub mod price_data;
+pub mod signature_params;
 pub mod sys_primitive;
 pub mod trading_pair;
 pub use {

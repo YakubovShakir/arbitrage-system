@@ -1,7 +1,7 @@
 use crate::{
     config::{USDT_LIMIT, parameters::REQUIRED_SPREAD_PERCENT},
     core::{
-        traits::Workable,
+        traits::{Workable, exchange_service::OrderBookService},
         types::{Exchanges, TradingPairs},
         utils::{
             calculate_price_by_glass, comput_spread_percent,
@@ -89,11 +89,11 @@ impl Workable for ComputWorker {
                     continue;
                 };
 
-                let Ok(buy_book) = buy_exchange.fetch_orderbook(&base, &quote).await else {
+                let Ok(buy_book) = buy_exchange.orderbook(&base, &quote).await else {
                     continue;
                 };
 
-                let Ok(sell_book) = sell_exchange.fetch_orderbook(&base, &quote).await else {
+                let Ok(sell_book) = sell_exchange.orderbook(&base, &quote).await else {
                     continue;
                 };
 

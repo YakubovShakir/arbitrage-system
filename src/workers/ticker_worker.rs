@@ -2,12 +2,9 @@ use std::sync::Arc;
 
 use tokio::sync::RwLock;
 
-use crate::{
-    core::{
-        traits::Workable,
-        types::{Exchanges, TradingPairs},
-    },
-    workers::ticker_worker,
+use crate::core::{
+    traits::{Workable, exchange_service::TickerService},
+    types::{Exchanges, TradingPairs},
 };
 
 pub struct TickerWorker {
@@ -38,7 +35,7 @@ impl Workable for TickerWorker {
     async fn run(&self) -> ! {
         loop {
             for (exchange_name, exchange) in &*self.exchanges {
-                let new_tickers = match exchange.fetch_tickers().await {
+                let new_tickers = match exchange.tickers().await {
                     Ok(tickers) => tickers,
                     Err(e) => {
                         println!(
@@ -48,17 +45,10 @@ impl Workable for TickerWorker {
                         continue;
                     }
                 };
-
                 let mut global_pairs = self.trading_pairs.write().await;
 
                 for (new_trading_pair, new_price_data) in new_tickers {
                     let Some(existing_price) = global_pairs.get(&new_trading_pair) else {
-                        // println!(
-                        //     "Пара {}/{} с биржи {} добавлена в глобальную хеш мапу",
-                        //     new_trading_pair.base,
-                        //     new_trading_pair.quote,
-                        //     exchange.name(),
-                        // );
                         global_pairs.insert(new_trading_pair, new_price_data);
                         continue;
                     };

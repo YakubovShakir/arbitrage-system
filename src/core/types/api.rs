@@ -31,7 +31,7 @@ impl API {
                 Exchange::Bybit(_) => Some("/v5/asset/coin/query-info"),
                 Exchange::Bitget(_) => Some("/api/v2/spot/public/coins"),
                 Exchange::Gate(_) => Some("/api/v4/wallet/currency_chains"),
-                Exchange::Kucoin(_) => Some("/api/v3/currencies/{}"),
+                Exchange::Kucoin(_) => Some("/api/v3/currencies"),
                 Exchange::Mexc(_) => Some("/api/v3/capital/config/getall"),
             },
             API::GetOrderBook => match exchange {

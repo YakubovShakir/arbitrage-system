@@ -11,8 +11,10 @@ use openssl::sign::Signer;
 use sha2::{Digest, Sha256};
 
 use crate::core::{
-    traits::Exchange,
-    types::{Glass, HmacSha256, HmacSha512, Network, Price, Quantity, TradingPair},
+    traits::exchange_service::{MarginInfoService, NetworkService},
+    types::{
+        Glass, HmacSha256, HmacSha512, Network, Price, Quantity, TradingPair, exchanges::Exchange,
+    },
 };
 
 pub fn find_value_from_json_key(
@@ -71,11 +73,11 @@ pub fn find_intersection_from_networks(
 }
 
 pub async fn verify_arbitrage_conditions_and_get_networks(
-    buy_exchange: &Box<dyn Exchange>,
-    sell_exchange: &Box<dyn Exchange>,
+    buy_exchange: &Exchange,
+    sell_exchange: &Exchange,
     trading_pair_name: &TradingPair,
 ) -> Option<Vec<Network>> {
-    let is_margin_available = match sell_exchange.is_margin_available(&trading_pair_name).await {
+    let is_margin_available = match sell_exchange.borrowable(&trading_pair_name).await {
         Ok(result) => result,
         Err(e) => {
             // println!("Ошибка вызова is_margin_available {}", e);
@@ -86,24 +88,24 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     if !is_margin_available {
         return None;
     }
-    let buy_networks = match buy_exchange.fetch_networks(&trading_pair_name.base).await {
+    let buy_networks = match buy_exchange.networks(&trading_pair_name.base).await {
         Ok(networks) => networks,
         Err(e) => {
             println!(
                 "Не удалось получить сети с биржи покупки, {} - {}",
-                buy_exchange.name(),
+                buy_exchange.config().name,
                 e
             );
             return None;
         }
     };
 
-    let sell_networks = match sell_exchange.fetch_networks(&trading_pair_name.base).await {
+    let sell_networks = match sell_exchange.networks(&trading_pair_name.base).await {
         Ok(networks) => networks,
         Err(e) => {
             println!(
                 "Не удалось получить сети с биржи продажи, {} - {}",
-                sell_exchange.name(),
+                sell_exchange.config().name,
                 e
             );
             return None;
@@ -203,42 +205,6 @@ pub fn parse_json_as_bool(value: &JsonValue) -> Result<bool, Box<dyn std::error:
 
     Err("Could not parse value as boolean".into())
 }
-// В нулевом индексе пары должна быть цена, а в первом количество
-pub fn parse_string_typed_glass(
-    glass: &JsonValue,
-) -> Result<Vec<(f64, f64)>, Box<dyn std::error::Error>> {
-    let mut result: Vec<(f64, f64)> = Vec::new();
-    for order_level in glass.members() {
-        let price: Price = order_level[0]
-            .as_str()
-            .ok_or("Cannot parse price json as str")?
-            .parse()?;
-        let quantity: Quantity = order_level[1]
-            .as_str()
-            .ok_or("Cannot parse quantity json as str")?
-            .parse()?;
-        result.push((price, quantity));
-    }
-    Ok(result)
-}
-
-// В нулевом индексе пары должна быть цена, а в первом количество
-pub fn parse_number_typed_glass(
-    glass: &JsonValue,
-) -> Result<Vec<(f64, f64)>, Box<dyn std::error::Error>> {
-    let mut result: Vec<(f64, f64)> = Vec::new();
-    for order_level in glass.members() {
-        let price: Price = order_level[0]
-            .as_f64()
-            .ok_or("Cannot parse price json as number")?;
-
-        let quantity: Quantity = order_level[1]
-            .as_f64()
-            .ok_or("Cannot parse quantity json as str")?;
-        result.push((price, quantity));
-    }
-    Ok(result)
-}
 
 pub fn get_current_timestamp() -> Result<String, Box<dyn std::error::Error>> {
     Ok(SystemTime::now()
@@ -259,8 +225,8 @@ pub fn sha512_with_ring_return_hex(input: &str) -> String {
     hex::encode(digest.as_ref())
 }
 pub fn encrypt_hmac_sha256(
-    secret_key: &String,
-    signature: &String,
+    secret_key: &str,
+    signature: &str,
 ) -> Result<[u8; 32], Box<dyn std::error::Error>> {
     Ok(HmacSha256::new_from_slice(secret_key.as_bytes())?
         .chain_update(signature.as_bytes())
@@ -270,8 +236,8 @@ pub fn encrypt_hmac_sha256(
 }
 
 pub fn encrypt_hmac_sha512(
-    secret_key: &String,
-    signature: &String,
+    secret_key: &str,
+    signature: &str,
 ) -> Result<[u8; 64], Box<dyn std::error::Error>> {
     Ok(HmacSha512::new_from_slice(secret_key.as_bytes())?
         .chain_update(signature.as_bytes())
