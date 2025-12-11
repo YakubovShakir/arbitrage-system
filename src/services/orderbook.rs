@@ -158,6 +158,24 @@ impl OrderBookService for Exchange {
                 let raw_bids = find_value_from_json_key(&response, &["bids"])?;
                 (raw_asks, raw_bids)
             }
+            Exchange::Huobi(cfg) => {
+                let symbol = format!("{}{}", base, quote).to_lowercase();
+                let headers = &[("Content-Type", "application/json")];
+                let query = &[
+                    ("symbol", symbol.as_str()),
+                    ("depth", "20"),
+                    ("type", "step0"),
+                ];
+                let res = cfg
+                    .http_client
+                    .get(endpoint, Some(query), Some(headers))
+                    .await?;
+
+                let raw_asks = find_value_from_json_key(&res, &["tick", "asks"])?;
+                let raw_bids = find_value_from_json_key(&res, &["tick", "bids"])?;
+
+                (raw_asks, raw_bids)
+            }
         };
 
         if raw_asks.is_empty() || raw_bids.is_empty() {

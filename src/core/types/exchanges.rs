@@ -1,5 +1,7 @@
 use std::error::Error;
 
+use prost::Message;
+
 use crate::core::{
     net::{http::HttpClient, websocket::WebSocketClient},
     types::signature_params::SignatureParams,
@@ -24,6 +26,7 @@ pub enum Exchange {
     Gate(ExchangeConfig),
     Kucoin(ExchangeConfig),
     Mexc(ExchangeConfig),
+    Huobi(ExchangeConfig),
 }
 impl Exchange {
     pub fn config(&self) -> &ExchangeConfig {
@@ -34,6 +37,7 @@ impl Exchange {
             Exchange::Gate(config) => config,
             Exchange::Kucoin(config) => config,
             Exchange::Mexc(config) => config,
+            Exchange::Huobi(config) => config,
         }
     }
 
@@ -117,7 +121,33 @@ impl Exchange {
                 let encrypted = encrypt_hmac_sha256(&cfg.secret_key, &signature)?;
                 Ok(hex_encode(encrypted))
             }
+            // Huobi
+            (
+                Self::Huobi(cfg),
+                SignatureParams::Huobi {
+                    method,
+                    host,
+                    path,
+                    params,
+                },
+            ) => {
+                let mut urlencoded_params = params
+                    .iter()
+                    .map(|(key, value)| (urlencoding::encode(key), urlencoding::encode(value)))
+                    .collect::<Vec<_>>();
 
+                urlencoded_params.sort_by(|a, b| a.0.cmp(&b.0));
+                let query = urlencoded_params
+                    .iter()
+                    .map(|(key, value)| format!("{}={}", key, value))
+                    .collect::<Vec<_>>()
+                    .join("&");
+
+                let prepared_str = format!("{}\n{}\n{}\n{}", method, host, path, query);
+                let encrypted = encrypt_hmac_sha256(&cfg.secret_key, &prepared_str)?;
+                let signed = base64_encode(&encrypted);
+                Ok(signed)
+            }
             _ => Err(format!(
                 "Cannot generate Signature - method not implemented for this Exchange",
             )

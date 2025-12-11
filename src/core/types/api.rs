@@ -17,6 +17,7 @@ impl API {
                 Exchange::Gate(_) => Some("/api/v4/spot/tickers"),
                 Exchange::Kucoin(_) => None,
                 Exchange::Mexc(_) => None,
+                Exchange::Huobi(_) => Some("/market/tickers"),
             },
             API::GetMarginInfo => match exchange {
                 Exchange::Binance(_) => Some("/sapi/v1/margin/allAssets"),
@@ -25,6 +26,7 @@ impl API {
                 Exchange::Gate(_) => Some("/api/v4/margin/uni/currency_pairs"),
                 Exchange::Kucoin(_) => Some("/api/v3/currencies/"),
                 Exchange::Mexc(_) => None,
+                Exchange::Huobi(_) => Some("/v1/margin/loan-info"),
             },
             API::GetNetworks => match exchange {
                 Exchange::Binance(_) => Some("/sapi/v1/capital/config/getall"),
@@ -33,6 +35,7 @@ impl API {
                 Exchange::Gate(_) => Some("/api/v4/wallet/currency_chains"),
                 Exchange::Kucoin(_) => Some("/api/v3/currencies"),
                 Exchange::Mexc(_) => Some("/api/v3/capital/config/getall"),
+                Exchange::Huobi(_) => Some("/v2/reference/currencies"),
             },
             API::GetOrderBook => match exchange {
                 Exchange::Binance(_) => Some("/api/v3/depth"),
@@ -41,6 +44,7 @@ impl API {
                 Exchange::Gate(_) => Some("/api/v4/spot/order_book"),
                 Exchange::Kucoin(_) => Some("/api/v3/market/orderbook/level2"),
                 Exchange::Mexc(_) => Some("/api/v3/depth"),
+                Exchange::Huobi(_) => Some("/market/depth"),
             },
         }
     }

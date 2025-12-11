@@ -1,7 +1,7 @@
 use crate::core::{
     net::websocket::WebSocketClient,
-    traits::exchange_service::TickerService,
-    types::{API, PriceData, TradingPair, TradingPairs, exchanges::Exchange},
+    traits::exchange_service::{MarginInfoService, NetworkService, TickerService},
+    types::{API, Price, PriceData, TradingPair, TradingPairs, exchanges::Exchange},
     utils::{find_value_from_json_key, parse_json_as_f64},
 };
 use async_trait::async_trait;
@@ -100,6 +100,24 @@ async fn handle_http_interface(
                 if let Some(pair) =
                     TradingPair::from_str_with_separator(&ticker["currency_pair"].to_string(), '_')
                 {
+                    trading_pairs.insert(pair, price_data);
+                }
+            }
+        }
+        Exchange::Huobi(cfg) => {
+            let headers = &[("Content-Type", "application/json")];
+            let res = cfg.http_client.get(endpoint, None, Some(headers)).await?;
+            let tickers = find_value_from_json_key(&res, &["data"])?;
+
+            for ticker in tickers.members() {
+                let (Ok(ask_price), Ok(bid_price)) = (
+                    parse_json_as_f64(&ticker["ask"]),
+                    parse_json_as_f64(&ticker["bid"]),
+                ) else {
+                    continue;
+                };
+                let price_data = PriceData::new(&cfg.name, &bid_price, &ask_price);
+                if let Some(pair) = TradingPair::from_str(&ticker["symbol"].to_string()) {
                     trading_pairs.insert(pair, price_data);
                 }
             }
@@ -210,7 +228,9 @@ fn read_ws_state(
         Exchange::Mexc(cfg) => {
             for ticker_info in state.split('|') {
                 if let Some((symbol, price_str)) = ticker_info.split_once(':') {
-                    let parsed_price = price_str.parse::<f64>()?;
+                    let Ok(parsed_price) = price_str.parse::<f64>() else {
+                        continue;
+                    };
                     let price = PriceData::new(&cfg.name, &parsed_price, &parsed_price);
                     if let Some(pair) = TradingPair::from_str(symbol) {
                         trading_pairs.insert(pair, price);

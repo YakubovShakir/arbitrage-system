@@ -1,4 +1,4 @@
-use md5::digest::typenum::int;
+use chrono::{DateTime, Utc};
 use ring::digest;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -12,9 +12,7 @@ use sha2::{Digest, Sha256};
 
 use crate::core::{
     traits::exchange_service::{MarginInfoService, NetworkService},
-    types::{
-        Glass, HmacSha256, HmacSha512, Network, Price, Quantity, TradingPair, exchanges::Exchange,
-    },
+    types::{Glass, HmacSha256, HmacSha512, Network, TradingPair, exchanges::Exchange},
 };
 
 pub fn find_value_from_json_key(
@@ -79,7 +77,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
 ) -> Option<Vec<Network>> {
     let is_margin_available = match sell_exchange.borrowable(&trading_pair_name).await {
         Ok(result) => result,
-        Err(e) => {
+        Err(_) => {
             // println!("Ошибка вызова is_margin_available {}", e);
             return None;
         }
@@ -204,6 +202,11 @@ pub fn parse_json_as_bool(value: &JsonValue) -> Result<bool, Box<dyn std::error:
     }
 
     Err("Could not parse value as boolean".into())
+}
+
+pub fn get_timestamp_iso_8601() -> Result<String, Box<dyn std::error::Error>> {
+    let now: DateTime<Utc> = Utc::now();
+    Ok(now.format("%Y-%m-%dT%H:%M:%S").to_string())
 }
 
 pub fn get_current_timestamp() -> Result<String, Box<dyn std::error::Error>> {

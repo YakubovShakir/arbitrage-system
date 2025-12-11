@@ -30,4 +30,10 @@ pub enum SignatureParams<'a> {
         query: &'a str,
         string_body: &'a str,
     },
+    Huobi {
+        method: &'a str,
+        host: &'a str,
+        path: &'a str,
+        params: &'a [(&'a str, &'a str)],
+    },
 }

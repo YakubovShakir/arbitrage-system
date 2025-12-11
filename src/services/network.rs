@@ -282,8 +282,34 @@ impl NetworkService for Exchange {
                     }
                 }
             }
+            Exchange::Huobi(cfg) => {
+                let cur = coin.to_lowercase();
+                let query = &[("currency", cur.as_str())];
+                let headers = &[("Content-Type", "application/json")];
+                let res = cfg
+                    .http_client
+                    .get(endpoint, Some(query), Some(headers))
+                    .await?;
+                let data = find_value_from_json_key(&res, &["data"])?;
+                let chains = find_value_from_json_key(&data[0], &["chains"])?;
+                for chain in chains.members() {
+                    if chain["depositStatus"] != "allowed" || chain["withdrawStatus"] != "allowed" {
+                        continue;
+                    }
+                    if let Ok(network) = Network::parse_json(
+                        &chain["chain"],
+                        &chain["fullName"],
+                        coin.to_string(),
+                        Some(&chain["transactFeeWithdraw"]),
+                        &chain["contractAddress"],
+                        None,
+                        None,
+                    ) {
+                        fetched_networks.push(network);
+                    };
+                }
+            }
         }
-
         Ok(fetched_networks)
     }
 }

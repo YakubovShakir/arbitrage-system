@@ -1,11 +1,13 @@
 use async_trait::async_trait;
 use json::JsonValue;
+use uuid::timestamp;
 
 use crate::core::{
     traits::exchange_service::MarginInfoService,
     types::{API, TradingPair, exchanges::Exchange, signature_params::SignatureParams},
     utils::{
-        find_value_from_json_key, get_current_timestamp, parse_json_as_bool, parse_json_as_str,
+        base64_encode, encrypt_hmac_sha256, find_value_from_json_key, get_current_timestamp,
+        get_timestamp_iso_8601, parse_json_as_bool, parse_json_as_str,
     },
 };
 
@@ -103,7 +105,43 @@ impl MarginInfoService for Exchange {
                 let response = cfg.http_client.get(endpoint, Some(query), None).await?;
                 find_value_from_json_key(&response, &["data", "isMarginEnabled"])?
             }
-            Exchange::Mexc(cfg) => JsonValue::Boolean(false),
+            Exchange::Mexc(_) => JsonValue::Boolean(false),
+            Exchange::Huobi(cfg) => {
+                let symbols = format!("{}{}", pair.base, pair.quote).to_lowercase();
+                let timestamp = get_timestamp_iso_8601()?;
+
+                // PARAMETERS
+                let mut parameters = vec![
+                    ("AccessKeyId", cfg.api_key.as_str()),
+                    ("order-id", "124432"), // ВАЖНО: Для GET-запросов все параметры включаются
+                    ("SignatureMethod", "HmacSHA256"),
+                    ("SignatureVersion", "2"),
+                    ("Timestamp", &timestamp),
+                    ("symbols", symbols.as_str()),
+                ];
+
+                let signature = self.generate_signature(SignatureParams::Huobi {
+                    method: "GET",
+                    host: "api.huobi.pro",
+                    path: endpoint,
+                    params: &parameters,
+                })?;
+
+                parameters.push(("Signature", &signature));
+
+                let headers = &[("Content-Type", "application/json")];
+                let res = cfg
+                    .http_client
+                    .get(endpoint, Some(&parameters), Some(headers))
+                    .await?;
+
+                let data = find_value_from_json_key(&res, &["data"])?;
+                if data.len() == 1 {
+                    JsonValue::Boolean(true)
+                } else {
+                    JsonValue::Boolean(false)
+                }
+            }
         };
 
         let borrowable = parse_json_as_bool(&raw_borrowable)?;
