@@ -1,7 +1,3 @@
-use std::error::Error;
-
-use prost::Message;
-
 use crate::core::{
     net::{http::HttpClient, websocket::WebSocketClient},
     types::signature_params::SignatureParams,
@@ -10,6 +6,7 @@ use crate::core::{
         sha512_with_ring_return_hex,
     },
 };
+use std::error::Error;
 
 pub struct ExchangeConfig {
     pub name: String,

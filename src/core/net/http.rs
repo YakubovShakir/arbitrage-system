@@ -15,7 +15,7 @@ pub async fn get_global_client() -> &'static Arc<Client> {
         .get_or_init(|| async {
             Arc::new(
                 Client::builder()
-                    .timeout(std::time::Duration::from_secs(30))
+                    .timeout(std::time::Duration::from_secs(5))
                     .pool_max_idle_per_host(20) // Переиспользует соединения!
                     .build()
                     .unwrap(),
@@ -67,8 +67,8 @@ impl HttpClient {
             Err(e) => {
                 if e.is_timeout() {
                     eprintln!(
-                        "Timeout error - увеличьте таймаут - {}{}",
-                        self._base_url, endpoint
+                        "Timeout error - увеличьте таймаут - {}{} - {}",
+                        self._base_url, endpoint, e
                     );
                 }
                 return Err(Box::new(e));
@@ -79,7 +79,7 @@ impl HttpClient {
             let status = response.status();
             // Пытаемся прочитать тело ошибки
             let error_body = response.text().await.unwrap_or_default();
-
+            // println!("Error status code HTTP {}: {}", status, error_body);
             return Err(format!("Error status code HTTP {}: {}", status, error_body).into());
         }
 

@@ -141,13 +141,16 @@ impl WebSocketClient {
         &self,
         subscribe_message: Option<&str>,
     ) -> Result<JoinHandle<()>, Box<dyn std::error::Error + Send + Sync>> {
-        println!("Подключаемся к {}", self.connection_url);
+        println!("📡 Подключаемся к {}", self.connection_url);
 
         let (ws_stream, _) = match &self.connection_handler {
             Some(handler) => handler().await?,
             None => {
                 let con = connect_async(&self.connection_url).await?;
-                println!("WebSocket соединение c {} установлено", self.connection_url);
+                println!(
+                    "🔗 WebSocket соединение c {} установлено",
+                    self.connection_url
+                );
                 con
             }
         };

@@ -1,14 +1,12 @@
 use crate::core::{
     net::websocket::WebSocketClient,
-    traits::exchange_service::{MarginInfoService, NetworkService, TickerService},
-    types::{API, Price, PriceData, TradingPair, TradingPairs, exchanges::Exchange},
+    traits::exchange_service::TickerService,
+    types::{API, PriceData, TradingPair, TradingPairs, exchanges::Exchange},
     utils::{find_value_from_json_key, parse_json_as_f64},
 };
 use async_trait::async_trait;
-use std::{
-    collections::{HashMap, VecDeque},
-    error::Error,
-};
+use dashmap::DashMap;
+use std::{collections::VecDeque, error::Error};
 
 #[async_trait]
 impl TickerService for Exchange {
@@ -31,7 +29,7 @@ async fn handle_http_interface(
         )
         .into());
     };
-    let mut trading_pairs: TradingPairs = HashMap::new();
+    let trading_pairs: TradingPairs = DashMap::new();
 
     match exchange {
         Exchange::Bybit(cfg) => {
@@ -156,6 +154,18 @@ async fn handle_ws_interface(
 
     // If any of state not readed -> establish connection
     let _ = establish_ws_connection_and_sub(client, exchange).await?;
+
+    tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
+    if is_streamed_state {
+        if let Some(streamed_state) = client.get_streamed_state().await {
+            return Ok(read_streamed_ws_state(&streamed_state, &exchange)?);
+        }
+    } else {
+        if let Some(state) = client.get_state().await {
+            return Ok(read_ws_state(&state, &exchange)?);
+        }
+    };
+
     Ok(TradingPairs::new())
 }
 
@@ -163,7 +173,7 @@ fn read_streamed_ws_state(
     state_vec: &VecDeque<String>,
     exchange: &Exchange,
 ) -> Result<TradingPairs, Box<dyn std::error::Error>> {
-    let mut trading_pairs: TradingPairs = HashMap::new();
+    let trading_pairs: TradingPairs = DashMap::new();
 
     match exchange {
         Exchange::Kucoin(cfg) => {
@@ -207,7 +217,7 @@ fn read_ws_state(
     state: &String,
     exchange: &Exchange,
 ) -> Result<TradingPairs, Box<dyn std::error::Error>> {
-    let mut trading_pairs: TradingPairs = HashMap::new();
+    let trading_pairs: TradingPairs = DashMap::new();
 
     match exchange {
         Exchange::Binance(cfg) => {

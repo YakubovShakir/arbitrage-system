@@ -1,13 +1,12 @@
 use async_trait::async_trait;
 use json::JsonValue;
-use uuid::timestamp;
 
 use crate::core::{
     traits::exchange_service::MarginInfoService,
     types::{API, TradingPair, exchanges::Exchange, signature_params::SignatureParams},
     utils::{
-        base64_encode, encrypt_hmac_sha256, find_value_from_json_key, get_current_timestamp,
-        get_timestamp_iso_8601, parse_json_as_bool, parse_json_as_str,
+        find_value_from_json_key, get_current_timestamp, get_timestamp_iso_8601,
+        parse_json_as_bool, parse_json_as_str,
     },
 };
 

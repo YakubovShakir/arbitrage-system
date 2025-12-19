@@ -1,3 +1,4 @@
+use dashmap::DashMap;
 use hmac::Hmac;
 use sha2::{Sha256, Sha512};
 use std::collections::HashMap;
@@ -24,4 +25,4 @@ pub type ExchangeName = String;
 
 pub type Exchanges = HashMap<ExchangeName, Exchange>;
 
-pub type TradingPairs = HashMap<TradingPair, PriceData>;
+pub type TradingPairs = DashMap<TradingPair, PriceData>;

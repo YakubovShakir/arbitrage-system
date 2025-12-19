@@ -3,27 +3,23 @@ use crate::{
     core::{
         traits::{Workable, exchange_service::OrderBookService},
         types::{Exchanges, TradingPairs},
-        utils::{
-            calculate_price_by_glass, comput_spread_percent,
-            verify_arbitrage_conditions_and_get_networks,
-        },
+        utils::{calculate_price_by_glass, comput_spread_percent},
     },
 };
 use std::{sync::Arc, time::Instant};
-use tokio::sync::RwLock;
 
 pub struct ComputWorker {
     id: usize,
-    trading_pairs: Arc<RwLock<TradingPairs>>,
-    spread_pairs: Arc<RwLock<TradingPairs>>,
+    trading_pairs: Arc<TradingPairs>,
+    spread_pairs: Arc<TradingPairs>,
     exchanges: Arc<Exchanges>,
 }
 
 impl ComputWorker {
     pub fn new(
         id: usize,
-        trading_pairs: Arc<RwLock<TradingPairs>>,
-        spread_pairs: Arc<RwLock<TradingPairs>>,
+        trading_pairs: Arc<TradingPairs>,
+        spread_pairs: Arc<TradingPairs>,
         exchanges: Arc<Exchanges>,
     ) -> Self {
         Self {
@@ -42,58 +38,69 @@ impl Workable for ComputWorker {
 
     async fn run(&self) -> ! {
         loop {
+            tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
             let start = Instant::now();
 
-            let global_pairs = self.trading_pairs.read().await;
-            let global_spreads = self.spread_pairs.write().await;
+            for entry in self.trading_pairs.iter() {
+                let pair = entry.key();
+                let price_data = entry.value();
 
-            for trading_pair in &*global_pairs {
-                if global_spreads.contains_key(trading_pair.0) {
+                if self.spread_pairs.contains_key(pair) {
                     continue;
                 }
-                let is_checked = trading_pair.1.check_if_not_checked().await;
-
-                if is_checked {
+                if price_data.check_if_not_checked().await {
                     continue;
                 }
 
-                let base = &trading_pair.0.base;
-                let quote = &trading_pair.0.quote;
-
-                // Получение тикер цену покупки и продажи
-                let (buy_price, sell_price) = (
-                    trading_pair.1.min_buy_price.read().await,
-                    trading_pair.1.max_sell_price.read().await,
-                );
+                let (buy_price, sell_price) = {
+                    let buy_guard = price_data.min_buy_price.read().await;
+                    let sell_guard = price_data.max_sell_price.read().await;
+                    (buy_guard, sell_guard)
+                };
 
                 // Вычисление тикер-спреда
-                let mut spread = comput_spread_percent(&buy_price.1, &sell_price.1);
+                let spread = comput_spread_percent(&buy_price.1, &sell_price.1);
                 if spread < REQUIRED_SPREAD_PERCENT {
                     continue;
                 }
 
-                let Some(buy_exchange) = self.exchanges.get(&buy_price.0) else {
-                    continue;
-                };
-                let Some(sell_exchange) = self.exchanges.get(&sell_price.0) else {
-                    continue;
-                };
-                // println!("{:#?}, {:#?}", trading_pair.0, trading_pair.1);
-                let Some(networks) = verify_arbitrage_conditions_and_get_networks(
-                    &buy_exchange,
-                    &sell_exchange,
-                    trading_pair.0,
-                )
-                .await
-                else {
-                    continue;
+                let (buy_exchange, sell_exchange) = match (
+                    self.exchanges.get(&buy_price.0),
+                    self.exchanges.get(&sell_price.0),
+                ) {
+                    (Some(buy), Some(sell)) => (buy, sell),
+                    _ => continue,
                 };
 
-                let Ok(buy_book) = buy_exchange.orderbook(&base, &quote).await else {
-                    continue;
-                };
+                // let Some(networks) =
+                //     verify_arbitrage_conditions_and_get_networks(buy_exchange, sell_exchange, pair)
+                //         .await
+                // else {
+                //     continue;
+                // };
 
-                let Ok(sell_book) = sell_exchange.orderbook(&base, &quote).await else {
+                let (buy_book, sell_book) = tokio::join!(
+                    async {
+                        match buy_exchange.orderbook(&pair.base, &pair.quote).await {
+                            Ok(book) => Ok(book),
+                            Err(_) => {
+                                // eprintln!("Buy orderbook error: {}", e);
+                                Err(()) // Просто возвращаем ошибку без деталей
+                            }
+                        }
+                    },
+                    async {
+                        match sell_exchange.orderbook(&pair.base, &pair.quote).await {
+                            Ok(book) => Ok(book),
+                            Err(_) => {
+                                // eprintln!("Sell orderbook error: {}", e);
+                                Err(())
+                            }
+                        }
+                    }
+                );
+
+                let (Ok(buy_book), Ok(sell_book)) = (buy_book, sell_book) else {
                     continue;
                 };
 
@@ -106,26 +113,33 @@ impl Workable for ComputWorker {
                 else {
                     continue;
                 };
-                spread = (sell_price_from_book / buy_price_from_book - 1.0) * 100.0;
 
-                if spread < REQUIRED_SPREAD_PERCENT {
+                let final_spread = (sell_price_from_book / buy_price_from_book - 1.0) * 100.0;
+                if final_spread < REQUIRED_SPREAD_PERCENT || final_spread > 10.0 {
                     continue;
                 }
 
+                // Попробовать использовать dash-set
+                // self.spread_pairs.insert(pair.clone(), price_data.clone());
+
                 println!(
-                    "{}/{}. spread is {:.2}% buy: {} sell: {} Networks {:?}",
-                    base, quote, spread, buy_price.0, sell_price.0, networks
+                    "✅ {}/{}. spread {:.2}% buy: {} sell: {}",
+                    pair.base,
+                    pair.quote,
+                    final_spread,
+                    buy_exchange.config().name,
+                    sell_exchange.config().name,
+                    // networks
                 );
             }
-
             let elapsed = start.elapsed();
 
             println!(
                 "Просмотр {} торговых пар занял {:?}\n",
-                global_pairs.len(),
+                self.trading_pairs.len(),
                 elapsed
             );
-            tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
+            tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
         }
     }
 }

@@ -1,24 +1,25 @@
 use arbitrage_system::{
+    // config::parameters::EXCHANGES_PER_TICKER_THREAD,
     core::{traits::Workable, types::TradingPairs},
     init::exchanges::get_exchanges,
     workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
 };
 use std::sync::Arc;
-use tokio::sync::RwLock;
 
 #[tokio::main]
 async fn main() {
     // Получаем список бирж из init
-    let exchanges = Arc::new(get_exchanges().await.unwrap());
+    let exchanges = Arc::new(get_exchanges().unwrap());
 
     // Определяем список торговых пар и спред-пар
-    let trading_pairs = Arc::new(RwLock::new(TradingPairs::new()));
-    let spread_pairs = Arc::new(RwLock::new(TradingPairs::new()));
+    let trading_pairs = Arc::new(TradingPairs::new());
+    let spread_pairs = Arc::new(TradingPairs::new());
 
+    // let tickers_produced: Vec<Arc<TradingPairs>> = Vec::from(Arc::new(TradingPairs::new()));
+    let mut tasks = Vec::new();
     // ------------
     let comput_exchanges = exchanges.clone();
     let comput_trading_pairs = trading_pairs.clone();
-    let mut tasks = Vec::new();
 
     let ticker_task = tokio::spawn(async move {
         let worker = TickerWorker::new(0, trading_pairs, exchanges);

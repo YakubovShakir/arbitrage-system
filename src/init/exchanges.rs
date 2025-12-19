@@ -12,7 +12,7 @@ use crate::core::types::Exchanges;
 use crate::core::types::exchanges::{Exchange, ExchangeConfig};
 use crate::core::utils::find_value_from_json_key;
 
-pub async fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
+pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     let mut exchanges: Exchanges = HashMap::new();
 
     // Binance
@@ -137,7 +137,7 @@ pub async fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 let url = format!("{}?token={}", endpoint, token);
 
                 let result = connect_async(&url).await?;
-                println!("WebSocket соединение c {} установлено", endpoint);
+                println!("🔗 WebSocket соединение c {} установлено", endpoint);
 
                 Ok(result)
             })
