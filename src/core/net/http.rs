@@ -6,7 +6,10 @@ use reqwest::{
 use std::{error::Error, str::FromStr, sync::Arc};
 use tokio::sync::OnceCell;
 
-use crate::core::types::KeyValue;
+use crate::{
+    config::parameters::{HTTP_MAX_POOL_IDLE_PER_HOST, HTTP_RETRY_AFTER_MILLIS, HTTP_TIMEOUT_SECS},
+    core::types::KeyValue,
+};
 
 static GLOBAL_CLIENT: OnceCell<Arc<Client>> = OnceCell::const_new();
 
@@ -15,8 +18,8 @@ pub async fn get_global_client() -> &'static Arc<Client> {
         .get_or_init(|| async {
             Arc::new(
                 Client::builder()
-                    .timeout(std::time::Duration::from_secs(5))
-                    .pool_max_idle_per_host(20) // Переиспользует соединения!
+                    .timeout(std::time::Duration::from_secs(HTTP_TIMEOUT_SECS))
+                    .pool_max_idle_per_host(HTTP_MAX_POOL_IDLE_PER_HOST) // Переиспользует соединения!
                     .build()
                     .unwrap(),
             )
@@ -58,20 +61,42 @@ impl HttpClient {
         let req_builder = get_global_client()
             .await
             .get(format!("{}{}", self._base_url, endpoint))
-            .headers(formated_headers)
+            .headers(formated_headers.clone())
             .query(query);
 
         // Отправляем запрос с полной обработкой ошибок
         let response = match req_builder.send().await {
             Ok(resp) => resp,
             Err(e) => {
-                if e.is_timeout() {
-                    eprintln!(
-                        "Timeout error - увеличьте таймаут - {}{} - {}",
-                        self._base_url, endpoint, e
-                    );
+                println!(
+                    "Error GET {}{} status: {:?}. Retry.. after {} millis",
+                    self._base_url,
+                    endpoint,
+                    e.status(),
+                    HTTP_RETRY_AFTER_MILLIS
+                );
+                tokio::time::sleep(std::time::Duration::from_millis(HTTP_RETRY_AFTER_MILLIS)).await;
+                let req_builder = get_global_client()
+                    .await
+                    .get(format!("{}{}", self._base_url, endpoint))
+                    .headers(formated_headers)
+                    .query(query);
+
+                match req_builder.send().await {
+                    Ok(res) => res,
+                    Err(e) => {
+                        println!(
+                            "Error GET after retry {}{} status: {:?}",
+                            self._base_url,
+                            endpoint,
+                            e.status()
+                        );
+                        if e.is_timeout() {
+                            eprintln!("Timeout error {}{} - {}", self._base_url, endpoint, e);
+                        }
+                        return Err(Box::new(e));
+                    }
                 }
-                return Err(Box::new(e));
             }
         };
 

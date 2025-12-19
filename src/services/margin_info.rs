@@ -66,12 +66,13 @@ impl MarginInfoService for Exchange {
                     );
                 }
 
-                let mut result = JsonValue::Null;
+                let mut result = JsonValue::Boolean(false);
+                let symbol = pair.base.to_string() + &pair.quote;
                 for item in data.members() {
-                    if item["baseCoin"] != pair.base {
+                    if item["symbol"] != symbol.as_str() {
                         continue;
                     };
-                    result = find_value_from_json_key(&item, &["isBorrowable"])?;
+                    result = find_value_from_json_key(&item, &["isIsolatedBaseBorrowable"])?;
                 }
                 result
             }
@@ -100,8 +101,8 @@ impl MarginInfoService for Exchange {
                 result
             }
             Exchange::Kucoin(cfg) => {
-                let query = &[("currency", pair.base.as_str())];
-                let response = cfg.http_client.get(endpoint, Some(query), None).await?;
+                let endpoint = endpoint.to_string() + &pair.base;
+                let response = cfg.http_client.get(&endpoint, None, None).await?;
                 find_value_from_json_key(&response, &["data", "isMarginEnabled"])?
             }
             Exchange::Mexc(_) => JsonValue::Boolean(false),

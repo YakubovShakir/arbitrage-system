@@ -129,9 +129,9 @@ async fn handle_http_interface(
         }
     }
 
-    if trading_pairs.is_empty() {
-        return Err("Error: Trading Pairs is empty".into());
-    }
+    // if trading_pairs.is_empty() {
+    //     return Err("Error: Trading Pairs is empty".into());
+    // }
 
     Ok(trading_pairs)
 }
@@ -257,9 +257,9 @@ fn read_ws_state(
         }
     }
 
-    if trading_pairs.is_empty() {
-        return Err("Error: Trading Pairs is empty".into());
-    }
+    // if trading_pairs.is_empty() {
+    //     return Err("Error: Trading Pairs is empty".into());
+    // }
 
     Ok(trading_pairs)
 }

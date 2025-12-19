@@ -3,7 +3,10 @@ use crate::{
     core::{
         traits::{Workable, exchange_service::OrderBookService},
         types::{Exchanges, TradingPairs},
-        utils::{calculate_price_by_glass, comput_spread_percent},
+        utils::{
+            calculate_price_by_glass, comput_spread_percent,
+            verify_arbitrage_conditions_and_get_networks,
+        },
     },
 };
 use std::{sync::Arc, time::Instant};
@@ -72,12 +75,12 @@ impl Workable for ComputWorker {
                     _ => continue,
                 };
 
-                // let Some(networks) =
-                //     verify_arbitrage_conditions_and_get_networks(buy_exchange, sell_exchange, pair)
-                //         .await
-                // else {
-                //     continue;
-                // };
+                let Some(networks) =
+                    verify_arbitrage_conditions_and_get_networks(buy_exchange, sell_exchange, pair)
+                        .await
+                else {
+                    continue;
+                };
 
                 let (buy_book, sell_book) = tokio::join!(
                     async {
@@ -123,13 +126,13 @@ impl Workable for ComputWorker {
                 // self.spread_pairs.insert(pair.clone(), price_data.clone());
 
                 println!(
-                    "✅ {}/{}. spread {:.2}% buy: {} sell: {}",
+                    "✅ {}/{}. \nSpread {:.2}% \nBuy: {} Sell: {} \nNetworks: {:#?}",
                     pair.base,
                     pair.quote,
                     final_spread,
                     buy_exchange.config().name,
                     sell_exchange.config().name,
-                    // networks
+                    networks
                 );
             }
             let elapsed = start.elapsed();
@@ -139,7 +142,7 @@ impl Workable for ComputWorker {
                 self.trading_pairs.len(),
                 elapsed
             );
-            tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+            tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
         }
     }
 }

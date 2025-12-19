@@ -1,8 +1,8 @@
-pub const USDT_LIMIT: f64 = 1000.0;
+pub const USDT_LIMIT: f64 = 700.0;
 pub const PAIRS_PER_THREAD: usize = 15;
 pub const EXCHANGES_PER_TICKER_THREAD: usize = 4;
 pub const QUOTE_LIST: &[&'static str] = &["USDT"];
-pub const REQUIRED_SPREAD_PERCENT: f64 = 0.5;
-// "EUR", "TRY", "BTC", "ETH", "BNB", "ARS", "BRL", "PLN", "DAI", "JPY",
-//     "RON", "MXN", "COP", "ZAR", "UAH", "XRP", "DOGE", "SOL", "EURI", "TRX", "MNT", "USD1", "USDE",
-//     "USDQ", "CZK", "USD", "USDC"
+pub const REQUIRED_SPREAD_PERCENT: f64 = 0.4;
+pub const HTTP_MAX_POOL_IDLE_PER_HOST: usize = 20;
+pub const HTTP_TIMEOUT_SECS: u64 = 5;
+pub const HTTP_RETRY_AFTER_MILLIS: u64 = 2000;
