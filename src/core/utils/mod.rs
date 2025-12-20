@@ -274,3 +274,19 @@ pub fn sign_rsa_sha256(
 pub fn base64_encode(data: &[u8]) -> String {
     BASE64.encode(data)
 }
+
+pub fn format_duration(nanos: u128) -> String {
+    if nanos > 1_000_000_000 {
+        // > 1 секунда
+        format!("{:.3} s", nanos as f64 / 1_000_000_000.0)
+    } else if nanos > 1_000_000 {
+        // > 1 миллисекунда
+        format!("{:.3} ms", nanos as f64 / 1_000_000.0)
+    } else if nanos > 1_000 {
+        // > 1 микросекунда
+        format!("{:.3} µs", nanos as f64 / 1_000.0)
+    } else {
+        // наносекунды
+        format!("{} ns", nanos)
+    }
+}

@@ -87,7 +87,7 @@ impl Workable for TickerWorker {
             self.update_tickers(fetched_tickers).await;
 
             let elapsed = start.elapsed();
-            stat_info += &format!("\n---------- Total elapsed:{:?} ----------", elapsed);
+            stat_info += &format!("\n---------- Total elapsed:{:.2?} ----------", elapsed);
             println!("{}", stat_info);
             tokio::time::sleep(std::time::Duration::from_millis(3000)).await;
         }
