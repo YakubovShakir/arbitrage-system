@@ -37,7 +37,7 @@ impl OrderBookService for Exchange {
                 let headers = &[("X-MBX-APIKEY", cfg.api_key.as_str())];
                 let response = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(endpoint, Some(query), Some(headers), None)
                     .await?;
                 let raw_asks = find_value_from_json_key(&response, &["asks"])?;
                 let raw_bids = find_value_from_json_key(&response, &["bids"])?;
@@ -73,7 +73,7 @@ impl OrderBookService for Exchange {
                 ];
                 let response = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(endpoint, Some(query), Some(headers), None)
                     .await?;
                 let raw_asks = find_value_from_json_key(&response, &["result", "a"])?;
                 let raw_bids = find_value_from_json_key(&response, &["result", "b"])?;
@@ -89,7 +89,7 @@ impl OrderBookService for Exchange {
                 let headers = &[("Content-Type", "application/json")];
                 let response = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(endpoint, Some(query), Some(headers), None)
                     .await?;
                 let raw_asks = find_value_from_json_key(&response, &["data", "asks"])?;
                 let raw_bids = find_value_from_json_key(&response, &["data", "bids"])?;
@@ -104,7 +104,7 @@ impl OrderBookService for Exchange {
                 ];
                 let response = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(endpoint, Some(query), Some(headers), None)
                     .await?;
                 let raw_asks = find_value_from_json_key(&response, &["asks"])?;
                 let raw_bids = find_value_from_json_key(&response, &["bids"])?;
@@ -137,7 +137,7 @@ impl OrderBookService for Exchange {
                 ];
                 let response = cfg
                     .http_client
-                    .get(endpoint, Some(queries), Some(headers))
+                    .get(endpoint, Some(queries), Some(headers), None)
                     .await?;
                 let raw_asks = find_value_from_json_key(&response, &["data", "asks"])?;
                 let raw_bids = find_value_from_json_key(&response, &["data", "bids"])?;
@@ -152,7 +152,7 @@ impl OrderBookService for Exchange {
                 ];
                 let response = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(endpoint, Some(query), Some(headers), None)
                     .await?;
                 let raw_asks = find_value_from_json_key(&response, &["asks"])?;
                 let raw_bids = find_value_from_json_key(&response, &["bids"])?;
@@ -168,7 +168,7 @@ impl OrderBookService for Exchange {
                 ];
                 let res = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(endpoint, Some(query), Some(headers), None)
                     .await?;
 
                 let raw_asks = find_value_from_json_key(&res, &["tick", "asks"])?;

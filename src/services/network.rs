@@ -1,9 +1,16 @@
+use std::time::Duration;
+
 use async_trait::async_trait;
 
-use crate::core::{
-    traits::exchange_service::NetworkService,
-    types::{API, Network, exchanges::Exchange, signature_params::SignatureParams},
-    utils::{find_value_from_json_key, get_current_timestamp, parse_json_as_bool},
+use crate::{
+    config::parameters::{
+        BINANCE_NETWORKS_HTTP_TIMEOUT_SECONDS, MEXC_NETWORKS_HTTP_TIMEOUT_SECONDS,
+    },
+    core::{
+        traits::exchange_service::NetworkService,
+        types::{API, Network, exchanges::Exchange, signature_params::SignatureParams},
+        utils::{find_value_from_json_key, get_current_timestamp, parse_json_as_bool},
+    },
 };
 
 #[async_trait]
@@ -36,7 +43,12 @@ impl NetworkService for Exchange {
                 let headers = &[("X-MBX-APIKEY", cfg.api_key.as_str())];
                 let response = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(
+                        endpoint,
+                        Some(query),
+                        Some(headers),
+                        Some(Duration::from_secs(BINANCE_NETWORKS_HTTP_TIMEOUT_SECONDS)),
+                    )
                     .await?;
 
                 for item in response.members() {
@@ -86,7 +98,7 @@ impl NetworkService for Exchange {
 
                 let response = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(endpoint, Some(query), Some(headers), None)
                     .await?;
 
                 let rows = find_value_from_json_key(&response, &["result", "rows"])?;
@@ -115,7 +127,10 @@ impl NetworkService for Exchange {
             }
             Exchange::Bitget(cfg) => {
                 let query = &[("coin", coin)];
-                let response = cfg.http_client.get(endpoint, Some(query), None).await?;
+                let response = cfg
+                    .http_client
+                    .get(endpoint, Some(query), None, None)
+                    .await?;
                 let data = find_value_from_json_key(&response, &["data"])?;
                 if data.is_empty() {
                     return Err(
@@ -164,7 +179,7 @@ impl NetworkService for Exchange {
 
                 let chains = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(endpoint, Some(query), Some(headers), None)
                     .await?;
 
                 if chains.is_empty() {
@@ -202,7 +217,7 @@ impl NetworkService for Exchange {
             Exchange::Kucoin(cfg) => {
                 let response = cfg
                     .http_client
-                    .get(&format!("{}/{}", endpoint, coin), None, None)
+                    .get(&format!("{}/{}", endpoint, coin), None, None, None)
                     .await?;
 
                 let chains = find_value_from_json_key(&response, &["data", "chains"])?;
@@ -253,7 +268,12 @@ impl NetworkService for Exchange {
 
                 let response = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(
+                        endpoint,
+                        Some(query),
+                        Some(headers),
+                        Some(Duration::from_secs(MEXC_NETWORKS_HTTP_TIMEOUT_SECONDS)),
+                    )
                     .await?;
 
                 for item in response.members() {
@@ -288,7 +308,7 @@ impl NetworkService for Exchange {
                 let headers = &[("Content-Type", "application/json")];
                 let res = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(endpoint, Some(query), Some(headers), None)
                     .await?;
                 let data = find_value_from_json_key(&res, &["data"])?;
                 let chains = find_value_from_json_key(&data[0], &["chains"])?;

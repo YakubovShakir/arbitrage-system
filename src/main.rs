@@ -27,7 +27,8 @@ async fn main() {
     });
 
     let comput_task = tokio::spawn(async move {
-        let computer = ComputWorker::new(1, comput_trading_pairs, spread_pairs, comput_exchanges);
+        let computer: ComputWorker =
+            ComputWorker::new(1, comput_trading_pairs, spread_pairs, comput_exchanges);
         computer.run().await;
     });
 

@@ -77,8 +77,12 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
 ) -> Option<Vec<Network>> {
     let is_margin_available = match sell_exchange.borrowable(&trading_pair_name).await {
         Ok(result) => result,
-        Err(_) => {
-            // println!("Ошибка вызова is_margin_available {}", e);
+        Err(e) => {
+            println!(
+                "Не удалось получить статус is_margin_available {} с {}",
+                e,
+                sell_exchange.config().name
+            );
             return None;
         }
     };

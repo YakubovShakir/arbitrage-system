@@ -1,12 +1,20 @@
+use std::time::Duration;
+
 use async_trait::async_trait;
 use json::JsonValue;
 
-use crate::core::{
-    traits::exchange_service::MarginInfoService,
-    types::{API, TradingPair, exchanges::Exchange, signature_params::SignatureParams},
-    utils::{
-        find_value_from_json_key, get_current_timestamp, get_timestamp_iso_8601,
-        parse_json_as_bool, parse_json_as_str,
+use crate::{
+    config::parameters::{
+        BITGET_MARGIN_INFO_HTTP_TIMEOUT_SECONDS, GATE_MARGIN_INFO_HTTP_TIMEOUT_SECONDS,
+        HUOBI_MARGIN_INFO_HTTP_TIMEOUT_SECONDS,
+    },
+    core::{
+        traits::exchange_service::MarginInfoService,
+        types::{API, TradingPair, exchanges::Exchange, signature_params::SignatureParams},
+        utils::{
+            find_value_from_json_key, get_current_timestamp, get_timestamp_iso_8601,
+            parse_json_as_bool, parse_json_as_str,
+        },
     },
 };
 
@@ -14,11 +22,12 @@ use crate::core::{
 impl MarginInfoService for Exchange {
     async fn borrowable(&self, pair: &TradingPair) -> Result<bool, Box<dyn std::error::Error>> {
         let Some(endpoint) = API::GetMarginInfo.endpoint(self) else {
-            return Err(format!(
-                "Error: GetMarginInfo endpoint is not set for the exchange {}",
-                self.config().name
-            )
-            .into());
+            // return Err(format!(
+            //     "Error: GetMarginInfo endpoint is not set for the exchange {}",
+            //     self.config().name
+            // )
+            // .into());
+            return Ok(false);
         };
 
         let raw_borrowable: JsonValue = match self {
@@ -27,25 +36,39 @@ impl MarginInfoService for Exchange {
                 let headers = &[("X-MBX-APIKEY", cfg.api_key.as_str())];
                 let response = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers))
+                    .get(endpoint, Some(query), Some(headers), None)
                     .await?;
                 find_value_from_json_key(&response[0], &["isBorrowable"])?
             }
 
             Exchange::Bybit(cfg) => {
                 let query = &[("currency", pair.base.as_str())];
-                let response = cfg.http_client.get(endpoint, Some(query), None).await?;
-                let vip_list = find_value_from_json_key(&response, &["result", "vipCoinList"])?;
-                let vip_level = 0;
-                let vip_list_level = vip_list
-                    .members()
-                    .nth(vip_level)
-                    .ok_or("vipCoinList is is empty")?;
-                let list_item = vip_list_level["list"]
-                    .members()
-                    .nth(0)
-                    .ok_or("list is empty")?;
-                find_value_from_json_key(&list_item, &["borrowable"])?
+                let response = cfg
+                    .http_client
+                    .get(endpoint, Some(query), None, None)
+                    .await?;
+
+                if response["result"] == JsonValue::Null {
+                    JsonValue::Boolean(false)
+                } else {
+                    let vip_list =
+                        match find_value_from_json_key(&response, &["result", "vipCoinList"]) {
+                            Ok(res) => res,
+                            Err(e) => {
+                                return Err(format!("Response - {} Error - {}", response, e).into());
+                            }
+                        };
+                    let vip_level = 0;
+                    let vip_list_level = vip_list
+                        .members()
+                        .nth(vip_level)
+                        .ok_or("vipCoinList is is empty")?;
+                    let list_item = vip_list_level["list"]
+                        .members()
+                        .nth(0)
+                        .ok_or("list is empty")?;
+                    find_value_from_json_key(&list_item, &["borrowable"])?
+                }
             }
 
             Exchange::Bitget(cfg) => {
@@ -58,7 +81,15 @@ impl MarginInfoService for Exchange {
                 })?;
 
                 let headers = &[("ACCESS-KEY", cfg.api_key.as_str()), ("ACCESS-SIGN", &sign)];
-                let response = cfg.http_client.get(endpoint, None, Some(headers)).await?;
+                let response = cfg
+                    .http_client
+                    .get(
+                        endpoint,
+                        None,
+                        Some(headers),
+                        Some(Duration::from_secs(BITGET_MARGIN_INFO_HTTP_TIMEOUT_SECONDS)),
+                    )
+                    .await?;
                 let data = find_value_from_json_key(&response, &["data"])?;
                 if !data.is_array() {
                     return Err(
@@ -80,14 +111,22 @@ impl MarginInfoService for Exchange {
             Exchange::Gate(cfg) => {
                 // let t = get_current_timestamp_secs()?;
                 // let auth_headers = self.get_auth_headers("GET", endpoint, None, None, t)?;
-                let items = cfg.http_client.get(endpoint, None, None).await?;
+                let items = cfg
+                    .http_client
+                    .get(
+                        endpoint,
+                        None,
+                        None,
+                        Some(Duration::from_secs(GATE_MARGIN_INFO_HTTP_TIMEOUT_SECONDS)),
+                    )
+                    .await?;
                 if items.is_empty() {
                     return Err(
                         format!("{} Invalid response: 'items' is not an array", cfg.name).into(),
                     );
                 }
 
-                let mut result = JsonValue::Null;
+                let mut result = JsonValue::Boolean(false);
                 for item in items.members() {
                     let Ok(pair_name) = parse_json_as_str(&item["currency_pair"]) else {
                         continue;
@@ -102,7 +141,7 @@ impl MarginInfoService for Exchange {
             }
             Exchange::Kucoin(cfg) => {
                 let endpoint = endpoint.to_string() + &pair.base;
-                let response = cfg.http_client.get(&endpoint, None, None).await?;
+                let response = cfg.http_client.get(&endpoint, None, None, None).await?;
                 find_value_from_json_key(&response, &["data", "isMarginEnabled"])?
             }
             Exchange::Mexc(_) => JsonValue::Boolean(false),
@@ -132,7 +171,12 @@ impl MarginInfoService for Exchange {
                 let headers = &[("Content-Type", "application/json")];
                 let res = cfg
                     .http_client
-                    .get(endpoint, Some(&parameters), Some(headers))
+                    .get(
+                        endpoint,
+                        Some(&parameters),
+                        Some(headers),
+                        Some(Duration::from_secs(HUOBI_MARGIN_INFO_HTTP_TIMEOUT_SECONDS)),
+                    )
                     .await?;
 
                 let data = find_value_from_json_key(&res, &["data"])?;

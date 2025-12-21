@@ -1,8 +1,11 @@
 use std::{sync::Arc, time::Instant};
 
+use futures_util::future::join_all;
+
 use crate::core::{
     traits::{Workable, exchange_service::TickerService},
     types::{Exchanges, TradingPairs},
+    utils::format_duration,
 };
 
 pub struct TickerWorker {
@@ -20,21 +23,29 @@ impl TickerWorker {
         }
     }
     async fn fetch_tickers(&self) -> Vec<(String, TradingPairs)> {
-        let mut fetched_tickers: Vec<(String, TradingPairs)> = Vec::new();
-        for (exchange_name, exchange) in &*self.exchanges {
-            let new_tickers = match exchange.tickers().await {
-                Ok(tickers) => tickers,
-                Err(e) => {
-                    println!(
-                        "❌ Не удалось получить тикеры от биржи {}, ошибка - {}",
-                        exchange_name, e
-                    );
-                    continue;
+        let tickers_futures: Vec<_> = self
+            .exchanges
+            .iter()
+            .map(|(exchange_name, exchange)| async move {
+                match exchange.tickers().await {
+                    Ok(tickers) => Some((exchange_name.clone(), tickers)),
+                    Err(e) => {
+                        println!(
+                            "Не удалось получить тикеры от биржи {}, ошибка - {}",
+                            exchange_name, e
+                        );
+                        None
+                    }
                 }
-            };
-            fetched_tickers.push((exchange_name.to_string(), new_tickers));
-        }
-        fetched_tickers
+            })
+            .collect();
+        let tickers_results: Vec<_> = join_all(tickers_futures)
+            .await
+            .into_iter()
+            .filter_map(|result| result)
+            .collect();
+
+        tickers_results
     }
 
     async fn update_tickers(&self, fetched_tickers: Vec<(String, TradingPairs)>) {
@@ -69,13 +80,14 @@ impl Workable for TickerWorker {
     }
 
     async fn run(&self) -> ! {
+        let mut loop_count = 0;
+        let loop_to_update_stat = 10;
+        let mut total_elapsed = 0;
+        let mut stat_info = format!("----TickerWorker:{} Statistics ----", self.id);
         loop {
-            let start = Instant::now();
+            stat_info += &format!("\n       loop: {}", loop_count + 1);
 
-            let mut stat_info = format!(
-                "---------- Statistic from TickerWorker:{} ----------",
-                self.id
-            );
+            let start = Instant::now();
             stat_info += &format!("\n| {:<8} | {:<8} |", "Exchange", "Tickers");
 
             // Получение тикеров с бирж
@@ -85,10 +97,20 @@ impl Workable for TickerWorker {
             }
             // Обновление глобальной мапы
             self.update_tickers(fetched_tickers).await;
+            loop_count += 1;
+            total_elapsed += start.elapsed().as_nanos();
+            if loop_count == loop_to_update_stat {
+                stat_info += &format!(
+                    "\n---- Total elapsed:{} ----",
+                    format_duration(total_elapsed)
+                );
 
-            let elapsed = start.elapsed();
-            stat_info += &format!("\n---------- Total elapsed:{:.2?} ----------", elapsed);
-            println!("{}", stat_info);
+                println!("{}", stat_info);
+                total_elapsed = 0;
+                loop_count = 0;
+                stat_info = format!("----TickerWorker:{} statistics ----", self.id);
+            }
+
             tokio::time::sleep(std::time::Duration::from_millis(3000)).await;
         }
     }

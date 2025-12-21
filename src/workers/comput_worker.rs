@@ -42,30 +42,37 @@ impl Workable for ComputWorker {
     }
     // "┌ │ ├─ └─"
     async fn run(&self) -> ! {
+        let mut check_passed = 0;
+        let mut check_total_elapsed: u128 = 0;
+
+        let mut prices_quard_total_elapsed: u128 = 0;
+
+        let mut ticker_spread_passed = 0;
+        let mut ticker_spread_total_elapsed: u128 = 0;
+
+        let mut verify_passed = 0;
+        let mut verify_total_elapsed: u128 = 0;
+
+        let mut orderbook_passed = 0;
+        let mut orderbook_total_elapsed: u128 = 0;
+
+        let mut calc_books_passed = 0;
+        let mut calc_books_total_elapsed: u128 = 0;
+
+        let mut final_spread_passed = 0;
+        let mut final_spread_total_elapsed: u128 = 0;
+
+        let mut loop_count = 0;
+        let loop_to_update_stat = 10;
+        let mut stat_info = format!(
+            "┌── СomputWorker:{} Statistics for {} iteration\n",
+            self.id, loop_to_update_stat
+        );
+        let mut loop_elapsed = 0;
+
         loop {
-            let start = Instant::now();
-            let mut stat_info = format!("┌── СomputWorker:{} Statistics\n", self.id);
-            stat_info += &format!("├──── Trading Pairs: {}\n", self.trading_pairs.len());
-
-            let check_passed: usize;
-            let mut check_total_elapsed: u128 = 0;
-
-            let mut prices_quard_total_elapsed: u128 = 0;
-
-            let ticker_spread_passed: usize;
-            let mut ticker_spread_total_elapsed: u128 = 0;
-
-            let verify_passed: usize;
-            let mut verify_total_elapsed: u128 = 0;
-
-            let orderbook_passed: usize;
-            let mut orderbook_total_elapsed: u128 = 0;
-
-            let mut calc_books_passed = 0;
-            let mut calc_books_total_elapsed: u128 = 0;
-
-            let mut final_spread_passed = 0;
-            let mut final_spread_total_elapsed: u128 = 0;
+            let start_time = Instant::now();
+            // stat_info += &format!("├──── Trading Pairs: {}\n", self.trading_pairs.len());
 
             // Сбор непроверенные тикеры
             let mut not_checked_keys: Vec<TradingPair> = vec![];
@@ -84,7 +91,7 @@ impl Workable for ComputWorker {
                 }
                 not_checked_keys.push(pair.clone());
             }
-            check_passed = not_checked_keys.len();
+            check_passed += not_checked_keys.len();
 
             // Фильтрация по тикер спреду
             let mut ticker_spread_passed_keys: Vec<(TradingPair, String, String)> = vec![];
@@ -116,7 +123,7 @@ impl Workable for ComputWorker {
                     sell_price.0.to_string(),
                 ));
             }
-            ticker_spread_passed = ticker_spread_passed_keys.len();
+            ticker_spread_passed += ticker_spread_passed_keys.len();
 
             // Сбор параметров для параллельного запроса на верификацию
             let verify_tasks: Vec<_> = ticker_spread_passed_keys
@@ -163,7 +170,7 @@ impl Workable for ComputWorker {
                         networks.map(|nets| (pair, buy_exchange, sell_exchange, nets))
                     })
                     .collect();
-            verify_passed = verify_passed_pairs.len();
+            verify_passed += verify_passed_pairs.len();
 
             let orderbook_futures = verify_passed_pairs.into_iter().map(
                 |(pair, buy_exchange, sell_exchange, networks)| async move {
@@ -171,13 +178,27 @@ impl Workable for ComputWorker {
                         async {
                             match buy_exchange.orderbook(&pair.base, &pair.quote).await {
                                 Ok(book) => Ok(book),
-                                Err(_) => Err(()),
+                                Err(e) => {
+                                    println!(
+                                        "Не удалось получить orderbook с {} - {}",
+                                        buy_exchange.config().name,
+                                        e
+                                    );
+                                    Err(())
+                                }
                             }
                         },
                         async {
                             match sell_exchange.orderbook(&pair.base, &pair.quote).await {
                                 Ok(book) => Ok(book),
-                                Err(_) => Err(()),
+                                Err(e) => {
+                                    println!(
+                                        "Не удалось получить orderbook с {} - {}",
+                                        sell_exchange.config().name,
+                                        e
+                                    );
+                                    Err(())
+                                }
                             }
                         }
                     );
@@ -234,7 +255,7 @@ impl Workable for ComputWorker {
                     },
                 )
                 .collect();
-            orderbook_passed = orderbook_passed_pairs.len();
+            orderbook_passed += orderbook_passed_pairs.len();
 
             for (pair, buy_exchange, sell_exchange, networks, buy_orderbook, sell_orderbook) in
                 orderbook_passed_pairs
@@ -257,6 +278,7 @@ impl Workable for ComputWorker {
                 let final_spread =
                     comput_spread_percent(&calculated_buy_price, &calculated_sell_price);
                 final_spread_total_elapsed += final_spread_time.elapsed().as_nanos();
+
                 if final_spread < REQUIRED_SPREAD_PERCENT || final_spread > 10.0 {
                     continue;
                 }
@@ -272,42 +294,65 @@ impl Workable for ComputWorker {
                     networks
                 );
             }
+            loop_elapsed += start_time.elapsed().as_nanos();
 
-            let total_elapsed = start.elapsed();
-            let formated_total_check = format_duration(check_total_elapsed);
-            let formated_total_prices = format_duration(prices_quard_total_elapsed);
-            let formated_total_ticker = format_duration(ticker_spread_total_elapsed);
-            let formated_total_verify = format_duration(verify_total_elapsed);
-            let formated_total_orderbook = format_duration(orderbook_total_elapsed);
-            let formated_total_calc_books = format_duration(calc_books_total_elapsed);
-            let formated_total_final = format_duration(final_spread_total_elapsed);
+            loop_count += 1;
+            if loop_count == loop_to_update_stat {
+                let formated_total_check = format_duration(check_total_elapsed);
+                let formated_total_prices = format_duration(prices_quard_total_elapsed);
+                let formated_total_ticker = format_duration(ticker_spread_total_elapsed);
+                let formated_total_verify = format_duration(verify_total_elapsed);
+                let formated_total_orderbook = format_duration(orderbook_total_elapsed);
+                let formated_total_calc_books = format_duration(calc_books_total_elapsed);
+                let formated_total_final = format_duration(final_spread_total_elapsed);
+                let formated_total_loop = format_duration(loop_elapsed);
 
-            // "│ ├─ └─"
-            stat_info += &format!("├──── Check stat\n");
-            stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_check);
-            stat_info += &format!("│        └─ Total passed: {}\n", check_passed);
-            stat_info += &format!("├──── Prices stat\n");
-            stat_info += &format!("│        └─ Total elapsed: {}\n", formated_total_prices);
-            stat_info += &format!("├──── Ticker spread stat\n");
-            stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_ticker);
-            stat_info += &format!("│        └─ Total passed: {}\n", ticker_spread_passed);
-            stat_info += &format!("├──── Verify stat\n");
-            stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_verify);
-            stat_info += &format!("│        └─ Total passed: {}\n", verify_passed);
-            stat_info += &format!("├──── Orderbook stat\n");
-            stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_orderbook);
-            stat_info += &format!("│        └─ Total passed: {}\n", orderbook_passed);
-            stat_info += &format!("├──── Calculated Books stat\n");
-            stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_calc_books);
-            stat_info += &format!("│        └─ Total passed: {}\n", calc_books_passed);
-            stat_info += &format!("├──── Final spread stat\n");
-            stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_final);
-            stat_info += &format!("│        └─ Total passed: {}\n", final_spread_passed);
-            stat_info += &format!("└── Total elapsed: {:?}\n", total_elapsed);
+                // "│ ├─ └─"
+                stat_info += &format!("├──── Updated tickers\n");
+                stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_check);
+                stat_info += &format!("│        └─ Total passed: {}\n", check_passed);
+                stat_info += &format!("├──── Prices stat\n");
+                stat_info += &format!("│        └─ Total elapsed: {}\n", formated_total_prices);
+                stat_info += &format!("├──── Ticker spread stat\n");
+                stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_ticker);
+                stat_info += &format!("│        └─ Total passed: {}\n", ticker_spread_passed);
+                stat_info += &format!("├──── Verify stat\n");
+                stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_verify);
+                stat_info += &format!("│        └─ Total passed: {}\n", verify_passed);
+                stat_info += &format!("├──── Orderbook stat\n");
+                stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_orderbook);
+                stat_info += &format!("│        └─ Total passed: {}\n", orderbook_passed);
+                stat_info += &format!("├──── Calculated Books stat\n");
+                stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_calc_books);
+                stat_info += &format!("│        └─ Total passed: {}\n", calc_books_passed);
+                stat_info += &format!("├──── Final spread stat\n");
+                stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_final);
+                stat_info += &format!("│        └─ Total passed: {}\n", final_spread_passed);
+                stat_info += &format!("└── Total elapsed: {}\n", formated_total_loop);
 
-            println!("{}", stat_info);
+                println!("{}", stat_info);
 
-            tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
+                loop_count = 0;
+                check_passed = 0;
+                check_total_elapsed = 0;
+                prices_quard_total_elapsed = 0;
+                ticker_spread_passed = 0;
+                ticker_spread_total_elapsed = 0;
+                verify_passed = 0;
+                verify_total_elapsed = 0;
+                orderbook_passed = 0;
+                orderbook_total_elapsed = 0;
+                calc_books_passed = 0;
+                calc_books_total_elapsed = 0;
+                final_spread_passed = 0;
+                final_spread_total_elapsed = 0;
+                loop_elapsed = 0;
+                stat_info = format!(
+                    "┌── СomputWorker:{} Statistics for {} iteration\n",
+                    self.id, loop_to_update_stat
+                );
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
         }
     }
 }

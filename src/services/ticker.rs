@@ -1,12 +1,15 @@
-use crate::core::{
-    net::websocket::WebSocketClient,
-    traits::exchange_service::TickerService,
-    types::{API, PriceData, TradingPair, TradingPairs, exchanges::Exchange},
-    utils::{find_value_from_json_key, parse_json_as_f64},
+use crate::{
+    config::parameters::{GATE_TICKERS_HTTP_TIMEOUT_SECONDS, HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS},
+    core::{
+        net::websocket::WebSocketClient,
+        traits::exchange_service::TickerService,
+        types::{API, PriceData, TradingPair, TradingPairs, exchanges::Exchange},
+        utils::{find_value_from_json_key, parse_json_as_f64},
+    },
 };
 use async_trait::async_trait;
 use dashmap::DashMap;
-use std::{collections::VecDeque, error::Error};
+use std::{collections::VecDeque, error::Error, time::Duration};
 
 #[async_trait]
 impl TickerService for Exchange {
@@ -34,7 +37,10 @@ async fn handle_http_interface(
     match exchange {
         Exchange::Bybit(cfg) => {
             let query = &[("category", "spot")];
-            let response = cfg.http_client.get(endpoint, Some(query), None).await?;
+            let response = cfg
+                .http_client
+                .get(endpoint, Some(query), None, None)
+                .await?;
             let tickers = find_value_from_json_key(&response, &["result", "list"])?;
             for ticker in tickers.members() {
                 let (Ok(parsed_ask_price), Ok(parsed_bid_price)) = (
@@ -53,7 +59,7 @@ async fn handle_http_interface(
 
         Exchange::Bitget(cfg) => {
             // Просто запускаем, игнорируем ошибки соединения
-            let response = cfg.http_client.get(endpoint, None, None).await?;
+            let response = cfg.http_client.get(endpoint, None, None, None).await?;
             let data = find_value_from_json_key(&response, &["data"])?;
             if data.is_empty() {
                 return Err(format!("{} Invalid response: 'data' is empty array", cfg.name).into());
@@ -79,7 +85,15 @@ async fn handle_http_interface(
                 ("Content-Type", "application/json"),
             ];
 
-            let tickers = cfg.http_client.get(endpoint, None, Some(headers)).await?;
+            let tickers = cfg
+                .http_client
+                .get(
+                    endpoint,
+                    None,
+                    Some(headers),
+                    Some(Duration::from_secs(GATE_TICKERS_HTTP_TIMEOUT_SECONDS)),
+                )
+                .await?;
             if tickers.is_empty() {
                 return Err(
                     format!("{} Invalid response: 'tickers' is empty array", cfg.name).into(),
@@ -104,7 +118,15 @@ async fn handle_http_interface(
         }
         Exchange::Huobi(cfg) => {
             let headers = &[("Content-Type", "application/json")];
-            let res = cfg.http_client.get(endpoint, None, Some(headers)).await?;
+            let res = cfg
+                .http_client
+                .get(
+                    endpoint,
+                    None,
+                    Some(headers),
+                    Some(Duration::from_secs(HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS)),
+                )
+                .await?;
             let tickers = find_value_from_json_key(&res, &["data"])?;
 
             for ticker in tickers.members() {
