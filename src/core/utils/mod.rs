@@ -12,7 +12,9 @@ use sha2::{Digest, Sha256};
 
 use crate::core::{
     traits::exchange_service::{MarginInfoService, NetworkService},
-    types::{Glass, HmacSha256, HmacSha512, Network, TradingPair, exchanges::Exchange},
+    types::{
+        ExchangeName, Glass, HmacSha256, HmacSha512, Network, TradingPair, exchanges::Exchange,
+    },
 };
 
 pub fn find_value_from_json_key(
@@ -74,46 +76,55 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     buy_exchange: &Exchange,
     sell_exchange: &Exchange,
     trading_pair_name: &TradingPair,
-) -> Option<Vec<Network>> {
+) -> Result<Vec<Network>, ExchangeName> {
+    let buy_exchange_name = &buy_exchange.config().name;
+    let sell_exchange_name = &sell_exchange.config().name;
     let is_margin_available = match sell_exchange.borrowable(&trading_pair_name).await {
         Ok(result) => result,
         Err(e) => {
             println!(
-                "Не удалось получить статус is_margin_available {} с {}",
-                e,
-                sell_exchange.config().name
+                "[WARNING] {}/{} verify returns empty networks. REASON: Can't get {} borrowable status. ERROR: {}",
+                trading_pair_name.base, trading_pair_name.quote, sell_exchange_name, e
             );
-            return None;
+            // return Err(sell_exchange_name.to_string());
+            return Ok(Vec::new());
         }
     };
 
     if !is_margin_available {
-        return None;
+        // println!(
+        //     "[DEBUG] {}/{} verify - failed. REASON: {} not borrowable",
+        //     trading_pair_name.base, trading_pair_name.quote, sell_exchange_name
+        // );
+        return Err(sell_exchange_name.to_string());
     }
+
     let buy_networks = match buy_exchange.networks(&trading_pair_name.base).await {
         Ok(networks) => networks,
         Err(e) => {
             println!(
-                "Не удалось получить сети с биржи покупки, {} - {}",
-                buy_exchange.config().name,
-                e
+                "[WARNING] {}/{} verify returns empty networks. REASON: Can't get buy {} networks. ERROR: {}",
+                trading_pair_name.base, trading_pair_name.quote, buy_exchange_name, e
             );
-            return None;
+            return Ok(Vec::new());
         }
     };
-
+    if buy_networks.len() == 0 {
+        return Err(buy_exchange_name.to_string());
+    }
     let sell_networks = match sell_exchange.networks(&trading_pair_name.base).await {
         Ok(networks) => networks,
         Err(e) => {
             println!(
-                "Не удалось получить сети с биржи продажи, {} - {}",
-                sell_exchange.config().name,
-                e
+                "[WARNING] {}/{} verify returns empty networks. REASON: Can't get sell {} networks. ERROR: {}",
+                trading_pair_name.base, trading_pair_name.quote, sell_exchange_name, e
             );
-            return None;
+            return Ok(Vec::new());
         }
     };
-
+    if sell_networks.len() == 0 {
+        return Err(sell_exchange_name.to_string());
+    }
     let Some(networks) = find_intersection_from_networks(&buy_networks, &sell_networks) else {
         // println!(
         //     "No network intersection beetween {}:{:#?} and {}:{:#?} at {}/{}",
@@ -131,10 +142,10 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         //     trading_pair_name.base,
         //     trading_pair_name.quote,
         // );
-        return None;
+        return Ok(Vec::new());
     };
 
-    Some(networks)
+    Ok(networks)
 }
 
 pub fn comput_spread_percent(buy_price: &f64, sell_price: &f64) -> f64 {

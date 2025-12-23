@@ -4,7 +4,7 @@ use futures_util::future::join_all;
 
 use crate::core::{
     traits::{Workable, exchange_service::TickerService},
-    types::{Exchanges, TradingPairs},
+    types::{Exchanges, TradingPairExchangesBlacklist, TradingPairs},
     utils::format_duration,
 };
 
@@ -12,14 +12,21 @@ pub struct TickerWorker {
     id: usize,
     trading_pairs: Arc<TradingPairs>,
     exchanges: Arc<Exchanges>,
+    tickers_exchanges_blacklist: Arc<TradingPairExchangesBlacklist>,
 }
 
 impl TickerWorker {
-    pub fn new(id: usize, trading_pairs: Arc<TradingPairs>, exchanges: Arc<Exchanges>) -> Self {
+    pub fn new(
+        id: usize,
+        trading_pairs: Arc<TradingPairs>,
+        exchanges: Arc<Exchanges>,
+        tickers_exchanges_blacklist: Arc<TradingPairExchangesBlacklist>,
+    ) -> Self {
         Self {
             id,
             trading_pairs,
             exchanges,
+            tickers_exchanges_blacklist,
         }
     }
     async fn fetch_tickers(&self) -> Vec<(String, TradingPairs)> {
@@ -51,6 +58,30 @@ impl TickerWorker {
     async fn update_tickers(&self, fetched_tickers: Vec<(String, TradingPairs)>) {
         for (exchange_name, tickers) in fetched_tickers {
             for (new_trading_pair, new_price_data) in tickers {
+                let mut in_buy_blacklist = false;
+                let mut in_sell_blacklist = false;
+
+                if let Some(blacklist) = self.tickers_exchanges_blacklist.get(&new_trading_pair) {
+                    if blacklist
+                        .buy_exchanges
+                        .read()
+                        .await
+                        .get(&exchange_name)
+                        .is_some()
+                    {
+                        in_buy_blacklist = true
+                    };
+
+                    if blacklist
+                        .sell_exchanges
+                        .read()
+                        .await
+                        .get(&exchange_name)
+                        .is_some()
+                    {
+                        in_sell_blacklist = true
+                    };
+                };
                 if self.trading_pairs.contains_key(&new_trading_pair) {
                     if let Some(existing_price) = self.trading_pairs.get(&new_trading_pair) {
                         let (buy_price, sell_price) = {
@@ -59,15 +90,21 @@ impl TickerWorker {
                             (buy_guard.1, sell_guard.1)
                         };
 
-                        existing_price
-                            .update_buy_price(exchange_name.clone(), buy_price)
-                            .await;
-                        existing_price
-                            .update_sell_price(exchange_name.clone(), sell_price)
-                            .await;
+                        if !in_buy_blacklist {
+                            existing_price
+                                .update_buy_price(exchange_name.clone(), buy_price)
+                                .await;
+                        }
+                        if !in_sell_blacklist {
+                            existing_price
+                                .update_sell_price(exchange_name.clone(), sell_price)
+                                .await;
+                        }
                     }
                 } else {
-                    self.trading_pairs.insert(new_trading_pair, new_price_data);
+                    if !in_buy_blacklist && !in_sell_blacklist {
+                        self.trading_pairs.insert(new_trading_pair, new_price_data);
+                    }
                 }
             }
         }

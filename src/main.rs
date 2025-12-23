@@ -1,10 +1,14 @@
 use arbitrage_system::{
     // config::parameters::EXCHANGES_PER_TICKER_THREAD,
-    core::{traits::Workable, types::TradingPairs},
+    core::{
+        traits::Workable,
+        types::{TradingPair, TradingPairExchangesBlacklist, TradingPairs},
+    },
     init::exchanges::get_exchanges,
     workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
 };
-use std::sync::Arc;
+use dashmap::DashMap;
+use std::{collections::HashSet, sync::Arc};
 
 #[tokio::main]
 async fn main() {
@@ -15,20 +19,29 @@ async fn main() {
     let trading_pairs = Arc::new(TradingPairs::new());
     let spread_pairs = Arc::new(TradingPairs::new());
 
+    // blacklist
+    let tickers_blacklist = Arc::new(TradingPairExchangesBlacklist::new());
+
     // let tickers_produced: Vec<Arc<TradingPairs>> = Vec::from(Arc::new(TradingPairs::new()));
     let mut tasks = Vec::new();
     // ------------
     let comput_exchanges = exchanges.clone();
     let comput_trading_pairs = trading_pairs.clone();
+    let comput_tickers_blacklist = tickers_blacklist.clone();
 
     let ticker_task = tokio::spawn(async move {
-        let worker = TickerWorker::new(0, trading_pairs, exchanges);
+        let worker = TickerWorker::new(0, trading_pairs, exchanges, tickers_blacklist);
         worker.run().await;
     });
 
     let comput_task = tokio::spawn(async move {
-        let computer: ComputWorker =
-            ComputWorker::new(1, comput_trading_pairs, spread_pairs, comput_exchanges);
+        let computer: ComputWorker = ComputWorker::new(
+            1,
+            comput_trading_pairs,
+            spread_pairs,
+            comput_exchanges,
+            comput_tickers_blacklist,
+        );
         computer.run().await;
     });
 

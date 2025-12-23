@@ -1,23 +1,28 @@
 use futures_util::future::join_all;
+use tokio::sync::RwLock;
 
 use crate::{
     config::{USDT_LIMIT, parameters::REQUIRED_SPREAD_PERCENT},
     core::{
         traits::{Workable, exchange_service::OrderBookService},
-        types::{Exchanges, Network, OrderBook, TradingPair, TradingPairs, exchanges::Exchange},
+        types::{
+            Exchanges, Network, OrderBook, TradingPair, TradingPairBlackList,
+            TradingPairExchangesBlacklist, TradingPairs, exchanges::Exchange,
+        },
         utils::{
             calculate_price_by_glass, comput_spread_percent, format_duration,
             verify_arbitrage_conditions_and_get_networks,
         },
     },
 };
-use std::{sync::Arc, time::Instant};
+use std::{collections::HashSet, sync::Arc, time::Instant};
 
 pub struct ComputWorker {
     id: usize,
     trading_pairs: Arc<TradingPairs>,
     spread_pairs: Arc<TradingPairs>,
     exchanges: Arc<Exchanges>,
+    tickers_exchanges_blacklist: Arc<TradingPairExchangesBlacklist>,
 }
 
 impl ComputWorker {
@@ -26,12 +31,14 @@ impl ComputWorker {
         trading_pairs: Arc<TradingPairs>,
         spread_pairs: Arc<TradingPairs>,
         exchanges: Arc<Exchanges>,
+        tickers_exchanges_blacklist: Arc<TradingPairExchangesBlacklist>,
     ) -> Self {
         Self {
             id,
             trading_pairs,
             spread_pairs,
             exchanges,
+            tickers_exchanges_blacklist,
         }
     }
 }
@@ -148,27 +155,85 @@ impl Workable for ComputWorker {
             let verify_futures: Vec<_> = verify_tasks
                 .into_iter()
                 .map(|(pair, buy_exchange, sell_exchange)| async move {
-                    let networks = verify_arbitrage_conditions_and_get_networks(
+                    match verify_arbitrage_conditions_and_get_networks(
                         &buy_exchange,
                         &sell_exchange,
                         &pair,
                     )
-                    .await;
-                    (pair, buy_exchange, sell_exchange, networks)
+                    .await
+                    {
+                        Ok(networks) => {
+                            if networks.len() != 0 {
+                                Some((pair, buy_exchange, sell_exchange, networks))
+                            } else {
+                                None
+                            }
+                        }
+                        Err(failed_exchange) => {
+                            self.trading_pairs.remove(&pair);
+                            if let Some(blacklist) = self.tickers_exchanges_blacklist.get(pair) {
+                                let blacklist = blacklist.value();
+                                if failed_exchange == buy_exchange.config().name {
+                                    // println!("[DEBUG] Верификация не пройдена из-за биржи покупки {} для {}/{}", failed_exchange, pair.base, pair.quote);
+                                    blacklist
+                                        .buy_exchanges
+                                        .write()
+                                        .await
+                                        .insert(failed_exchange.clone());
+                                }
+                                if failed_exchange == sell_exchange.config().name {
+                                    // println!("[DEBUG] Верификация не пройдена из-за биржи продажи {} для {}/{}", failed_exchange, pair.base, pair.quote);
+
+                                    blacklist
+                                        .sell_exchanges
+                                        .write()
+                                        .await
+                                        .insert(failed_exchange);
+                                };
+
+                                None
+                            } else {
+                                let blacklist = TradingPairBlackList {
+                                    buy_exchanges: RwLock::new(HashSet::<String>::new()),
+                                    sell_exchanges: RwLock::new(HashSet::<String>::new()),
+                                };
+                                if failed_exchange == buy_exchange.config().name {
+                                    // println!("[DEBUG] Верификация не пройдена из-за buy {} для {}/{}", failed_exchange, pair.base, pair.quote);
+
+                                    blacklist
+                                        .buy_exchanges
+                                        .write()
+                                        .await
+                                        .insert(failed_exchange.clone());
+                                }
+                                if failed_exchange == sell_exchange.config().name {
+                                    // println!("[DEBUG] Верификация не пройдена из-за sell {} для {}/{}", failed_exchange, pair.base, pair.quote);
+
+                                    blacklist
+                                        .sell_exchanges
+                                        .write()
+                                        .await
+                                        .insert(failed_exchange);
+                                };
+                                self.tickers_exchanges_blacklist
+                                    .insert(pair.clone(), blacklist);
+
+                                None
+                            }
+                        }
+                    }
                 })
                 .collect();
 
             let verify_time = Instant::now();
-            let verify_results: Vec<(&TradingPair, &Exchange, &Exchange, Option<Vec<Network>>)> =
+            let verify_results: Vec<Option<(&TradingPair, &Exchange, &Exchange, Vec<Network>)>> =
                 join_all(verify_futures).await;
             verify_total_elapsed += verify_time.elapsed().as_nanos();
 
             let verify_passed_pairs: Vec<(&TradingPair, &Exchange, &Exchange, Vec<Network>)> =
                 verify_results
                     .into_iter()
-                    .filter_map(|(pair, buy_exchange, sell_exchange, networks)| {
-                        networks.map(|nets| (pair, buy_exchange, sell_exchange, nets))
-                    })
+                    .filter_map(|result| result)
                     .collect();
             verify_passed += verify_passed_pairs.len();
 

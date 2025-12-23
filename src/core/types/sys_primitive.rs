@@ -1,7 +1,8 @@
 use dashmap::DashMap;
 use hmac::Hmac;
 use sha2::{Sha256, Sha512};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+use tokio::sync::RwLock;
 
 use super::{PriceData, TradingPair};
 use crate::core::types::exchanges::Exchange;
@@ -26,3 +27,9 @@ pub type ExchangeName = String;
 pub type Exchanges = HashMap<ExchangeName, Exchange>;
 
 pub type TradingPairs = DashMap<TradingPair, PriceData>;
+pub type Blacklist = HashSet<String>;
+pub struct TradingPairBlackList {
+    pub buy_exchanges: RwLock<Blacklist>,
+    pub sell_exchanges: RwLock<Blacklist>,
+}
+pub type TradingPairExchangesBlacklist = DashMap<TradingPair, TradingPairBlackList>;

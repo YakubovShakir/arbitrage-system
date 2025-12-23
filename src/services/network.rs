@@ -330,6 +330,13 @@ impl NetworkService for Exchange {
                 }
             }
         }
+        // if fetched_networks.len() == 0 {
+        //     return Err(format!(
+        //         "Error: Fetched networks is empty for {}",
+        //         self.config().name
+        //     )
+        //     .into());
+        // };
         Ok(fetched_networks)
     }
 }
