@@ -6,10 +6,12 @@ use std::time::Duration;
 use tokio_tungstenite::connect_async;
 
 use crate::config;
+use crate::config::parameters::{MARGIN_INFO_CACHE_TTL_SECS, NETWORKS_CACHE_TTL_SECS};
 use crate::core::net::http::HttpClient;
 use crate::core::net::websocket::{BinaryMessageHandler, ConnectionHandler, WebSocketClient};
 use crate::core::types::Exchanges;
-use crate::core::types::exchanges::{Exchange, ExchangeConfig};
+use crate::core::types::api::CacheData;
+use crate::core::types::exchanges::{CachedConfig, Exchange, ExchangeConfig};
 use crate::core::utils::find_value_from_json_key;
 
 pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
@@ -22,6 +24,16 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         secret_key: config::binance::SECRET_KEY.to_owned(),
         http_client: HttpClient::new(config::binance::BASE_URL)?,
         websocket_client: Some(WebSocketClient::new(config::binance::WEBSOCKET_URL)),
+        cached_data: CachedConfig {
+            networks: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+            ),
+            margin_info: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+            ),
+        },
     });
     exchanges.insert(config::binance::NAME.to_owned(), binance);
 
@@ -32,6 +44,16 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         secret_key: config::bybit::SECRET_KEY.to_owned(),
         http_client: HttpClient::new(config::bybit::BASE_URL)?,
         websocket_client: None,
+        cached_data: CachedConfig {
+            networks: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+            ),
+            margin_info: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+            ),
+        },
     });
     exchanges.insert(config::bybit::NAME.to_owned(), bybit);
 
@@ -70,6 +92,10 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 .with_ping_interval(Duration::from_secs(20), r#"{"method": "PING"}"#.to_string())
                 .with_binary_handler(mexc_binary_handler),
         ),
+        cached_data: CachedConfig {
+            networks: CacheData::new(json::JsonValue::Null, Duration::from_secs(0)),
+            margin_info: CacheData::new(json::JsonValue::Null, Duration::from_secs(0)),
+        },
     });
     exchanges.insert(config::mexc::NAME.to_owned(), mexc);
 
@@ -80,6 +106,10 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         secret_key: config::bitget::SECRET_KEY.to_owned(),
         http_client: HttpClient::new(config::bitget::BASE_URL)?,
         websocket_client: None,
+        cached_data: CachedConfig {
+            networks: CacheData::new(json::JsonValue::Null, Duration::from_secs(0)),
+            margin_info: CacheData::new(json::JsonValue::Null, Duration::from_secs(0)),
+        },
     });
     exchanges.insert(config::bitget::NAME.to_owned(), bitget);
 
@@ -157,6 +187,16 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 .with_connection_handler(kucoin_connection_handler) // ← просто передаем замыкание
                 .with_streamed_state(),
         ),
+        cached_data: CachedConfig {
+            networks: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+            ),
+            margin_info: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+            ),
+        },
     });
     exchanges.insert(config::kucoin::NAME.to_owned(), kucoin);
 
@@ -167,18 +207,38 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         secret_key: config::gate::SECRET_KEY.to_owned(),
         http_client: HttpClient::new(config::gate::BASE_URL)?,
         websocket_client: None,
+        cached_data: CachedConfig {
+            networks: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+            ),
+            margin_info: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+            ),
+        },
     });
     exchanges.insert(config::gate::NAME.to_owned(), gate);
 
-    // Huobi
-    let huobi = Exchange::Huobi(ExchangeConfig {
-        name: config::huobi::NAME.to_owned(),
-        api_key: config::huobi::API_KEY.to_owned(),
-        secret_key: config::huobi::SECRET_KEY.to_owned(),
-        http_client: HttpClient::new(config::huobi::BASE_URL)?,
-        websocket_client: None,
-    });
-    exchanges.insert(config::huobi::NAME.to_owned(), huobi);
+    // // Huobi
+    // let huobi = Exchange::Huobi(ExchangeConfig {
+    //     name: config::huobi::NAME.to_owned(),
+    //     api_key: config::huobi::API_KEY.to_owned(),
+    //     secret_key: config::huobi::SECRET_KEY.to_owned(),
+    //     http_client: HttpClient::new(config::huobi::BASE_URL)?,
+    //     websocket_client: None,
+    //     cached_data: CachedConfig {
+    //         networks: CacheData::new(
+    //             json::JsonValue::Null,
+    //             Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+    //         ),
+    //         margin_info: CacheData::new(
+    //             json::JsonValue::Null,
+    //             Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+    //         ),
+    //     },
+    // });
+    // exchanges.insert(config::huobi::NAME.to_owned(), huobi);
 
     Ok(exchanges)
 }

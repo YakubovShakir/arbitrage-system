@@ -27,9 +27,9 @@ pub fn find_value_from_json_key(
             value = &value[*key];
         } else {
             return Err(format!(
-                "Could not find Key<{:?}> because Key<{}> was not found in path",
+                "Could not find key <{:?}> in {}",
                 key_order.last(),
-                key,
+                json.pretty(4),
             )
             .into());
         }
@@ -92,10 +92,10 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     };
 
     if !is_margin_available {
-        // println!(
-        //     "[DEBUG] {}/{} verify - failed. REASON: {} not borrowable",
-        //     trading_pair_name.base, trading_pair_name.quote, sell_exchange_name
-        // );
+        println!(
+            "[DEBUG] {}/{} verify - failed. REASON: {} not borrowable",
+            trading_pair_name.base, trading_pair_name.quote, sell_exchange_name
+        );
         return Err(sell_exchange_name.to_string());
     }
 

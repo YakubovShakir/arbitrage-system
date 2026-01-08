@@ -10,7 +10,9 @@ use crate::{
     },
     core::{
         traits::exchange_service::MarginInfoService,
-        types::{API, TradingPair, exchanges::Exchange, signature_params::SignatureParams},
+        types::{
+            API, TradingPair, exchanges::Exchange, signature_params::SignatureParams, trading_pair,
+        },
         utils::{
             find_value_from_json_key, get_current_timestamp, get_timestamp_iso_8601,
             parse_json_as_bool, parse_json_as_str,
@@ -30,44 +32,72 @@ impl MarginInfoService for Exchange {
             return Ok(false);
         };
 
+        let cache_data = self.config().cached_data.margin_info.get().await;
+
         let raw_borrowable: JsonValue = match self {
             Exchange::Binance(cfg) => {
-                let query = &[("asset", pair.base.as_str())];
                 let headers = &[("X-MBX-APIKEY", cfg.api_key.as_str())];
-                let response = cfg
-                    .http_client
-                    .get(endpoint, Some(query), Some(headers), None)
-                    .await?;
-                find_value_from_json_key(&response[0], &["isBorrowable"])?
+                let data = match cache_data {
+                    Some(data) => data,
+                    None => {
+                        let response = cfg
+                            .http_client
+                            .get(endpoint, None, Some(headers), None)
+                            .await?;
+                        cfg.cached_data.margin_info.set(response.clone()).await;
+                        response
+                    }
+                };
+
+                let mut borrowable = JsonValue::Boolean(false);
+
+                for asset in data.members() {
+                    let Ok(asset_name) = parse_json_as_str(&asset["assetName"]) else {
+                        continue;
+                    };
+                    if asset_name != pair.base {
+                        continue;
+                    }
+                    borrowable = find_value_from_json_key(&asset, &["isBorrowable"])?;
+                }
+                borrowable
             }
 
             Exchange::Bybit(cfg) => {
-                let query = &[("currency", pair.base.as_str())];
-                let response = cfg
-                    .http_client
-                    .get(endpoint, Some(query), None, None)
-                    .await?;
+                let data = match cache_data {
+                    Some(data) => data,
+                    None => {
+                        let response = cfg.http_client.get(endpoint, None, None, None).await?;
+                        if response["result"] != JsonValue::Null {
+                            cfg.cached_data.margin_info.set(response.clone()).await;
+                        };
+                        response
+                    }
+                };
 
-                if response["result"] == JsonValue::Null {
+                if data["result"] == JsonValue::Null {
                     JsonValue::Boolean(false)
                 } else {
-                    let vip_list =
-                        match find_value_from_json_key(&response, &["result", "vipCoinList"]) {
-                            Ok(res) => res,
-                            Err(e) => {
-                                return Err(format!("Response - {} Error - {}", response, e).into());
-                            }
-                        };
+                    let vip_coin_list =
+                        find_value_from_json_key(&data, &["result", "vipCoinList"])?;
                     let vip_level = 0;
-                    let vip_list_level = vip_list
+                    let vip_level = vip_coin_list
                         .members()
                         .nth(vip_level)
                         .ok_or("vipCoinList is is empty")?;
-                    let list_item = vip_list_level["list"]
-                        .members()
-                        .nth(0)
-                        .ok_or("list is empty")?;
-                    find_value_from_json_key(&list_item, &["borrowable"])?
+                    let list = find_value_from_json_key(&vip_level, &["list"])?;
+                    let mut borrowable = JsonValue::Boolean(false);
+
+                    for item in list.members() {
+                        let Ok(asset_name) = parse_json_as_str(&item["currency"]) else {
+                            continue;
+                        };
+                        if asset_name != pair.base {
+                            continue;
+                        };
+                        borrowable = find_value_from_json_key(&item, &["borrowable"])?;
+                    }
+                    borrowable
                 }
             }
 
@@ -81,22 +111,30 @@ impl MarginInfoService for Exchange {
                 })?;
 
                 let headers = &[("ACCESS-KEY", cfg.api_key.as_str()), ("ACCESS-SIGN", &sign)];
-                let response = cfg
-                    .http_client
-                    .get(
-                        endpoint,
-                        None,
-                        Some(headers),
-                        Some(Duration::from_secs(BITGET_MARGIN_INFO_HTTP_TIMEOUT_SECONDS)),
-                    )
-                    .await?;
-                let data = find_value_from_json_key(&response, &["data"])?;
+
+                let data = match cache_data {
+                    Some(cached) => cached,
+                    None => {
+                        let response = cfg
+                            .http_client
+                            .get(
+                                endpoint,
+                                None,
+                                Some(headers),
+                                Some(Duration::from_secs(BITGET_MARGIN_INFO_HTTP_TIMEOUT_SECONDS)),
+                            )
+                            .await?;
+
+                        cfg.cached_data.margin_info.set(response.clone()).await;
+                        response
+                    }
+                };
+                let data = find_value_from_json_key(&data, &["data"])?;
                 if !data.is_array() {
                     return Err(
                         format!("{} Invalid response: 'data'is not an array", cfg.name).into(),
                     );
                 }
-
                 let mut result = JsonValue::Boolean(false);
                 let symbol = pair.base.to_string() + &pair.quote;
                 for item in data.members() {
@@ -111,23 +149,32 @@ impl MarginInfoService for Exchange {
             Exchange::Gate(cfg) => {
                 // let t = get_current_timestamp_secs()?;
                 // let auth_headers = self.get_auth_headers("GET", endpoint, None, None, t)?;
-                let items = cfg
-                    .http_client
-                    .get(
-                        endpoint,
-                        None,
-                        None,
-                        Some(Duration::from_secs(GATE_MARGIN_INFO_HTTP_TIMEOUT_SECONDS)),
-                    )
-                    .await?;
-                if items.is_empty() {
-                    return Err(
-                        format!("{} Invalid response: 'items' is not an array", cfg.name).into(),
-                    );
-                }
+                let data = match cache_data {
+                    Some(cached) => cached,
+                    None => {
+                        let response = cfg
+                            .http_client
+                            .get(
+                                endpoint,
+                                None,
+                                None,
+                                Some(Duration::from_secs(GATE_MARGIN_INFO_HTTP_TIMEOUT_SECONDS)),
+                            )
+                            .await?;
+                        if response.is_empty() {
+                            return Err(format!(
+                                "{} Invalid response: 'items' is not an array",
+                                cfg.name
+                            )
+                            .into());
+                        }
+                        cfg.cached_data.margin_info.set(response.clone()).await;
+                        response
+                    }
+                };
 
                 let mut result = JsonValue::Boolean(false);
-                for item in items.members() {
+                for item in data.members() {
                     let Ok(pair_name) = parse_json_as_str(&item["currency_pair"]) else {
                         continue;
                     };
@@ -140,9 +187,32 @@ impl MarginInfoService for Exchange {
                 result
             }
             Exchange::Kucoin(cfg) => {
-                let endpoint = endpoint.to_string() + &pair.base;
-                let response = cfg.http_client.get(&endpoint, None, None, None).await?;
-                find_value_from_json_key(&response, &["data", "isMarginEnabled"])?
+                let data = match cache_data {
+                    Some(data) => data,
+                    None => {
+                        let response = cfg
+                            .http_client
+                            .get(&endpoint.to_string(), None, None, None)
+                            .await?;
+
+                        if response["code"] == "200000" {
+                            cfg.cached_data.margin_info.set(response.clone()).await;
+                        }
+                        response
+                    }
+                };
+                let mut borrowable = JsonValue::Boolean(false);
+
+                for item in data["data"].members() {
+                    let Ok(asset_name) = parse_json_as_str(&item["currency"]) else {
+                        continue;
+                    };
+                    if asset_name != pair.base {
+                        continue;
+                    }
+                    borrowable = find_value_from_json_key(&item, &["isMarginEnabled"])?;
+                }
+                borrowable
             }
             Exchange::Mexc(_) => JsonValue::Boolean(false),
             Exchange::Huobi(cfg) => {

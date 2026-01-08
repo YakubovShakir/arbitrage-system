@@ -1,8 +1,12 @@
+use dashmap::DashSet;
 use futures_util::future::join_all;
 use tokio::sync::RwLock;
 
 use crate::{
-    config::{USDT_LIMIT, parameters::REQUIRED_SPREAD_PERCENT},
+    config::{
+        USDT_LIMIT,
+        parameters::{REQUIRED_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT},
+    },
     core::{
         traits::{Workable, exchange_service::OrderBookService},
         types::{
@@ -15,7 +19,7 @@ use crate::{
         },
     },
 };
-use std::{collections::HashSet, sync::Arc, time::Instant};
+use std::{sync::Arc, time::Instant};
 
 pub struct ComputWorker {
     id: usize,
@@ -120,7 +124,7 @@ impl Workable for ComputWorker {
                 let ticker_spread_time = Instant::now();
                 let spread = comput_spread_percent(&buy_price.1, &sell_price.1);
                 ticker_spread_total_elapsed += ticker_spread_time.elapsed().as_nanos();
-                if spread < REQUIRED_SPREAD_PERCENT {
+                if spread < REQUIRED_TICKER_SPREAD_PERCENT {
                     continue;
                 }
 
@@ -175,45 +179,29 @@ impl Workable for ComputWorker {
                                 let blacklist = blacklist.value();
                                 if failed_exchange == buy_exchange.config().name {
                                     // println!("[DEBUG] Верификация не пройдена из-за биржи покупки {} для {}/{}", failed_exchange, pair.base, pair.quote);
-                                    blacklist
-                                        .buy_exchanges
-                                        .write()
-                                        .await
-                                        .insert(failed_exchange.clone());
+                                    blacklist.buy_exchanges.insert(failed_exchange.clone());
                                 }
                                 if failed_exchange == sell_exchange.config().name {
                                     // println!("[DEBUG] Верификация не пройдена из-за биржи продажи {} для {}/{}", failed_exchange, pair.base, pair.quote);
 
-                                    blacklist
-                                        .sell_exchanges
-                                        .write()
-                                        .await
-                                        .insert(failed_exchange);
+                                    blacklist.sell_exchanges.insert(failed_exchange);
                                 };
 
                                 None
                             } else {
                                 let blacklist = TradingPairBlackList {
-                                    buy_exchanges: RwLock::new(HashSet::<String>::new()),
-                                    sell_exchanges: RwLock::new(HashSet::<String>::new()),
+                                    buy_exchanges: DashSet::<String>::new(),
+                                    sell_exchanges: DashSet::<String>::new(),
                                 };
                                 if failed_exchange == buy_exchange.config().name {
                                     // println!("[DEBUG] Верификация не пройдена из-за buy {} для {}/{}", failed_exchange, pair.base, pair.quote);
 
-                                    blacklist
-                                        .buy_exchanges
-                                        .write()
-                                        .await
-                                        .insert(failed_exchange.clone());
+                                    blacklist.buy_exchanges.insert(failed_exchange.clone());
                                 }
                                 if failed_exchange == sell_exchange.config().name {
                                     // println!("[DEBUG] Верификация не пройдена из-за sell {} для {}/{}", failed_exchange, pair.base, pair.quote);
 
-                                    blacklist
-                                        .sell_exchanges
-                                        .write()
-                                        .await
-                                        .insert(failed_exchange);
+                                    blacklist.sell_exchanges.insert(failed_exchange);
                                 };
                                 self.tickers_exchanges_blacklist
                                     .insert(pair.clone(), blacklist);
@@ -344,7 +332,7 @@ impl Workable for ComputWorker {
                     comput_spread_percent(&calculated_buy_price, &calculated_sell_price);
                 final_spread_total_elapsed += final_spread_time.elapsed().as_nanos();
 
-                if final_spread < REQUIRED_SPREAD_PERCENT || final_spread > 10.0 {
+                if final_spread < REQUIRED_ORDERBOOK_SPREAD_PERCENT || final_spread > 10.0 {
                     continue;
                 }
                 final_spread_passed += 1;

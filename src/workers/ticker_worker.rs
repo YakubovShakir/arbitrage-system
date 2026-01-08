@@ -62,23 +62,11 @@ impl TickerWorker {
                 let mut in_sell_blacklist = false;
 
                 if let Some(blacklist) = self.tickers_exchanges_blacklist.get(&new_trading_pair) {
-                    if blacklist
-                        .buy_exchanges
-                        .read()
-                        .await
-                        .get(&exchange_name)
-                        .is_some()
-                    {
+                    if blacklist.buy_exchanges.get(&exchange_name).is_some() {
                         in_buy_blacklist = true
                     };
 
-                    if blacklist
-                        .sell_exchanges
-                        .read()
-                        .await
-                        .get(&exchange_name)
-                        .is_some()
-                    {
+                    if blacklist.sell_exchanges.get(&exchange_name).is_some() {
                         in_sell_blacklist = true
                     };
                 };
@@ -148,7 +136,7 @@ impl Workable for TickerWorker {
                 stat_info = format!("----TickerWorker:{} statistics ----", self.id);
             }
 
-            tokio::time::sleep(std::time::Duration::from_millis(3000)).await;
+            tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
         }
     }
 }

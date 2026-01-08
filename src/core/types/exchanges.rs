@@ -1,6 +1,6 @@
 use crate::core::{
     net::{http::HttpClient, websocket::WebSocketClient},
-    types::signature_params::SignatureParams,
+    types::{api::CacheData, signature_params::SignatureParams},
     utils::{
         base64_encode, encrypt_hmac_sha256, encrypt_hmac_sha512, hex_encode,
         sha512_with_ring_return_hex,
@@ -8,12 +8,17 @@ use crate::core::{
 };
 use std::error::Error;
 
+pub struct CachedConfig {
+    pub networks: CacheData,
+    pub margin_info: CacheData,
+}
 pub struct ExchangeConfig {
     pub name: String,
     pub api_key: String,
     pub secret_key: String,
     pub http_client: HttpClient,
     pub websocket_client: Option<WebSocketClient>,
+    pub cached_data: CachedConfig,
 }
 
 pub enum Exchange {

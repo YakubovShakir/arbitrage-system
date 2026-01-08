@@ -110,7 +110,6 @@ async fn test_margin_info_service() -> Result<(), Box<dyn std::error::Error>> {
             match exchange.borrowable(&TradingPair::new("BTC", "USDT")).await {
                 Ok(borrowable) => {
                     // assert!(tickers.len() > 0, "❗ Empty tickers from {}", exchange_name);
-
                     println!("{} {}", exchange_name, borrowable);
                     break;
                 }
@@ -150,21 +149,24 @@ async fn test_network_service() -> Result<(), Box<dyn std::error::Error>> {
         let mut networks_count = 0;
 
         while attempt <= attempts {
-            if let Ok(networks) = exchange.networks("BTC").await {
-                assert!(
-                    networks.len() > 0,
-                    "❗ Empty networks from {}",
-                    exchange_name
-                );
-                networks_count = networks.len();
-                break;
-            } else {
-                println!(
-                    "❗ {} attempt failed for {}. Retry after 2 secs.",
-                    attempt, exchange_name
-                );
-                attempt += 1;
-                tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+            match exchange.networks("BTC").await {
+                Ok(networks) => {
+                    assert!(
+                        networks.len() > 0,
+                        "❗ Empty networks from {}",
+                        exchange_name
+                    );
+                    networks_count = networks.len();
+                    break;
+                }
+                Err(e) => {
+                    println!(
+                        "❗ {} attempt failed for {} - {}. Retry after 2 secs.",
+                        attempt, exchange_name, e
+                    );
+                    attempt += 1;
+                    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+                }
             }
         }
 

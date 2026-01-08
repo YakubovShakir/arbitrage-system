@@ -2,13 +2,12 @@ use arbitrage_system::{
     // config::parameters::EXCHANGES_PER_TICKER_THREAD,
     core::{
         traits::Workable,
-        types::{TradingPair, TradingPairExchangesBlacklist, TradingPairs},
+        types::{TradingPairExchangesBlacklist, TradingPairs},
     },
     init::exchanges::get_exchanges,
     workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
 };
-use dashmap::DashMap;
-use std::{collections::HashSet, sync::Arc};
+use std::sync::Arc;
 
 #[tokio::main]
 async fn main() {

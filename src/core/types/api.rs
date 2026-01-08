@@ -1,4 +1,38 @@
+use std::time::Duration;
+
+use json::JsonValue;
+use tokio::{sync::RwLock, time::Instant};
+
 use super::exchanges::Exchange;
+
+pub struct CacheData {
+    value: RwLock<JsonValue>,
+    timestamp: RwLock<Instant>,
+    ttl: Duration,
+}
+
+impl CacheData {
+    pub fn new(value: JsonValue, ttl: Duration) -> Self {
+        Self {
+            value: RwLock::new(value),
+            timestamp: RwLock::new(Instant::now()),
+            ttl: ttl,
+        }
+    }
+    pub async fn get(&self) -> Option<JsonValue> {
+        if !self.value.read().await.is_null() && self.timestamp.read().await.elapsed() <= self.ttl {
+            return Some(self.value.read().await.clone());
+        }
+        None
+    }
+
+    pub async fn set(&self, value: JsonValue) {
+        let (mut timestamp_quard, mut value_quard) =
+            (self.timestamp.write().await, self.value.write().await);
+        *value_quard = value;
+        *timestamp_quard = Instant::now();
+    }
+}
 
 pub enum API {
     GetTickers,
