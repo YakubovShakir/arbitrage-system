@@ -93,8 +93,14 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 .with_binary_handler(mexc_binary_handler),
         ),
         cached_data: CachedConfig {
-            networks: CacheData::new(json::JsonValue::Null, Duration::from_secs(0)),
-            margin_info: CacheData::new(json::JsonValue::Null, Duration::from_secs(0)),
+            networks: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+            ),
+            margin_info: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+            ),
         },
     });
     exchanges.insert(config::mexc::NAME.to_owned(), mexc);
@@ -107,8 +113,14 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         http_client: HttpClient::new(config::bitget::BASE_URL)?,
         websocket_client: None,
         cached_data: CachedConfig {
-            networks: CacheData::new(json::JsonValue::Null, Duration::from_secs(0)),
-            margin_info: CacheData::new(json::JsonValue::Null, Duration::from_secs(0)),
+            networks: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+            ),
+            margin_info: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+            ),
         },
     });
     exchanges.insert(config::bitget::NAME.to_owned(), bitget);

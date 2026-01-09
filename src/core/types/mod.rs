@@ -1,4 +1,5 @@
 pub mod api;
+pub mod blacklist;
 pub mod exchanges;
 pub mod network;
 pub mod price_data;

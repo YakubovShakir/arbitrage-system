@@ -1,10 +1,10 @@
-use std::{sync::Arc, time::Instant};
+use std::{collections::HashMap, os::macos::raw, sync::Arc, time::Instant};
 
 use futures_util::future::join_all;
 
 use crate::core::{
     traits::{Workable, exchange_service::TickerService},
-    types::{Exchanges, TradingPairExchangesBlacklist, TradingPairs},
+    types::{Exchanges, PriceData, TickerPrice, Tickers, TradingPairs, blacklist::Blacklist},
     utils::format_duration,
 };
 
@@ -12,7 +12,7 @@ pub struct TickerWorker {
     id: usize,
     trading_pairs: Arc<TradingPairs>,
     exchanges: Arc<Exchanges>,
-    tickers_exchanges_blacklist: Arc<TradingPairExchangesBlacklist>,
+    blacklist: Arc<Blacklist>,
 }
 
 impl TickerWorker {
@@ -20,26 +20,26 @@ impl TickerWorker {
         id: usize,
         trading_pairs: Arc<TradingPairs>,
         exchanges: Arc<Exchanges>,
-        tickers_exchanges_blacklist: Arc<TradingPairExchangesBlacklist>,
+        blacklist: Arc<Blacklist>,
     ) -> Self {
         Self {
             id,
             trading_pairs,
             exchanges,
-            tickers_exchanges_blacklist,
+            blacklist,
         }
     }
-    async fn fetch_tickers(&self) -> Vec<(String, TradingPairs)> {
+    async fn fetch_tickers(&self) -> Vec<Tickers> {
         let tickers_futures: Vec<_> = self
             .exchanges
             .iter()
-            .map(|(exchange_name, exchange)| async move {
+            .map(|(ex_name, exchange)| async move {
                 match exchange.tickers().await {
-                    Ok(tickers) => Some((exchange_name.clone(), tickers)),
+                    Ok(tickers) => Some(tickers),
                     Err(e) => {
                         println!(
                             "Не удалось получить тикеры от биржи {}, ошибка - {}",
-                            exchange_name, e
+                            ex_name, e
                         );
                         None
                     }
@@ -51,49 +51,75 @@ impl TickerWorker {
             .into_iter()
             .filter_map(|result| result)
             .collect();
-
         tickers_results
     }
 
-    async fn update_tickers(&self, fetched_tickers: Vec<(String, TradingPairs)>) {
-        for (exchange_name, tickers) in fetched_tickers {
-            for (new_trading_pair, new_price_data) in tickers {
-                let mut in_buy_blacklist = false;
-                let mut in_sell_blacklist = false;
+    async fn filter_tickers(&self, raw_tickers: Vec<Tickers>) -> Tickers {
+        let mut filtered: Tickers = Tickers::new();
 
-                if let Some(blacklist) = self.tickers_exchanges_blacklist.get(&new_trading_pair) {
-                    if blacklist.buy_exchanges.get(&exchange_name).is_some() {
-                        in_buy_blacklist = true
-                    };
+        raw_tickers.iter().for_each(|tickers| {
+            for (pair, price) in tickers {
+                let ex_name = &price.buy_price.0;
+                let in_buy_blacklist = self.blacklist.is_buy_blacklisted(pair, &ex_name);
+                let in_sell_blacklist = self.blacklist.is_sell_blacklisted(pair, &ex_name);
 
-                    if blacklist.sell_exchanges.get(&exchange_name).is_some() {
-                        in_sell_blacklist = true
-                    };
-                };
-                if self.trading_pairs.contains_key(&new_trading_pair) {
-                    if let Some(existing_price) = self.trading_pairs.get(&new_trading_pair) {
-                        let (buy_price, sell_price) = {
-                            let buy_guard = new_price_data.min_buy_price.read().await;
-                            let sell_guard = new_price_data.max_sell_price.read().await;
-                            (buy_guard.1, sell_guard.1)
-                        };
-
-                        if !in_buy_blacklist {
-                            existing_price
-                                .update_buy_price(exchange_name.clone(), buy_price)
-                                .await;
+                if let Some(filtered_ticker) = filtered.get_mut(pair) {
+                    if !in_buy_blacklist {
+                        if price.buy_price.1 < filtered_ticker.buy_price.1 {
+                            filtered_ticker.buy_price = price.buy_price.clone()
                         }
-                        if !in_sell_blacklist {
-                            existing_price
-                                .update_sell_price(exchange_name.clone(), sell_price)
-                                .await;
+                    }
+                    if !in_sell_blacklist {
+                        if price.sell_price.1 > filtered_ticker.sell_price.1 {
+                            filtered_ticker.sell_price = price.sell_price.clone()
                         }
                     }
                 } else {
-                    if !in_buy_blacklist && !in_sell_blacklist {
-                        self.trading_pairs.insert(new_trading_pair, new_price_data);
+                    // Создаем новый тикер, даже если только одна сторона валидна
+                    let mut new_ticker = TickerPrice {
+                        buy_price: (String::new(), f64::MAX),
+                        sell_price: (String::new(), f64::MIN),
+                    };
+
+                    if !in_buy_blacklist {
+                        new_ticker.buy_price = price.buy_price.clone();
+                    }
+                    if !in_sell_blacklist {
+                        new_ticker.sell_price = price.sell_price.clone();
+                    }
+
+                    // Добавляем только если хотя бы одна сторона валидна
+                    if !new_ticker.buy_price.0.is_empty() || !new_ticker.sell_price.0.is_empty() {
+                        filtered.insert(pair.clone(), new_ticker);
                     }
                 }
+            }
+        });
+        filtered
+    }
+    async fn update_trading_pairs(&self, tickers: Tickers) {
+        for (pair, price) in tickers {
+            let buy_ex_name = price.buy_price.0;
+            let sell_ex_name = price.sell_price.0;
+            let price_data = PriceData::new(
+                &buy_ex_name,
+                &sell_ex_name,
+                &price.sell_price.1,
+                &price.buy_price.1,
+            );
+
+            if self.trading_pairs.contains_key(&pair) {
+                if let Some(existing_price) = self.trading_pairs.get(&pair) {
+                    existing_price
+                        .update_buy_price(buy_ex_name, price.buy_price.1)
+                        .await;
+
+                    existing_price
+                        .update_sell_price(sell_ex_name.clone(), price.sell_price.1)
+                        .await;
+                }
+            } else {
+                self.trading_pairs.insert(pair, price_data);
             }
         }
     }
@@ -111,17 +137,20 @@ impl Workable for TickerWorker {
         let mut stat_info = format!("----TickerWorker:{} Statistics ----", self.id);
         loop {
             stat_info += &format!("\n       loop: {}", loop_count + 1);
-
             let start = Instant::now();
             stat_info += &format!("\n| {:<8} | {:<8} |", "Exchange", "Tickers");
 
             // Получение тикеров с бирж
-            let fetched_tickers: Vec<(String, TradingPairs)> = self.fetch_tickers().await;
-            for (ex, tickers) in &fetched_tickers {
-                stat_info += &format!("\n| {:<8} | {:<8} |", ex, tickers.len());
+            let raw_tickers: Vec<Tickers> = self.fetch_tickers().await;
+            for tickers in &raw_tickers {
+                if let Some(pair) = tickers.iter().nth(0) {
+                    stat_info += &format!("\n| {:<8} | {:<8} |", pair.1.buy_price.0, tickers.len());
+                }
             }
-            // Обновление глобальной мапы
-            self.update_tickers(fetched_tickers).await;
+
+            let filtered_tickers: Tickers = self.filter_tickers(raw_tickers).await;
+            self.update_trading_pairs(filtered_tickers).await;
+
             loop_count += 1;
             total_elapsed += start.elapsed().as_nanos();
             if loop_count == loop_to_update_stat {

@@ -2,11 +2,12 @@ use arbitrage_system::{
     // config::parameters::EXCHANGES_PER_TICKER_THREAD,
     core::{
         traits::Workable,
-        types::{TradingPairExchangesBlacklist, TradingPairs},
+        types::{TradingPairs, blacklist::Blacklist},
     },
     init::exchanges::get_exchanges,
     workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
 };
+use dashmap::DashMap;
 use std::sync::Arc;
 
 #[tokio::main]
@@ -19,7 +20,10 @@ async fn main() {
     let spread_pairs = Arc::new(TradingPairs::new());
 
     // blacklist
-    let tickers_blacklist = Arc::new(TradingPairExchangesBlacklist::new());
+    let tickers_blacklist = Arc::new(Blacklist {
+        buy_blacklist: DashMap::new(),
+        sell_blacklist: DashMap::new(),
+    });
 
     // let tickers_produced: Vec<Arc<TradingPairs>> = Vec::from(Arc::new(TradingPairs::new()));
     let mut tasks = Vec::new();

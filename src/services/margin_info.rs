@@ -34,6 +34,13 @@ impl MarginInfoService for Exchange {
 
         let cache_data = self.config().cached_data.margin_info.get().await;
 
+        if cache_data.is_none() {
+            println!(
+                "[debug] Cache not given for margin_info {}",
+                self.config().name,
+            );
+        }
+
         let raw_borrowable: JsonValue = match self {
             Exchange::Binance(cfg) => {
                 let headers = &[("X-MBX-APIKEY", cfg.api_key.as_str())];
@@ -44,6 +51,7 @@ impl MarginInfoService for Exchange {
                             .http_client
                             .get(endpoint, None, Some(headers), None)
                             .await?;
+
                         cfg.cached_data.margin_info.set(response.clone()).await;
                         response
                     }
@@ -68,7 +76,7 @@ impl MarginInfoService for Exchange {
                     Some(data) => data,
                     None => {
                         let response = cfg.http_client.get(endpoint, None, None, None).await?;
-                        if response["result"] != JsonValue::Null {
+                        if response["result"].has_key("vipCoinList") {
                             cfg.cached_data.margin_info.set(response.clone()).await;
                         };
                         response
@@ -124,8 +132,8 @@ impl MarginInfoService for Exchange {
                                 Some(Duration::from_secs(BITGET_MARGIN_INFO_HTTP_TIMEOUT_SECONDS)),
                             )
                             .await?;
-
                         cfg.cached_data.margin_info.set(response.clone()).await;
+
                         response
                     }
                 };

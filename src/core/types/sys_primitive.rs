@@ -26,10 +26,10 @@ pub type ExchangeName = String;
 
 pub type Exchanges = HashMap<ExchangeName, Exchange>;
 
-pub type TradingPairs = DashMap<TradingPair, PriceData>;
-pub type Blacklist = DashSet<String>;
-pub struct TradingPairBlackList {
-    pub buy_exchanges: Blacklist,
-    pub sell_exchanges: Blacklist,
+#[derive(Clone)]
+pub struct TickerPrice {
+    pub buy_price: (ExchangeName, Price),
+    pub sell_price: (ExchangeName, Price),
 }
-pub type TradingPairExchangesBlacklist = DashMap<TradingPair, TradingPairBlackList>;
+pub type TradingPairs = DashMap<TradingPair, PriceData>;
+pub type Tickers = HashMap<TradingPair, TickerPrice>;

@@ -83,7 +83,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         Ok(result) => result,
         Err(e) => {
             println!(
-                "[WARNING] {}/{} verify returns empty networks. REASON: Can't get {} borrowable status. ERROR: {}",
+                "[WARNING] {}/{} verification failed due to can't get borrow status from {}. ERROR: {}",
                 trading_pair_name.base, trading_pair_name.quote, sell_exchange_name, e
             );
             // return Err(sell_exchange_name.to_string());

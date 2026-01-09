@@ -9,10 +9,10 @@ pub struct PriceData {
 }
 
 impl PriceData {
-    pub fn new(exchange_name: &str, sell_price: &f64, buy_price: &f64) -> Self {
+    pub fn new(buy_ex_name: &str, sell_ex_name: &str, sell_price: &f64, buy_price: &f64) -> Self {
         Self {
-            min_buy_price: RwLock::new((exchange_name.to_owned(), buy_price.to_owned())),
-            max_sell_price: RwLock::new((exchange_name.to_owned(), sell_price.to_owned())),
+            min_buy_price: RwLock::new((buy_ex_name.to_owned(), buy_price.to_owned())),
+            max_sell_price: RwLock::new((sell_ex_name.to_owned(), sell_price.to_owned())),
             checked: RwLock::new(false),
         }
     }

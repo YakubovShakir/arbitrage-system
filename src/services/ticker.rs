@@ -3,17 +3,20 @@ use crate::{
     core::{
         net::websocket::WebSocketClient,
         traits::exchange_service::TickerService,
-        types::{API, PriceData, TradingPair, TradingPairs, exchanges::Exchange},
+        types::{API, TickerPrice, Tickers, TradingPair, exchanges::Exchange},
         utils::{find_value_from_json_key, parse_json_as_f64},
     },
 };
 use async_trait::async_trait;
-use dashmap::DashMap;
-use std::{collections::VecDeque, error::Error, time::Duration};
+use std::{
+    collections::{HashMap, VecDeque},
+    error::Error,
+    time::Duration,
+};
 
 #[async_trait]
 impl TickerService for Exchange {
-    async fn tickers(&self) -> Result<TradingPairs, Box<dyn std::error::Error>> {
+    async fn tickers(&self) -> Result<Tickers, Box<dyn std::error::Error>> {
         // Checking is WebSocket interface available
         match &self.config().websocket_client {
             Some(ws_client) => Ok(handle_ws_interface(ws_client, self).await?),
@@ -22,9 +25,7 @@ impl TickerService for Exchange {
     }
 }
 
-async fn handle_http_interface(
-    exchange: &Exchange,
-) -> Result<TradingPairs, Box<dyn std::error::Error>> {
+async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn std::error::Error>> {
     let Some(endpoint) = API::GetTickers.endpoint(exchange) else {
         return Err(format!(
             "Error: GetTickers endpoint is not set for the exchange {}",
@@ -32,7 +33,7 @@ async fn handle_http_interface(
         )
         .into());
     };
-    let trading_pairs: TradingPairs = DashMap::new();
+    let mut trading_pairs: Tickers = HashMap::new();
 
     match exchange {
         Exchange::Bybit(cfg) => {
@@ -50,9 +51,13 @@ async fn handle_http_interface(
                     continue;
                 };
 
-                let price_data = PriceData::new(&cfg.name, &parsed_bid_price, &parsed_ask_price);
+                let price = TickerPrice {
+                    buy_price: (cfg.name.to_owned(), parsed_ask_price),
+                    sell_price: (cfg.name.to_owned(), parsed_bid_price),
+                };
+
                 if let Some(pair) = TradingPair::from_str(&ticker["symbol"].to_string()) {
-                    trading_pairs.insert(pair, price_data);
+                    trading_pairs.insert(pair, price);
                 }
             }
         }
@@ -73,9 +78,13 @@ async fn handle_http_interface(
                     continue;
                 };
 
-                let price_data = PriceData::new(&cfg.name, &bid_price, &ask_price);
+                let price = TickerPrice {
+                    buy_price: (cfg.name.to_owned(), ask_price),
+                    sell_price: (cfg.name.to_owned(), bid_price),
+                };
+
                 if let Some(pair) = TradingPair::from_str(&ticker["symbol"].to_string()) {
-                    trading_pairs.insert(pair, price_data);
+                    trading_pairs.insert(pair, price);
                 }
             }
         }
@@ -108,11 +117,14 @@ async fn handle_http_interface(
                     continue;
                 };
 
-                let price_data = PriceData::new(&cfg.name, &highest_bid, &lowest_ask);
+                let price = TickerPrice {
+                    buy_price: (cfg.name.to_owned(), lowest_ask),
+                    sell_price: (cfg.name.to_owned(), highest_bid),
+                };
                 if let Some(pair) =
                     TradingPair::from_str_with_separator(&ticker["currency_pair"].to_string(), '_')
                 {
-                    trading_pairs.insert(pair, price_data);
+                    trading_pairs.insert(pair, price);
                 }
             }
         }
@@ -136,9 +148,12 @@ async fn handle_http_interface(
                 ) else {
                     continue;
                 };
-                let price_data = PriceData::new(&cfg.name, &bid_price, &ask_price);
+                let price = TickerPrice {
+                    buy_price: (cfg.name.to_owned(), ask_price),
+                    sell_price: (cfg.name.to_owned(), bid_price),
+                };
                 if let Some(pair) = TradingPair::from_str(&ticker["symbol"].to_string()) {
-                    trading_pairs.insert(pair, price_data);
+                    trading_pairs.insert(pair, price);
                 }
             }
         }
@@ -161,7 +176,7 @@ async fn handle_http_interface(
 async fn handle_ws_interface(
     client: &WebSocketClient,
     exchange: &Exchange,
-) -> Result<TradingPairs, Box<dyn std::error::Error>> {
+) -> Result<Tickers, Box<dyn std::error::Error>> {
     let is_streamed_state = client.state_is_streamed;
 
     if is_streamed_state {
@@ -188,14 +203,14 @@ async fn handle_ws_interface(
         }
     };
 
-    Ok(TradingPairs::new())
+    Ok(Tickers::new())
 }
 
 fn read_streamed_ws_state(
     state_vec: &VecDeque<String>,
     exchange: &Exchange,
-) -> Result<TradingPairs, Box<dyn std::error::Error>> {
-    let trading_pairs: TradingPairs = DashMap::new();
+) -> Result<Tickers, Box<dyn std::error::Error>> {
+    let mut trading_pairs: Tickers = HashMap::new();
 
     match exchange {
         Exchange::Kucoin(cfg) => {
@@ -212,11 +227,14 @@ fn read_streamed_ws_state(
                     continue;
                 };
 
-                let price_data = PriceData::new(&cfg.name, &parsed_sell_price, &parsed_buy_price);
+                let price = TickerPrice {
+                    buy_price: (cfg.name.to_owned(), parsed_buy_price),
+                    sell_price: (cfg.name.to_owned(), parsed_sell_price),
+                };
                 if let Some(pair) =
                     TradingPair::from_str_with_separator(&parsed_ticker["subject"].to_string(), '-')
                 {
-                    trading_pairs.insert(pair, price_data);
+                    trading_pairs.insert(pair, price);
                 }
             }
         }
@@ -238,8 +256,8 @@ fn read_streamed_ws_state(
 fn read_ws_state(
     state: &String,
     exchange: &Exchange,
-) -> Result<TradingPairs, Box<dyn std::error::Error>> {
-    let trading_pairs: TradingPairs = DashMap::new();
+) -> Result<Tickers, Box<dyn std::error::Error>> {
+    let mut trading_pairs: Tickers = HashMap::new();
 
     match exchange {
         Exchange::Binance(cfg) => {
@@ -251,7 +269,10 @@ fn read_ws_state(
             for ticker in parsed_tickers.members() {
                 let symbol = &ticker["s"];
                 let parsed_price = parse_json_as_f64(&ticker["c"])?;
-                let price = PriceData::new(&cfg.name, &parsed_price, &parsed_price);
+                let price = TickerPrice {
+                    buy_price: (cfg.name.to_owned(), parsed_price),
+                    sell_price: (cfg.name.to_owned(), parsed_price),
+                };
                 if let Some(pair) = TradingPair::from_str(&symbol.to_string()) {
                     trading_pairs.insert(pair, price);
                 }
@@ -263,7 +284,10 @@ fn read_ws_state(
                     let Ok(parsed_price) = price_str.parse::<f64>() else {
                         continue;
                     };
-                    let price = PriceData::new(&cfg.name, &parsed_price, &parsed_price);
+                    let price = TickerPrice {
+                        buy_price: (cfg.name.to_owned(), parsed_price),
+                        sell_price: (cfg.name.to_owned(), parsed_price),
+                    };
                     if let Some(pair) = TradingPair::from_str(symbol) {
                         trading_pairs.insert(pair, price);
                     }

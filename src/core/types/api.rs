@@ -20,10 +20,14 @@ impl CacheData {
         }
     }
     pub async fn get(&self) -> Option<JsonValue> {
-        if !self.value.read().await.is_null() && self.timestamp.read().await.elapsed() <= self.ttl {
-            return Some(self.value.read().await.clone());
+        let value_guard = self.value.read().await;
+        let timestamp_guard = self.timestamp.read().await;
+
+        if !value_guard.is_null() && timestamp_guard.elapsed() <= self.ttl {
+            Some(value_guard.clone())
+        } else {
+            None
         }
-        None
     }
 
     pub async fn set(&self, value: JsonValue) {
