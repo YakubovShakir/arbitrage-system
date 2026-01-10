@@ -5,8 +5,8 @@ use json::JsonValue;
 
 use crate::{
     config::parameters::{
-        BITGET_MARGIN_INFO_HTTP_TIMEOUT_SECONDS, GATE_MARGIN_INFO_HTTP_TIMEOUT_SECONDS,
-        HUOBI_MARGIN_INFO_HTTP_TIMEOUT_SECONDS,
+        BITGET_MARGIN_INFO_HTTP_TIMEOUT_SECONDS, DEBUG_CODE, GATE_MARGIN_INFO_HTTP_TIMEOUT_SECONDS,
+        HUOBI_MARGIN_INFO_HTTP_TIMEOUT_SECONDS, RESET_CODE,
     },
     core::{
         traits::exchange_service::MarginInfoService,
@@ -36,7 +36,7 @@ impl MarginInfoService for Exchange {
 
         if cache_data.is_none() {
             println!(
-                "[debug] Cache not given for margin_info {}",
+                "{DEBUG_CODE}[DEBUG] Cache not given for margin_info {}{RESET_CODE}",
                 self.config().name,
             );
         }

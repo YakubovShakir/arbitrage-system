@@ -9,6 +9,8 @@ use tokio_tungstenite::tungstenite::http::Response;
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 
+use crate::config::parameters::{ERROR_CODE, INFO_CODE, RESET_CODE, SUCCESS_CODE};
+
 pub type BinaryMessageHandler = Arc<dyn Fn(prost::bytes::Bytes) -> Option<String> + Send + Sync>;
 pub type PingPongHandler = Arc<dyn Fn(&str) -> Option<String> + Send + Sync>;
 
@@ -111,17 +113,20 @@ impl WebSocketClient {
                     // Ждем либо час, либо пока задача не завершится
                     tokio::select! {
                         _ = tokio::time::sleep(Duration::from_secs(3600)) => {
-                            println!("Принудительное переподключение через 1 час");
+                            println!("{INFO_CODE}[INFO] Принудительное переподключение через 1 час{RESET_CODE}");
                             // Продолжаем цикл
                         }
                         _ = Self::wait_for_task_completion(listen_handle_clone) => {
-                            println!("Соединение разорвано, переподключаемся...");
+                            println!("{INFO_CODE}[INFO] Соединение разорвано, переподключаемся...{RESET_CODE}");
                             // Продолжаем цикл переподключения
                         }
                     }
                 }
                 Err(e) => {
-                    eprintln!("Ошибка подключения: {}. Повтор через 5 сек.", e);
+                    eprintln!(
+                        "{ERROR_CODE}[ERROR] Ошибка подключения: {}. Повтор через 5 сек.{RESET_CODE}",
+                        e
+                    );
                     tokio::time::sleep(Duration::from_secs(5)).await;
                 }
             }
@@ -141,14 +146,17 @@ impl WebSocketClient {
         &self,
         subscribe_message: Option<&str>,
     ) -> Result<JoinHandle<()>, Box<dyn std::error::Error + Send + Sync>> {
-        println!("📡 Подключаемся к {}", self.connection_url);
+        println!(
+            "{INFO_CODE}[INFO] 📡 Подключаемся к {}{RESET_CODE}",
+            self.connection_url
+        );
 
         let (ws_stream, _) = match &self.connection_handler {
             Some(handler) => handler().await?,
             None => {
                 let con = connect_async(&self.connection_url).await?;
                 println!(
-                    "🔗 WebSocket соединение c {} установлено",
+                    "{SUCCESS_CODE}[INFO] 🔗 WebSocket соединение c {} установлено{RESET_CODE}",
                     self.connection_url
                 );
                 con
@@ -159,10 +167,12 @@ impl WebSocketClient {
 
         // Подписываемся если нужно
         if let Some(msg) = subscribe_message {
-            write
-                .send(Message::Text(msg.into()))
-                .await
-                .map_err(|e| format!("Failed to send subscribe message: {}", e))?;
+            write.send(Message::Text(msg.into())).await.map_err(|e| {
+                format!(
+                    "{ERROR_CODE}[ERROR] Failed to send subscribe message: {}{RESET_CODE}",
+                    e
+                )
+            })?;
         }
 
         let state = self.state.clone();
@@ -182,27 +192,28 @@ impl WebSocketClient {
             let write = Arc::new(Mutex::new(write));
 
             // Задача для отправки ping
-            let ping_handle =
-                if let (Some(interval), Some(ping_message)) = (ping_interval, ping_message) {
-                    let write_for_ping = Arc::clone(&write);
+            let ping_handle = if let (Some(interval), Some(ping_message)) =
+                (ping_interval, ping_message)
+            {
+                let write_for_ping = Arc::clone(&write);
 
-                    Some(tokio::spawn(async move {
-                        let mut interval_timer = tokio::time::interval(interval);
-                        loop {
-                            interval_timer.tick().await;
-                            let mut write_guard = write_for_ping.lock().await;
-                            if let Err(e) = write_guard
-                                .send(Message::Text(ping_message.clone().into()))
-                                .await
-                            {
-                                eprintln!("Failed to send ping: {}", e);
-                                break;
-                            }
+                Some(tokio::spawn(async move {
+                    let mut interval_timer = tokio::time::interval(interval);
+                    loop {
+                        interval_timer.tick().await;
+                        let mut write_guard = write_for_ping.lock().await;
+                        if let Err(e) = write_guard
+                            .send(Message::Text(ping_message.clone().into()))
+                            .await
+                        {
+                            eprintln!("{ERROR_CODE}[ERROR] Failed to send ping: {}{RESET_CODE}", e);
+                            break;
                         }
-                    }))
-                } else {
-                    None
-                };
+                    }
+                }))
+            } else {
+                None
+            };
 
             // Основной цикл обработки сообщений
             while let Some(message_result) = read.next().await {
@@ -215,11 +226,17 @@ impl WebSocketClient {
                             if let Some(response) = handler(&text) {
                                 // Отправляем ответный pong
                                 let mut write_guard = write.lock().await;
-                                println!("Получили ping от {} отпраляем ответку", con_url);
+                                println!(
+                                    "{INFO_CODE}[INFO] Получили ping от {} отпраляем ответку{RESET_CODE}",
+                                    con_url
+                                );
                                 if let Err(e) =
                                     write_guard.send(Message::Text(response.into())).await
                                 {
-                                    eprintln!("Failed to send pong response: {}", e);
+                                    eprintln!(
+                                        "{ERROR_CODE}[ERROR]Failed to send pong response: {}{RESET_CODE}",
+                                        e
+                                    );
                                     break;
                                 }
                                 is_ping_pong = true;
@@ -244,12 +261,15 @@ impl WebSocketClient {
                     Ok(Message::Ping(data)) => {
                         let mut write_guard = write.lock().await;
                         if let Err(e) = write_guard.send(Message::Pong(data)).await {
-                            eprintln!("Failed to send pong: {}", e);
+                            eprintln!("{ERROR_CODE}[ERROR] Failed to send pong: {}{RESET_CODE}", e);
                             break;
                         }
                     }
                     Ok(Message::Close(frame)) => {
-                        println!("Сервер {} закрыл соединение: {:?}", con_url, frame);
+                        println!(
+                            "{INFO_CODE}[INFO] Сервер {} закрыл соединение: {:?}{RESET_CODE}",
+                            con_url, frame
+                        );
                         break;
                     }
                     Ok(Message::Binary(data)) => {
@@ -262,7 +282,7 @@ impl WebSocketClient {
                         }
                     }
                     Err(e) => {
-                        eprintln!("Ошибка WebSocket: {}", e);
+                        eprintln!("{ERROR_CODE}[ERROR] Ошибка WebSocket: {}{RESET_CODE}", e);
                         break;
                     }
                     _ => {}
@@ -274,7 +294,7 @@ impl WebSocketClient {
                 ping_handle.abort();
             }
 
-            println!("Задача слушателя завершена");
+            println!("{INFO_CODE}[INFO] Задача слушателя завершена{RESET_CODE}");
         });
 
         Ok(handle)

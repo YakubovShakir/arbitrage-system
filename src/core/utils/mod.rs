@@ -1,6 +1,9 @@
 use chrono::{DateTime, Utc};
 use ring::digest;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    mem,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use data_encoding::BASE64;
 use hmac::Mac;
@@ -10,10 +13,13 @@ use openssl::pkey::PKey;
 use openssl::sign::Signer;
 use sha2::{Digest, Sha256};
 
-use crate::core::{
-    traits::exchange_service::{MarginInfoService, NetworkService},
-    types::{
-        ExchangeName, Glass, HmacSha256, HmacSha512, Network, TradingPair, exchanges::Exchange,
+use crate::{
+    config::parameters::{DEBUG_CODE, RESET_CODE, WARNING_CODE},
+    core::{
+        traits::exchange_service::{MarginInfoService, NetworkService},
+        types::{
+            ExchangeName, Glass, HmacSha256, HmacSha512, Network, TradingPair, exchanges::Exchange,
+        },
     },
 };
 
@@ -40,38 +46,27 @@ pub fn find_value_from_json_key(
 // pub fn find_best_network_by_fee()
 
 pub fn find_intersection_from_networks(
-    withdraw_networks: &Vec<Network>,
-    deposit_networks: &Vec<Network>,
+    withdraw_networks: &[Network],
+    deposit_networks: &[Network],
 ) -> Option<Vec<Network>> {
     let mut intersection: Vec<Network> = Vec::new();
 
     for w_network in withdraw_networks {
+        // ← из withdraw_networks
         for d_network in deposit_networks {
-            if w_network.name.to_uppercase() == d_network.name.to_uppercase() {
-                intersection.push(w_network.clone());
-                break;
-            }
-
-            if let (Some(addr1), Some(addr2)) =
-                (&w_network.contract_address, &d_network.contract_address)
-            {
-                if addr1.to_uppercase() == addr2.to_uppercase() {
-                    intersection.push(w_network.clone());
-                    break;
-                }
-            }
-            if w_network.full_name.to_uppercase() == d_network.full_name.to_uppercase() {
-                intersection.push(w_network.clone());
+            if mem::discriminant(w_network) == mem::discriminant(d_network) {
+                intersection.push(w_network.clone()); // ← клонируем w_network
                 break;
             }
         }
     }
-    if intersection.len() == 0 {
-        return None;
-    };
-    Some(intersection)
-}
 
+    if intersection.is_empty() {
+        None
+    } else {
+        Some(intersection)
+    }
+}
 pub async fn verify_arbitrage_conditions_and_get_networks(
     buy_exchange: &Exchange,
     sell_exchange: &Exchange,
@@ -83,7 +78,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         Ok(result) => result,
         Err(e) => {
             println!(
-                "[WARNING] {}/{} verification failed due to can't get borrow status from {}. ERROR: {}",
+                "{WARNING_CODE}[WARNING] {}/{} verification failed due to can't get borrow status from {}. ERROR: {}{RESET_CODE}",
                 trading_pair_name.base, trading_pair_name.quote, sell_exchange_name, e
             );
             // return Err(sell_exchange_name.to_string());
@@ -93,7 +88,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
 
     if !is_margin_available {
         println!(
-            "[DEBUG] {}/{} verify - failed. REASON: {} not borrowable",
+            "{DEBUG_CODE}[DEBUG] {}/{} verify - failed. REASON: {} not borrowable{RESET_CODE}",
             trading_pair_name.base, trading_pair_name.quote, sell_exchange_name
         );
         return Err(sell_exchange_name.to_string());
@@ -103,7 +98,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         Ok(networks) => networks,
         Err(e) => {
             println!(
-                "[WARNING] {}/{} verify returns empty networks. REASON: Can't get buy {} networks. ERROR: {}",
+                "{WARNING_CODE}[WARNING] {}/{} verify returns empty networks. REASON: Can't get buy {} networks. ERROR: {} {RESET_CODE}",
                 trading_pair_name.base, trading_pair_name.quote, buy_exchange_name, e
             );
             return Ok(Vec::new());
@@ -116,7 +111,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         Ok(networks) => networks,
         Err(e) => {
             println!(
-                "[WARNING] {}/{} verify returns empty networks. REASON: Can't get sell {} networks. ERROR: {}",
+                "{WARNING_CODE}[WARNING] {}/{} verify returns empty networks. REASON: Can't get sell {} networks. ERROR: {}{RESET_CODE}",
                 trading_pair_name.base, trading_pair_name.quote, sell_exchange_name, e
             );
             return Ok(Vec::new());
@@ -126,22 +121,16 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         return Err(sell_exchange_name.to_string());
     }
     let Some(networks) = find_intersection_from_networks(&buy_networks, &sell_networks) else {
-        // println!(
-        //     "No network intersection beetween {}:{:#?} and {}:{:#?} at {}/{}",
-        //     buy_exchange.config().name,
-        //     buy_networks,
-        //     sell_exchange.config().name,
-        //     sell_networks,
-        //     trading_pair_name.base,
-        //     trading_pair_name.quote,
-        // );
-        // println!(
-        //     "No network intersection beetween {} and {} at {}/{}",
-        //     buy_exchange.name(),
-        //     sell_exchange.name(),
-        //     trading_pair_name.base,
-        //     trading_pair_name.quote,
-        // );
+        println!(
+            "No network intersection beetween {}:{:#?} and {}:{:#?} at {}/{}",
+            buy_exchange.config().name,
+            buy_networks,
+            sell_exchange.config().name,
+            sell_networks,
+            trading_pair_name.base,
+            trading_pair_name.quote,
+        );
+
         return Ok(Vec::new());
     };
 

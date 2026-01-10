@@ -3,7 +3,10 @@ use futures_util::future::join_all;
 use crate::{
     config::{
         USDT_LIMIT,
-        parameters::{REQUIRED_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT},
+        parameters::{
+            ERROR_CODE, INFO_CODE, REQUIRED_ORDERBOOK_SPREAD_PERCENT,
+            REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE, SUCCESS_CODE,
+        },
     },
     core::{
         traits::{Workable, exchange_service::OrderBookService},
@@ -149,7 +152,7 @@ impl Workable for ComputWorker {
         let mut loop_count = 0;
         let loop_to_update_stat = 10;
         let mut stat_info = format!(
-            "┌── СomputWorker:{} Statistics for {} iteration\n",
+            "{INFO_CODE}┌── СomputWorker:{} Statistics for {} iteration\n",
             self.id, loop_to_update_stat
         );
         let mut loop_elapsed = 0;
@@ -216,13 +219,15 @@ impl Workable for ComputWorker {
 
             let orderbook_futures = verify_passed_pairs.into_iter().map(
                 |(pair, buy_exchange, sell_exchange, networks)| async move {
+                    tokio::time::sleep(std::time::Duration::from_millis(30)).await;
+
                     let (buy_book, sell_book) = tokio::join!(
                         async {
                             match buy_exchange.orderbook(&pair.base, &pair.quote).await {
                                 Ok(book) => Ok(book),
                                 Err(e) => {
                                     println!(
-                                        "Не удалось получить orderbook с {} - {}",
+                                        "{ERROR_CODE}[ERROR] Не удалось получить orderbook с {} - {}{RESET_CODE}",
                                         buy_exchange.config().name,
                                         e
                                     );
@@ -235,7 +240,7 @@ impl Workable for ComputWorker {
                                 Ok(book) => Ok(book),
                                 Err(e) => {
                                     println!(
-                                        "Не удалось получить orderbook с {} - {}",
+                                        "{ERROR_CODE}[ERROR] Не удалось получить orderbook с {} - {}{RESET_CODE}",
                                         sell_exchange.config().name,
                                         e
                                     );
@@ -327,7 +332,7 @@ impl Workable for ComputWorker {
                 final_spread_passed += 1;
 
                 println!(
-                    "✅ {}/{}. \nSpread {:.2}% \nBuy: {} Sell: {} \nNetworks: {:#?}",
+                    "{SUCCESS_CODE}[INFO] ✅ {}/{}. \nSpread {:.2}% \nBuy: {} Sell: {} \nNetworks: {:#?}{RESET_CODE}",
                     pair.base,
                     pair.quote,
                     final_spread,
@@ -370,7 +375,7 @@ impl Workable for ComputWorker {
                 stat_info += &format!("├──── Final spread stat\n");
                 stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_final);
                 stat_info += &format!("│        └─ Total passed: {}\n", final_spread_passed);
-                stat_info += &format!("└── Total elapsed: {}\n", formated_total_loop);
+                stat_info += &format!("└── Total elapsed: {}\n{RESET_CODE}", formated_total_loop);
 
                 println!("{}", stat_info);
 
@@ -390,7 +395,7 @@ impl Workable for ComputWorker {
                 final_spread_total_elapsed = 0;
                 loop_elapsed = 0;
                 stat_info = format!(
-                    "┌── СomputWorker:{} Statistics for {} iteration\n",
+                    "{INFO_CODE}┌── СomputWorker:{} Statistics for {} iteration\n",
                     self.id, loop_to_update_stat
                 );
             }

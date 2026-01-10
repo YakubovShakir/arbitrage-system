@@ -29,3 +29,10 @@ pub const MEXC_NETWORKS_HTTP_TIMEOUT_SECONDS: u64 = 10;
 // HUOBI REQUEST TIMEOUTS
 pub const HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS: u64 = 10;
 pub const HUOBI_MARGIN_INFO_HTTP_TIMEOUT_SECONDS: u64 = 10;
+
+pub const SUCCESS_CODE: &str = "\x1b[38;5;48m"; // #00ff87 - яркий мятный ✅
+pub const ERROR_CODE: &str = "\x1b[38;5;203m"; // #ff5f5f - яркий алый ❌  
+pub const WARNING_CODE: &str = "\x1b[38;5;221m"; // #ffd75f - тёплый жёлтый ⚠️
+pub const INFO_CODE: &str = "\x1b[38;5;45m"; // #00d7ff - аквамарин 💎
+pub const DEBUG_CODE: &str = "\x1b[38;5;247m"; // #9e9e9e - средний серый 🔍
+pub const RESET_CODE: &str = "\x1b[0m";

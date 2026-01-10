@@ -8,7 +8,8 @@ use tokio::sync::OnceCell;
 
 use crate::{
     config::parameters::{
-        GLOBAL_HTTP_TIMEOUT_SECS, HTTP_MAX_POOL_IDLE_PER_HOST, HTTP_RETRY_AFTER_MILLIS,
+        ERROR_CODE, GLOBAL_HTTP_TIMEOUT_SECS, HTTP_MAX_POOL_IDLE_PER_HOST, HTTP_RETRY_AFTER_MILLIS,
+        RESET_CODE,
     },
     core::types::KeyValue,
 };
@@ -101,7 +102,7 @@ impl HttpClient {
             Ok(resp) => resp,
             Err(e) => {
                 println!(
-                    "Error GET {}{}. Retry after {}ms..",
+                    "{ERROR_CODE}[ERROR] Failed GET {}{}. Retry after {}ms..{RESET_CODE}",
                     self._base_url, endpoint, HTTP_RETRY_AFTER_MILLIS
                 );
                 tokio::time::sleep(std::time::Duration::from_millis(HTTP_RETRY_AFTER_MILLIS)).await;
@@ -112,9 +113,15 @@ impl HttpClient {
                 match req_builder.send().await {
                     Ok(res) => res,
                     Err(e) => {
-                        println!("Error GET after retry {}{}", self._base_url, endpoint);
+                        println!(
+                            "{ERROR_CODE}[ERROR] Failed GET after retry {}{} {RESET_CODE}",
+                            self._base_url, endpoint
+                        );
                         if e.is_timeout() {
-                            eprintln!("Timeout error {}{} - {}", self._base_url, endpoint, e);
+                            eprintln!(
+                                "{ERROR_CODE}[ERROR] Timeout error {}{} - {}{RESET_CODE}",
+                                self._base_url, endpoint, e
+                            );
                         }
                         return Err(Box::new(e));
                     }

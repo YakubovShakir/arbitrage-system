@@ -2,10 +2,13 @@ use std::{collections::HashMap, os::macos::raw, sync::Arc, time::Instant};
 
 use futures_util::future::join_all;
 
-use crate::core::{
-    traits::{Workable, exchange_service::TickerService},
-    types::{Exchanges, PriceData, TickerPrice, Tickers, TradingPairs, blacklist::Blacklist},
-    utils::format_duration,
+use crate::{
+    config::parameters::{ERROR_CODE, INFO_CODE, RESET_CODE},
+    core::{
+        traits::{Workable, exchange_service::TickerService},
+        types::{Exchanges, PriceData, TickerPrice, Tickers, TradingPairs, blacklist::Blacklist},
+        utils::format_duration,
+    },
 };
 
 pub struct TickerWorker {
@@ -38,7 +41,7 @@ impl TickerWorker {
                     Ok(tickers) => Some(tickers),
                     Err(e) => {
                         println!(
-                            "Не удалось получить тикеры от биржи {}, ошибка - {}",
+                            "{ERROR_CODE}[ERROR] Не удалось получить тикеры от биржи {}, ошибка - {}{RESET_CODE}",
                             ex_name, e
                         );
                         None
@@ -134,7 +137,7 @@ impl Workable for TickerWorker {
         let mut loop_count = 0;
         let loop_to_update_stat = 10;
         let mut total_elapsed = 0;
-        let mut stat_info = format!("----TickerWorker:{} Statistics ----", self.id);
+        let mut stat_info = format!("{INFO_CODE}----TickerWorker:{} Statistics ----", self.id);
         loop {
             stat_info += &format!("\n       loop: {}", loop_count + 1);
             let start = Instant::now();
@@ -155,14 +158,14 @@ impl Workable for TickerWorker {
             total_elapsed += start.elapsed().as_nanos();
             if loop_count == loop_to_update_stat {
                 stat_info += &format!(
-                    "\n---- Total elapsed:{} ----",
+                    "\n---- Total elapsed:{} ----{RESET_CODE}",
                     format_duration(total_elapsed)
                 );
 
                 println!("{}", stat_info);
                 total_elapsed = 0;
                 loop_count = 0;
-                stat_info = format!("----TickerWorker:{} statistics ----", self.id);
+                stat_info = format!("{INFO_CODE}----TickerWorker:{} statistics ----", self.id);
             }
 
             tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
