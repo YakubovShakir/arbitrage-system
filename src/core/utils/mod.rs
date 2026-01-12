@@ -121,15 +121,15 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         return Err(sell_exchange_name.to_string());
     }
     let Some(networks) = find_intersection_from_networks(&buy_networks, &sell_networks) else {
-        println!(
-            "No network intersection beetween {}:{:#?} and {}:{:#?} at {}/{}",
-            buy_exchange.config().name,
-            buy_networks,
-            sell_exchange.config().name,
-            sell_networks,
-            trading_pair_name.base,
-            trading_pair_name.quote,
-        );
+        // println!(
+        //     "No network intersection beetween {}:{:#?} and {}:{:#?} at {}/{}",
+        //     buy_exchange.config().name,
+        //     buy_networks,
+        //     sell_exchange.config().name,
+        //     sell_networks,
+        //     trading_pair_name.base,
+        //     trading_pair_name.quote,
+        // );
 
         return Ok(Vec::new());
     };

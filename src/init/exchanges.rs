@@ -237,25 +237,25 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     });
     exchanges.insert(config::gate::NAME.to_owned(), gate);
 
-    // Huobi
-    let huobi = Exchange::Huobi(ExchangeConfig {
-        name: config::huobi::NAME.to_owned(),
-        api_key: config::huobi::API_KEY.to_owned(),
-        secret_key: config::huobi::SECRET_KEY.to_owned(),
-        http_client: HttpClient::new(config::huobi::BASE_URL)?,
-        websocket_client: None,
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
-    });
-    exchanges.insert(config::huobi::NAME.to_owned(), huobi);
+    // // Huobi
+    // let huobi = Exchange::Huobi(ExchangeConfig {
+    //     name: config::huobi::NAME.to_owned(),
+    //     api_key: config::huobi::API_KEY.to_owned(),
+    //     secret_key: config::huobi::SECRET_KEY.to_owned(),
+    //     http_client: HttpClient::new(config::huobi::BASE_URL)?,
+    //     websocket_client: None,
+    //     cached_data: CachedConfig {
+    //         networks: CacheData::new(
+    //             json::JsonValue::Null,
+    //             Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+    //         ),
+    //         margin_info: CacheData::new(
+    //             json::JsonValue::Null,
+    //             Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+    //         ),
+    //     },
+    // });
+    // exchanges.insert(config::huobi::NAME.to_owned(), huobi);
 
     Ok(exchanges)
 }

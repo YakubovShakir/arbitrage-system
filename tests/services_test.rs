@@ -18,20 +18,22 @@ async fn test_ticker_service() -> Result<(), Box<dyn std::error::Error>> {
         let mut tickers_count = 0;
 
         while attempt <= attempts {
-            if let Ok(tickers) = exchange.tickers().await {
-                assert!(tickers.len() > 0, "❗ Empty tickers from {}", exchange_name);
-                tickers_count = tickers.len();
-                break;
-            } else {
-                println!(
-                    "❗ {} attempt failed for {}. Retry after 2 secs.",
-                    attempt, exchange_name
-                );
-                attempt += 1;
-                tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+            match exchange.tickers().await {
+                Ok(tickers) => {
+                    assert!(tickers.len() > 0, "❗ Empty tickers from {}", exchange_name);
+                    tickers_count = tickers.len();
+                    break;
+                }
+                Err(e) => {
+                    println!(
+                        "❗ {} attempt failed for {} - {}. Retry after 2 secs.",
+                        attempt, exchange_name, e
+                    );
+                    attempt += 1;
+                    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+                }
             }
         }
-
         if attempt > attempts {
             panic!(
                 "❌ Cannot get tickers from {} for {} attempts",

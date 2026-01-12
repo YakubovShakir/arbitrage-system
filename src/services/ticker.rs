@@ -130,6 +130,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
         }
         Exchange::Huobi(cfg) => {
             let headers = &[("Content-Type", "application/json")];
+
             let res = cfg
                 .http_client
                 .get(

@@ -1,4 +1,4 @@
-pub const USDT_LIMIT: f64 = 1000.0;
+pub const USDT_LIMIT: f64 = 900.0;
 pub const PAIRS_PER_THREAD: usize = 15;
 pub const EXCHANGES_PER_TICKER_THREAD: usize = 4;
 pub const QUOTE_LIST: &[&'static str] = &["USDT", "USDC"];
@@ -27,7 +27,7 @@ pub const GATE_NETWORKS_HTTP_TIMEOUT_SECONDS: u64 = 10;
 pub const MEXC_NETWORKS_HTTP_TIMEOUT_SECONDS: u64 = 10;
 
 // HUOBI REQUEST TIMEOUTS
-pub const HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS: u64 = 10;
+pub const HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS: u64 = 30;
 pub const HUOBI_MARGIN_INFO_HTTP_TIMEOUT_SECONDS: u64 = 10;
 
 pub const SUCCESS_CODE: &str = "\x1b[38;5;48m"; // #00ff87 - яркий мятный ✅
