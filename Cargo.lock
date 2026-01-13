@@ -56,7 +56,6 @@ dependencies = [
  "hmac",
  "json",
  "md-5",
- "openssl",
  "prost",
  "prost-build",
  "rand 0.8.5",
