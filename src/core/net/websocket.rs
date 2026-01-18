@@ -123,7 +123,7 @@ impl WebSocketClient {
                     }
                 }
                 Err(e) => {
-                    eprintln!(
+                    println!(
                         "{ERROR_CODE}[ERROR] Ошибка подключения: {}. Повтор через 5 сек.{RESET_CODE}",
                         e
                     );

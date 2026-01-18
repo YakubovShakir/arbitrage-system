@@ -31,6 +31,159 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         for mapped in GRAVITY_MAPPING {
             m.insert(mapped, NetworkType::Gravity);
         }
+        // STABLE (новый - возможно Stablecoin network?)
+        const STABLE_MAPPING: [&str; 4] = [
+            "STABLE",
+            "STABLE NETWORK",
+            "STABLE CHAIN",
+            "STABLE PROTOCOL",
+        ];
+        for mapped in STABLE_MAPPING {
+            m.insert(mapped, NetworkType::Stable);
+        }
+
+        // WEMIX (новый)
+        const WEMIX_MAPPING: [&str; 4] =
+            ["WEMIX", "WEMIX NETWORK", "WEMIX CHAIN", "WEMIX BLOCKCHAIN"];
+        for mapped in WEMIX_MAPPING {
+            m.insert(mapped, NetworkType::Wemix);
+        }
+
+        // Filecoin (новый)
+        const FILECOIN_MAPPING: [&str; 5] =
+            ["FIL", "FILEVM", "FILE COIN", "FILECOIN", "FIL NETWORK"];
+        for mapped in FILECOIN_MAPPING {
+            m.insert(mapped, NetworkType::Filecoin);
+        }
+
+        // Waves (новый)
+        const WAVES_MAPPING: [&str; 4] = [
+            "WAVES",
+            "WAVES NETWORK",
+            "WAVES PROTOCOL",
+            "WAVES BLOCKCHAIN",
+        ];
+        for mapped in WAVES_MAPPING {
+            m.insert(mapped, NetworkType::Waves);
+        }
+
+        // Neutron (NTRN) (новый)
+        const NEUTRON_MAPPING: [&str; 4] =
+            ["NTRN", "NEUTRON", "NEUTRON NETWORK", "NEUTRON PROTOCOL"];
+        for mapped in NEUTRON_MAPPING {
+            m.insert(mapped, NetworkType::Neutron);
+        }
+
+        // Merlin (новый)
+        const MERLIN_MAPPING: [&str; 5] = [
+            "MERLIN",
+            "MERLIN NETWORK",
+            "MERLIN CHAIN",
+            "MERLIN LAYER",
+            "MERLIN PROTOCOL",
+        ];
+        for mapped in MERLIN_MAPPING {
+            m.insert(mapped, NetworkType::Merlin);
+        }
+
+        // Aurora (новый)
+        const AURORA_MAPPING: [&str; 5] = [
+            "AURORAEVM",
+            "AURORA",
+            "AURORA CHAIN",
+            "AURORA EVM",
+            "AURORA NETWORK",
+        ];
+        for mapped in AURORA_MAPPING {
+            m.insert(mapped, NetworkType::Aurora);
+        }
+
+        // NEM (XEM) (новый)
+        const NEM_MAPPING: [&str; 5] = [
+            "XEM",
+            "NEM",
+            "NEM NETWORK",
+            "NEM BLOCKCHAIN",
+            "NEW ECONOMY MOVEMENT",
+        ];
+        for mapped in NEM_MAPPING {
+            m.insert(mapped, NetworkType::Nem);
+        }
+
+        // SKALE (новый)
+        const SKALE_MAPPING: [&str; 4] =
+            ["SKALE", "SKALE NETWORK", "SKALE CHAIN", "SKALE PROTOCOL"];
+        for mapped in SKALE_MAPPING {
+            m.insert(mapped, NetworkType::Skale);
+        }
+
+        // Solar (SXP) (новый)
+        const SOLAR_MAPPING: [&str; 5] = [
+            "SXP",
+            "SOLAR",
+            "SOLAR NETWORK",
+            "SXP NETWORK",
+            "SOLAR BLOCKCHAIN",
+        ];
+        for mapped in SOLAR_MAPPING {
+            m.insert(mapped, NetworkType::Solar);
+        }
+
+        // Nillion (новый)
+        const NILLION_MAPPING: [&str; 4] = [
+            "NILLION",
+            "NILLION NETWORK",
+            "NILLION PROTOCOL",
+            "NILLION CHAIN",
+        ];
+        for mapped in NILLION_MAPPING {
+            m.insert(mapped, NetworkType::Nillion);
+        }
+
+        // Elastos (новый)
+        const ELASTOS_MAPPING: [&str; 5] = [
+            "ELASTOS",
+            "ELA",
+            "ELASTOS NETWORK",
+            "ELASTOS CHAIN",
+            "ELASTOS BLOCKCHAIN",
+        ];
+        for mapped in ELASTOS_MAPPING {
+            m.insert(mapped, NetworkType::Elastos);
+        }
+
+        // HyperEVM (новый)
+        const HYPEREVM_MAPPING: [&str; 4] =
+            ["HYPEREVM", "HYPER EVM", "HYPER NETWORK", "HYPER CHAIN"];
+        for mapped in HYPEREVM_MAPPING {
+            m.insert(mapped, NetworkType::HyperEVM);
+        }
+
+        // Manta Network (новый)
+        const MANTA_MAPPING: [&str; 6] = [
+            "MANTA",
+            "MANTA NETWORK",
+            "MANTA CHAIN",
+            "MANTA L2",
+            "MANTA PACIFIC",
+            "MANTA MAINNET", // Добавил новое название
+        ];
+        for mapped in MANTA_MAPPING {
+            m.insert(mapped, NetworkType::Manta);
+        }
+        const MANTLE_MAPPING: [&str; 7] = [
+            "MANTLE",
+            "MANTLE MAINNET",
+            "MANTLE NETWORK",
+            "MANTLE CHAIN",
+            "MANTLE L2",
+            "MANTLE PROTOCOL",
+            "MANTLE TOKEN", // Добавил новое название
+        ];
+        for mapped in MANTLE_MAPPING {
+            m.insert(mapped, NetworkType::Mantle);
+        }
+
         // OM Network
         const OM_MAPPING: [&str; 3] = ["OM", "OMNETWORK", "MANTRANETWORK"];
         for mapped in OM_MAPPING {
@@ -47,6 +200,171 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         const VERGE_MAPPING: [&str; 3] = ["XVG", "VERGE", "VERGECURRENCY"];
         for mapped in VERGE_MAPPING {
             m.insert(mapped, NetworkType::Verge);
+        }
+        // FOGO (новый)
+        const FOGO_MAPPING: [&str; 3] = ["FOGO", "FOGO NETWORK", "FOGO CHAIN"];
+        for mapped in FOGO_MAPPING {
+            m.insert(mapped, NetworkType::Fogo);
+        }
+
+        // Frax (новый)
+        const FRAX_MAPPING: [&str; 5] = [
+            "FRAX",
+            "FRAX NETWORK",
+            "FRAX PROTOCOL",
+            "FRAX FINANCE",
+            "FRAXTOKEN",
+        ];
+        for mapped in FRAX_MAPPING {
+            m.insert(mapped, NetworkType::Frax);
+        }
+
+        // Siacoin (новый)
+        const SIACOIN_MAPPING: [&str; 4] = ["SC", "SIACOIN", "SIA", "SIA NETWORK"];
+        for mapped in SIACOIN_MAPPING {
+            m.insert(mapped, NetworkType::Siacoin);
+        }
+
+        // VeChain (уже есть? если нет - новый)
+        const VECHAIN_MAPPING: [&str; 4] = ["VECHAIN", "VET", "VE CHAIN", "VE CHAIN THOR"];
+        for mapped in VECHAIN_MAPPING {
+            m.insert(mapped, NetworkType::VeChain);
+        }
+
+        // Theta (новый)
+        const THETA_MAPPING: [&str; 5] = [
+            "THETA",
+            "THETA TOKEN",
+            "THETA NETWORK",
+            "THETA BLOCKCHAIN",
+            "THETA PROTOCOL",
+        ];
+        for mapped in THETA_MAPPING {
+            m.insert(mapped, NetworkType::Theta);
+        }
+
+        // Fetch.ai (новый)
+        const FETCHAI_MAPPING: [&str; 5] =
+            ["FET", "FETCH.AI", "FETCH AI", "FETCH", "FETCH NETWORK"];
+        for mapped in FETCHAI_MAPPING {
+            m.insert(mapped, NetworkType::FetchAi);
+        }
+
+        // Arweave (новый)
+        const ARWEAVE_MAPPING: [&str; 4] = ["AR", "ARWEAVE", "AR WEAVE", "AR PERMAWEB"];
+        for mapped in ARWEAVE_MAPPING {
+            m.insert(mapped, NetworkType::Arweave);
+        }
+
+        // ROSE (Oasis Network) (новый)
+        const OASIS_MAPPING: [&str; 5] = [
+            "ROSE",
+            "OASIS",
+            "OASIS NETWORK",
+            "OASIS PROTOCOL",
+            "OASIS ROSE",
+        ];
+        for mapped in OASIS_MAPPING {
+            m.insert(mapped, NetworkType::Oasis);
+        }
+
+        // Cosmos (ATOM) (новый)
+        const COSMOS_MAPPING: [&str; 5] = [
+            "ATOM",
+            "COSMOS",
+            "COSMOS NETWORK",
+            "COSMOS HUB",
+            "COSMOS PROTOCOL",
+        ];
+        for mapped in COSMOS_MAPPING {
+            m.insert(mapped, NetworkType::Cosmos);
+        }
+
+        // Fraxtal (Frax L2) (новый)
+        const FRAXTAL_MAPPING: [&str; 4] = ["FRAXTAL", "FRAX L2", "FRAX CHAIN", "FRAXTAL L2"];
+        for mapped in FRAXTAL_MAPPING {
+            m.insert(mapped, NetworkType::Fraxtal);
+        }
+
+        // Ravencoin (новый)
+        const RAVENCOIN_MAPPING: [&str; 4] = ["RVN", "RAVENCOIN", "RAVEN COIN", "RAVEN"];
+        for mapped in RAVENCOIN_MAPPING {
+            m.insert(mapped, NetworkType::Ravencoin);
+        }
+
+        // Asset Hub Polkadot (Statemint) (новый)
+        const ASSET_HUB_POLKADOT_MAPPING: [&str; 6] = [
+            "STATEMINT",
+            "ASSET HUB",
+            "ASSET HUB POLKADOT",
+            "POLKADOT ASSET HUB",
+            "STATEMINT ASSET HUB",
+            "ASSET HUB DOT",
+        ];
+        for mapped in ASSET_HUB_POLKADOT_MAPPING {
+            m.insert(mapped, NetworkType::AssetHubPolkadot);
+        }
+
+        // Hedera (HBAR) (новый)
+        const HEDERA_MAPPING: [&str; 5] = [
+            "HBAR",
+            "HEDERA",
+            "HEDERA HASHGRAPH",
+            "HEDERA NETWORK",
+            "HEDERA TOKEN",
+        ];
+        for mapped in HEDERA_MAPPING {
+            m.insert(mapped, NetworkType::Hedera);
+        }
+
+        // Algorand (новый)
+        const ALGORAND_MAPPING: [&str; 4] =
+            ["ALGO", "ALGORAND", "ALGO NETWORK", "ALGORAND BLOCKCHAIN"];
+        for mapped in ALGORAND_MAPPING {
+            m.insert(mapped, NetworkType::Algorand);
+        }
+
+        // Conflux (CFX) (новый)
+        const CONFLUX_MAPPING: [&str; 6] = [
+            "CFX",
+            "CFXCORE",
+            "CFX ESPACE",
+            "CFX CORE",
+            "CONFLUX",
+            "CONFLUX NETWORK",
+        ];
+        for mapped in CONFLUX_MAPPING {
+            m.insert(mapped, NetworkType::Conflux);
+        }
+        // Nano (новый)
+        const NANO_MAPPING: [&str; 4] =
+            ["NANO", "NANO COIN", "NANO NETWORK", "NANO CRYPTOCURRENCY"];
+        for mapped in NANO_MAPPING {
+            m.insert(mapped, NetworkType::Nano);
+        }
+
+        // eCash (XEC) (новый)
+        const ECASH_MAPPING: [&str; 5] = ["XEC", "ECASH", "E CASH", "BITCOIN CASH ABC", "BCHA"];
+        for mapped in ECASH_MAPPING {
+            m.insert(mapped, NetworkType::ECash);
+        }
+
+        // Init (новый - возможно Initial?)
+        const INIT_MAPPING: [&str; 4] = ["INIT", "INITIAL", "INIT NETWORK", "INITIAL NETWORK"];
+        for mapped in INIT_MAPPING {
+            m.insert(mapped, NetworkType::Init);
+        }
+
+        // Stellar (XLM) (новый)
+        const STELLAR_MAPPING: [&str; 4] = ["XLM", "STELLAR", "STELLAR LUMENS", "STELLAR NETWORK"];
+        for mapped in STELLAR_MAPPING {
+            m.insert(mapped, NetworkType::Stellar);
+        }
+
+        // DigiByte (новый)
+        const DIGIBYTE_MAPPING: [&str; 4] = ["DGB", "DIGIBYTE", "DIGI BYTE", "DIGIBYTE NETWORK"];
+        for mapped in DIGIBYTE_MAPPING {
+            m.insert(mapped, NetworkType::DigiByte);
         }
 
         // Initia
@@ -79,8 +397,12 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Asset Hub Kusama
-        const ASSET_HUB_KUSAMA_MAPPING: [&str; 3] =
-            ["ASSET HUB KUSAMA", "KUSAMA ASSET HUB", "KUSAMA HUB"];
+        const ASSET_HUB_KUSAMA_MAPPING: [&str; 4] = [
+            "ASSET HUB KUSAMA",
+            "KUSAMA ASSET HUB",
+            "KUSAMA HUB",
+            "AssetHubKusama",
+        ];
         for mapped in ASSET_HUB_KUSAMA_MAPPING {
             m.insert(mapped, NetworkType::AssetHubKusama);
         }
@@ -105,7 +427,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // 0G Chain
-        const ZEROG_MAPPING: [&str; 1] = ["0G"];
+        const ZEROG_MAPPING: [&str; 2] = ["0G", "ZEROGRAVITY"];
         for mapped in ZEROG_MAPPING {
             m.insert(mapped, NetworkType::ZeroG);
         }
@@ -121,7 +443,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Bera
-        const BERA_MAPPING: [&str; 2] = ["BERA", "BERA CHAIN"];
+        const BERA_MAPPING: [&str; 2] = ["BERA", "BERACHAIN"];
         for mapped in BERA_MAPPING {
             m.insert(mapped, NetworkType::Bera);
         }
@@ -144,11 +466,43 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Bitcoin
-        const BITCOIN_MAPPING: [&str; 4] = ["BTC", "BITCOIN", "BTCBRC", "BRC20"];
+        const BITCOIN_MAPPING: [&str; 9] = [
+            "BTC",
+            "BITCOIN",
+            "BTCBRC",
+            "BRC20",
+            "ORDIBTC",
+            "ORDI BRC20",
+            "ORDI-BRC20",
+            "BRC20",
+            "BITCOIN BRC20",
+        ];
         for mapped in BITCOIN_MAPPING {
             m.insert(mapped, NetworkType::Bitcoin);
         }
+        // Klaytn (новый)
+        const KLAYTN_MAPPING: [&str; 5] = [
+            "KLAY",
+            "KLAYTN",
+            "KLAY NETWORK",
+            "KLAYTN NETWORK",
+            "KLAYTN CHAIN",
+        ];
+        for mapped in KLAYTN_MAPPING {
+            m.insert(mapped, NetworkType::Klaytn);
+        }
 
+        // Plasma (новый)
+        const PLASMA_MAPPING: [&str; 5] = [
+            "PLASMA",
+            "PLASMA NETWORK",
+            "PLASMA CHAIN",
+            "PLASMA PROTOCOL",
+            "PLASMA FINANCE",
+        ];
+        for mapped in PLASMA_MAPPING {
+            m.insert(mapped, NetworkType::Plasma);
+        }
         // Ethereum
         const ETHEREUM_MAPPING: [&str; 3] = ["ETHEREUM", "ETH", "ERC20"];
         for mapped in ETHEREUM_MAPPING {
@@ -177,6 +531,18 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         const STX_MAPPING: [&str; 2] = ["STX", "STACKS"];
         for mapped in STX_MAPPING {
             m.insert(mapped, NetworkType::Stacks);
+        }
+        // Starknet (уже существует)
+        const STARKNET_MAPPING: [&str; 6] = [
+            "STARKNET",
+            "STARK NET",
+            "STARKWARE",
+            "STARK NETWORK",
+            "STARK CHAIN",
+            "STARK", // Добавил новое название
+        ];
+        for mapped in STARKNET_MAPPING {
+            m.insert(mapped, NetworkType::Starknet);
         }
 
         // Mina
@@ -237,15 +603,33 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         for mapped in XRP_MAPPING {
             m.insert(mapped, NetworkType::Xrp);
         }
-
+        // Morph (новый)
+        const MORPH_MAPPING: [&str; 5] = [
+            "MORPH",
+            "MORPH NETWORK",
+            "MORPH CHAIN",
+            "MORPH L2",
+            "MORPH PROTOCOL",
+        ];
+        for mapped in MORPH_MAPPING {
+            m.insert(mapped, NetworkType::Morph);
+        }
         // Harmony
         const HARMONY_MAPPING: [&str; 2] = ["ONE", "HARMONY"];
         for mapped in HARMONY_MAPPING {
             m.insert(mapped, NetworkType::Harmony);
         }
         // zkSync Era
-        const ZKSYNC_MAPPING: [&str; 2] = ["ZKSYNCERA", "ZKSYNC"];
-        for mapped in ZKSYNC_MAPPING {
+        const ZKSYNC_ERA_MAPPING: [&str; 7] = [
+            "ZKV2",
+            "ZKSYNC ERA",
+            "ZKSYNC",
+            "ZK SYNC",
+            "ZKSYNC V2",
+            "ZK SYNC ERA",
+            "ZKSYNCERA", // Добавил вариант без пробела
+        ];
+        for mapped in ZKSYNC_ERA_MAPPING {
             m.insert(mapped, NetworkType::ZkSync);
         }
 
@@ -274,7 +658,17 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Avalanche C-Chain
-        const AVALANCHE_MAPPING: [&str; 4] = ["CAVAX", "AVAXC", "AVAX", "AVALANCHE"];
+        const AVALANCHE_MAPPING: [&str; 9] = [
+            "CAVAX",
+            "AVAXC",
+            "AVAX",
+            "AVALANCHE",
+            "AVAX C-CHAIN",
+            "AVAX_C",
+            "AVAX C CHAIN",
+            "AVALANCHE C-CHAIN",
+            "AVALANCHE C CHAIN",
+        ];
         for mapped in AVALANCHE_MAPPING {
             m.insert(mapped, NetworkType::Avalanche);
         }
@@ -315,9 +709,30 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             m.insert(mapped, NetworkType::Bob);
         }
         // Arbitrum
-        const ARBITRUM_MAPPING: [&str; 5] = ["ARBITRUM", "ARBITRUM ONE", "ARB", "ARB EVM", "ARBI"];
+        const ARBITRUM_MAPPING: [&str; 7] = [
+            "ARBITRUMONE",
+            "ARBITRUM ONE",
+            "ARBITRUM",
+            "ARBITRUM L2",
+            "ARBITRUM MAINNET",
+            "ARBITRUM1", // Добавил новое название
+            "ARB",
+        ];
         for mapped in ARBITRUM_MAPPING {
             m.insert(mapped, NetworkType::Arbitrum);
+        }
+
+        // Arbitrum Nova (новый)
+        const ARBITRUM_NOVA_MAPPING: [&str; 6] = [
+            "ARBINOVA",
+            "ARBITRUM NOVA",
+            "ARBITRUM NOVA L2",
+            "NOVA",
+            "ARBITRUM NOVA NETWORK",
+            "ARBITRUMNOVA", // Добавил вариант без пробела
+        ];
+        for mapped in ARBITRUM_NOVA_MAPPING {
+            m.insert(mapped, NetworkType::ArbitrumNova);
         }
 
         // World Chain
@@ -349,7 +764,62 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         for mapped in METIS_MAPPING {
             m.insert(mapped, NetworkType::Metis);
         }
+        // NEAR Protocol (уже есть)
+        const NEAR_MAPPING: [&str; 7] = [
+            "NEAR",
+            "NEAR PROTOCOL",
+            "NEAR CHAIN",
+            "NEAR NETWORK",
+            "NEAR BLOCKCHAIN", // Добавил новое название
+            "NEAR TOKEN",      // Добавил новое название
+            "NEARProtocol",
+        ];
+        for mapped in NEAR_MAPPING {
+            m.insert(mapped, NetworkType::Near);
+        }
+        // SEI
+        const SEI_MAPPING: [&str; 5] =
+            ["SEI", "SEIEVM", "SEI NETWORK", "SEI CHAIN", "SEI PROTOCOL"];
+        for mapped in SEI_MAPPING {
+            m.insert(mapped, NetworkType::Sei);
+        }
+        // Litecoin (дополнение)
+        const LITECOIN_MAPPING: [&str; 4] = ["LTC", "LITECOIN", "LITE COIN", "LITE"];
+        for mapped in LITECOIN_MAPPING {
+            m.insert(mapped, NetworkType::Litecoin);
+        }
 
+        const LIGHTNING_MAPPING: [&str; 5] = [
+            "BTCLN",
+            "LIGHTNING",
+            "LIGHTNING NETWORK",
+            "BITCOIN LIGHTNING",
+            "LN NETWORK",
+        ];
+        for mapped in LIGHTNING_MAPPING {
+            m.insert(mapped, NetworkType::Lightning);
+        }
+        // Bitcoin SegWit (дополнение к Bitcoin)
+        const BITCOIN_SEGWIT_MAPPING: [&str; 5] = [
+            "SEGWITBTC",
+            "BTC SEGWIT",
+            "BITCOIN SEGWIT",
+            "SEGWIT",
+            "BTC (SEGWIT)",
+        ];
+        for mapped in BITCOIN_SEGWIT_MAPPING {
+            m.insert(mapped, NetworkType::Bitcoin);
+        }
+        const KCC_MAPPING: [&str; 5] = [
+            "KCC",
+            "KCS",
+            "KUCOIN COMMUNITY CHAIN",
+            "KUCOIN CHAIN",
+            "KCC NETWORK",
+        ];
+        for mapped in KCC_MAPPING {
+            m.insert(mapped, NetworkType::Kcc);
+        }
         // Linea
         const LINEA_MAPPING: [&str; 3] = ["LINEA", "LINEA NETWORK", "CONSENSYS LINEA"];
         for mapped in LINEA_MAPPING {
@@ -366,7 +836,49 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         for mapped in IOTA_MAPPING {
             m.insert(mapped, NetworkType::Iota);
         }
+        // Syscoin (новый)
+        const SYSCOIN_MAPPING: [&str; 4] = ["SYS", "SYSCOIN", "SYS COIN", "SYS NETWORK"];
+        for mapped in SYSCOIN_MAPPING {
+            m.insert(mapped, NetworkType::Syscoin);
+        }
 
+        // Kava (новый)
+        const KAVA_MAPPING: [&str; 5] =
+            ["KAVA", "KAVAEVM", "KAVA EVM", "KAVA NETWORK", "KAVA CHAIN"];
+        for mapped in KAVA_MAPPING {
+            m.insert(mapped, NetworkType::Kava);
+        }
+
+        // IoTeX (новый)
+        const IOTEX_MAPPING: [&str; 4] = ["IOTX", "IOTEX", "IOT EX", "INTERNET OF THINGS EX"];
+        for mapped in IOTEX_MAPPING {
+            m.insert(mapped, NetworkType::IoTeX);
+        }
+
+        // Internet Computer (новый)
+        const INTERNET_COMPUTER_MAPPING: [&str; 6] = [
+            "ICP",
+            "INTERNET COMPUTER",
+            "ICP NETWORK",
+            "INTERNET COMPUTER PROTOCOL",
+            "DFINITY",
+            "DFINITY ICP",
+        ];
+        for mapped in INTERNET_COMPUTER_MAPPING {
+            m.insert(mapped, NetworkType::InternetComputer);
+        }
+
+        // Acala (новый)
+        const ACALA_MAPPING: [&str; 4] = ["ACA", "ACALA", "ACALA NETWORK", "ACALA PROTOCOL"];
+        for mapped in ACALA_MAPPING {
+            m.insert(mapped, NetworkType::Acala);
+        }
+
+        // FitFi (Step App) (новый)
+        const FITFI_MAPPING: [&str; 4] = ["FITFI", "STEP APP", "FITFI NETWORK", "STEP NETWORK"];
+        for mapped in FITFI_MAPPING {
+            m.insert(mapped, NetworkType::FitFi);
+        }
         // IOST
         const IOST_MAPPING: [&str; 3] = ["IOST", "IOST NETWORK", "INTERNET OF SERVICES"];
         for mapped in IOST_MAPPING {
@@ -395,7 +907,16 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         for mapped in CHILIZ_MAPPING {
             m.insert(mapped, NetworkType::Chiliz);
         }
-
+        const DOGECOIN_MAPPING: [&str; 5] = [
+            "DOGE",
+            "DOGECOIN",
+            "DOGE COIN",
+            "DOGE CHAIN",
+            "DOGECOIN NETWORK", // Добавил новое название
+        ];
+        for mapped in DOGECOIN_MAPPING {
+            m.insert(mapped, NetworkType::Dogecoin);
+        }
         // Bifrost
         const BIFROST_MAPPING: [&str; 3] = ["BNCDOT", "BNC", "BIFROST"];
         for mapped in BIFROST_MAPPING {

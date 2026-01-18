@@ -1,4 +1,4 @@
-use crate::core::types::{Network, OrderBook, Tickers, TradingPair, TradingPairs};
+use crate::core::types::{Network, OrderBook, Tickers, TradingPair};
 use async_trait::async_trait;
 
 #[async_trait]

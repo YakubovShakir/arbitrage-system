@@ -2,10 +2,8 @@ use futures_util::future::join_all;
 
 use crate::{
     config::{
-        USDT_LIMIT,
         parameters::{
-            ERROR_CODE, INFO_CODE, REQUIRED_ORDERBOOK_SPREAD_PERCENT,
-            REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE, SUCCESS_CODE,
+            ERROR_CODE, INFO_CODE, REQUESTS_CHUNK_SIZE, REQUIRED_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE, SUCCESS_CODE
         },
     },
     core::{
@@ -15,12 +13,11 @@ use crate::{
             blacklist::Blacklist, exchanges::Exchange,
         },
         utils::{
-            calculate_price_by_glass, comput_spread_percent, format_duration,
-            verify_arbitrage_conditions_and_get_networks,
+            calculate_price_by_glass, comput_spread_percent, format_duration, verify_arbitrage_conditions_and_get_networks
         },
     },
 };
-use std::{sync::Arc, time::Instant};
+use std::{ sync::Arc, time::Instant};
 
 pub struct ComputWorker {
     id: usize,
@@ -217,10 +214,9 @@ impl Workable for ComputWorker {
                     .collect();
             verify_passed += verify_passed_pairs.len();
 
-            let orderbook_futures = verify_passed_pairs.into_iter().map(
+            let mut orderbook_futures: Vec<_>  = verify_passed_pairs.into_iter().map(
                 |(pair, buy_exchange, sell_exchange, networks)| async move {
-                    tokio::time::sleep(std::time::Duration::from_millis(30)).await;
-
+                    
                     let (buy_book, sell_book) = tokio::join!(
                         async {
                             match buy_exchange.orderbook(&pair.base, &pair.quote).await {
@@ -258,16 +254,28 @@ impl Workable for ComputWorker {
                         sell_book,
                     )
                 },
-            );
+            ).collect();
+
+
             let books_time = Instant::now();
-            let orderbook_results: Vec<(
+  
+            let mut orderbook_results: Vec<(
                 TradingPair,
                 &Exchange,
                 &Exchange,
                 Vec<Network>,
                 Result<OrderBook, ()>,
                 Result<OrderBook, ()>,
-            )> = join_all(orderbook_futures).await;
+            )> = Vec::new();
+
+            // Выполняем чанками, забирая владение фьючеров
+            while !orderbook_futures.is_empty() {
+                let chunk_size = std::cmp::min(REQUESTS_CHUNK_SIZE, orderbook_futures.len());
+                let chunk: Vec<_> = orderbook_futures.drain(0..chunk_size).collect();
+                let chunk_results = join_all(chunk).await;
+                orderbook_results.extend(chunk_results);
+            }
+
             orderbook_total_elapsed += books_time.elapsed().as_nanos();
 
             let orderbook_passed_pairs: Vec<(
@@ -306,11 +314,15 @@ impl Workable for ComputWorker {
 
             for (pair, buy_exchange, sell_exchange, networks, buy_orderbook, sell_orderbook) in
                 orderbook_passed_pairs
-            {
+            {   
+                let Some(quote_volume) = pair.get_volume_by_quote() else {
+                    println!("{ERROR_CODE}[ERROR] Не удалось получить объем квота {:?}{RESET_CODE}", pair);  
+                    continue;
+                };
                 let calc_books_time = Instant::now();
                 let (calculated_asks, calculated_bids) = (
-                    calculate_price_by_glass(&USDT_LIMIT, &buy_orderbook.0),
-                    calculate_price_by_glass(&USDT_LIMIT, &sell_orderbook.1),
+                    calculate_price_by_glass(&quote_volume, &buy_orderbook.0),
+                    calculate_price_by_glass(&quote_volume, &sell_orderbook.1),
                 );
 
                 calc_books_total_elapsed += calc_books_time.elapsed().as_nanos();

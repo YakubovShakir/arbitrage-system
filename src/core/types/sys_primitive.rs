@@ -1,8 +1,7 @@
-use dashmap::{DashMap, DashSet};
+use dashmap::DashMap;
 use hmac::Hmac;
 use sha2::{Sha256, Sha512};
 use std::collections::HashMap;
-use tokio::sync::RwLock;
 
 use super::{PriceData, TradingPair};
 use crate::core::types::exchanges::Exchange;

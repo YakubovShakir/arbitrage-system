@@ -1,11 +1,21 @@
 pub const USDT_LIMIT: f64 = 900.0;
 pub const PAIRS_PER_THREAD: usize = 15;
 pub const EXCHANGES_PER_TICKER_THREAD: usize = 4;
-pub const QUOTE_LIST: &[&'static str] = &["USDT", "USDC"];
+pub const QUOTE_LIST: &[(&str, f64)] = &[
+    ("USDT", 900.0),
+    ("USDC", 900.0),
+    ("DAI", 900.0),
+    ("TUSD", 900.0),
+    ("BTC", 0.01048461),
+    ("ETH", 0.30057401),
+];
+
 pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.2;
 pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.3;
 pub const NETWORKS_CACHE_TTL_SECS: u64 = 600;
 pub const MARGIN_INFO_CACHE_TTL_SECS: u64 = 600;
+
+pub const REQUESTS_CHUNK_SIZE: usize = 5;
 
 pub const HTTP_MAX_POOL_IDLE_PER_HOST: usize = 20;
 pub const HTTP_RETRY_AFTER_MILLIS: u64 = 300;

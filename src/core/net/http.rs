@@ -1,6 +1,6 @@
 use json::JsonValue;
 use reqwest::{
-    Client, RequestBuilder, Response, StatusCode,
+    Client, RequestBuilder, StatusCode,
     header::{HeaderMap, HeaderName, HeaderValue},
 };
 use std::{error::Error, str::FromStr, sync::Arc, time::Duration};
@@ -100,7 +100,7 @@ impl HttpClient {
         // Отправляем запрос с полной обработкой ошибок
         let response = match req_builder.send().await {
             Ok(resp) => resp,
-            Err(e) => {
+            Err(_) => {
                 println!(
                     "{ERROR_CODE}[ERROR] Failed GET {}{}. Retry after {}ms..{RESET_CODE}",
                     self._base_url, endpoint, HTTP_RETRY_AFTER_MILLIS

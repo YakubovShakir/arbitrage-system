@@ -13,9 +13,18 @@ impl TradingPair {
             quote: quote.to_string().to_uppercase(),
         }
     }
+    pub fn get_volume_by_quote(&self) -> Option<f64> {
+        for &(symbol, volume) in QUOTE_LIST {
+            if symbol == self.quote {
+                return Some(volume);
+            }
+        }
+        None
+    }
     pub fn from_str(symbol: &str) -> Option<Self> {
         let upper_symbol = symbol.to_uppercase();
         for quote in QUOTE_LIST {
+            let quote = quote.0;
             if upper_symbol.ends_with(quote) {
                 let base = &upper_symbol[..symbol.len() - quote.len()];
                 if !base.is_empty() {
@@ -32,6 +41,8 @@ impl TradingPair {
                 return None;
             }
             for q in QUOTE_LIST {
+                let q = q.0;
+
                 if quote.to_uppercase() == *q {
                     return Some(Self::new(base, quote));
                 }

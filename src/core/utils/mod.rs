@@ -1,5 +1,6 @@
 use base64::{Engine, engine::general_purpose};
 use chrono::{DateTime, Utc};
+use futures_util::{StreamExt, stream::iter};
 use ring::{
     digest,
     rand::SystemRandom,
@@ -14,9 +15,6 @@ use std::{
 use data_encoding::BASE64;
 use hmac::Mac;
 use json::JsonValue;
-// use openssl::hash::MessageDigest;
-// use openssl::pkey::PKey;
-// use openssl::sign::Signer;
 use sha2::{Digest, Sha256};
 
 use crate::{
@@ -28,6 +26,42 @@ use crate::{
         },
     },
 };
+pub async fn execute_in_chunks_simple<I, F, T>(futures_iter: I, max_concurrent: usize) -> Vec<T>
+where
+    I: IntoIterator<Item = F>,
+    F: std::future::Future<Output = T>,
+{
+    // Просто используем buffered напрямую
+    iter(futures_iter)
+        .buffered(max_concurrent)
+        .collect::<Vec<_>>()
+        .await
+}
+
+// pub async fn execute_in_chunks_ref<'a, I, F, T>(futures_iter: I, max_concurrent: usize) -> Vec<T>
+// where
+//     I: IntoIterator<Item = F>,
+//     F: std::future::Future<Output = T> + Send + 'a,
+//     T: Send + 'a,
+// {
+//     // Явно указываем времена жизни
+//     iter(futures_iter)
+//         .buffered(max_concurrent)
+//         .collect::<Vec<_>>()
+//         .await
+// }
+// pub async fn execute_in_chunks<I, F, T>(futures_iter: I, max_concurrent: usize) -> Vec<T>
+// where
+//     I: IntoIterator<Item = F>,
+//     F: std::future::Future<Output = T> + Send + 'static,
+//     T: Send + 'static,
+// {
+//     // buffered ОГРАНИЧИВАЕТ количество одновременно выполняемых фьючеров
+//     iter(futures_iter)
+//         .buffered(max_concurrent) // ← КЛЮЧЕВОЕ ОТЛИЧИЕ!
+//         .collect::<Vec<_>>()
+//         .await
+// }
 
 pub fn find_value_from_json_key(
     json: &JsonValue,
