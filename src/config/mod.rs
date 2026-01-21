@@ -6,4 +6,3 @@ pub use exchanges::{binance, bitget, bybit, gate, huobi, kucoin, lbank, mexc};
 pub use network::*;
 pub use parameters::PAIRS_PER_THREAD;
 pub use parameters::QUOTE_LIST;
-pub use parameters::USDT_LIMIT;

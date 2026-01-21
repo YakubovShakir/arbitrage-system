@@ -131,12 +131,14 @@ impl HttpClient {
         let response_status = response.status();
 
         // Читаем ответ
-        let text = match response.text().await {
-            Ok(text) => text,
-            Err(e) => {
-                return Err(Box::new(e));
-            }
+        let text = if self._base_url.contains("huobi.pro") {
+            // Для HTX читаем ответ побайтово
+            self.read_chunked_response(response).await?
+        } else {
+            // Для других бирж - обычный способ
+            response.text().await?
         };
+
         HttpClient::is_success(response_status, &text).await?;
         // Парсим JSON
         match json::parse(&text) {
@@ -144,7 +146,37 @@ impl HttpClient {
             Err(e) => Err(Box::new(e)),
         }
     }
+    async fn read_chunked_response(
+        &self,
+        response: reqwest::Response,
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        use flate2::read::GzDecoder;
+        use std::io::Read;
 
+        // 1. Собираем все байты
+        let bytes = response.bytes().await?;
+
+        // 2. Проверяем, сжат ли ответ
+        let text = if bytes.len() > 2 && bytes[0] == 0x1f && bytes[1] == 0x8b {
+            // GZIP compressed
+            let mut decoder = GzDecoder::new(&bytes[..]);
+            let mut decompressed = String::new();
+            decoder.read_to_string(&mut decompressed)?;
+            decompressed
+        } else {
+            // Not compressed
+            String::from_utf8_lossy(&bytes).to_string()
+        };
+
+        // 3. Проверяем целостность JSON
+        if !text.trim().ends_with("}]}") && text.contains("\"status\":\"ok\"") {
+            // Ответ обрезан - логируем для отладки
+            eprintln!("⚠️ HTX response may be truncated: {} chars", text.len());
+            // Но продолжаем обработку - возможно, JSON валиден
+        }
+
+        Ok(text)
+    }
     pub async fn post(
         &self,
         endpoint: &str,

@@ -1,16 +1,15 @@
-pub const USDT_LIMIT: f64 = 900.0;
 pub const PAIRS_PER_THREAD: usize = 15;
 pub const EXCHANGES_PER_TICKER_THREAD: usize = 4;
 pub const QUOTE_LIST: &[(&str, f64)] = &[
-    ("USDT", 900.0),
-    ("USDC", 900.0),
-    ("DAI", 900.0),
-    ("TUSD", 900.0),
-    ("BTC", 0.01048461),
-    ("ETH", 0.30057401),
+    ("USDT", 1800.0),
+    ("USDC", 1800.0),
+    ("DAI", 1800.0),
+    ("TUSD", 1800.0),
+    ("BTC", 0.02),
+    ("ETH", 0.6),
 ];
 
-pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.2;
+pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.20;
 pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.3;
 pub const NETWORKS_CACHE_TTL_SECS: u64 = 600;
 pub const MARGIN_INFO_CACHE_TTL_SECS: u64 = 600;

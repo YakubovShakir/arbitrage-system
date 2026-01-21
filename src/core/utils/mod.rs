@@ -1,5 +1,6 @@
 use base64::{Engine, engine::general_purpose};
 use chrono::{DateTime, Utc};
+use flate2::read::GzDecoder;
 use futures_util::{StreamExt, stream::iter};
 use ring::{
     digest,
@@ -7,6 +8,7 @@ use ring::{
     signature::{RSA_PKCS1_SHA256, RsaKeyPair},
 };
 use std::{
+    io::Read,
     mem,
     sync::Arc,
     time::{SystemTime, UNIX_EPOCH},
@@ -114,25 +116,25 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
 ) -> Result<Vec<Network>, ExchangeName> {
     let buy_exchange_name = &buy_exchange.config().name;
     let sell_exchange_name = &sell_exchange.config().name;
-    let is_margin_available = match sell_exchange.borrowable(&trading_pair_name).await {
-        Ok(result) => result,
-        Err(e) => {
-            println!(
-                "{WARNING_CODE}[WARNING] {}/{} verification failed due to can't get borrow status from {}. ERROR: {}{RESET_CODE}",
-                trading_pair_name.base, trading_pair_name.quote, sell_exchange_name, e
-            );
-            // return Err(sell_exchange_name.to_string());
-            return Ok(Vec::new());
-        }
-    };
+    // let is_margin_available = match sell_exchange.borrowable(&trading_pair_name).await {
+    //     Ok(result) => result,
+    //     Err(e) => {
+    //         println!(
+    //             "{WARNING_CODE}[WARNING] {}/{} verification failed due to can't get borrow status from {}. ERROR: {}{RESET_CODE}",
+    //             trading_pair_name.base, trading_pair_name.quote, sell_exchange_name, e
+    //         );
+    //         // return Err(sell_exchange_name.to_string());
+    //         return Ok(Vec::new());
+    //     }
+    // };
 
-    if !is_margin_available {
-        println!(
-            "{DEBUG_CODE}[DEBUG] {}/{} verify - failed. REASON: {} not borrowable{RESET_CODE}",
-            trading_pair_name.base, trading_pair_name.quote, sell_exchange_name
-        );
-        return Err(sell_exchange_name.to_string());
-    }
+    // if !is_margin_available {
+    //     println!(
+    //         "{DEBUG_CODE}[DEBUG] {}/{} verify - failed. REASON: {} not borrowable{RESET_CODE}",
+    //         trading_pair_name.base, trading_pair_name.quote, sell_exchange_name
+    //     );
+    //     return Err(sell_exchange_name.to_string());
+    // }
 
     let buy_networks = match buy_exchange.networks(&trading_pair_name.base).await {
         Ok(networks) => networks,
@@ -145,6 +147,10 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         }
     };
     if buy_networks.len() == 0 {
+        println!(
+            "{DEBUG_CODE}[DEBUG] {}/{} verify - failed. REASON: Empty buy networks {} {RESET_CODE}",
+            trading_pair_name.base, trading_pair_name.quote, buy_exchange_name
+        );
         return Err(buy_exchange_name.to_string());
     }
     let sell_networks = match sell_exchange.networks(&trading_pair_name.base).await {
@@ -158,6 +164,10 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         }
     };
     if sell_networks.len() == 0 {
+        println!(
+            "{DEBUG_CODE}[DEBUG] {}/{} verify - failed. REASON: Empty sell networks {} {RESET_CODE}",
+            trading_pair_name.base, trading_pair_name.quote, sell_exchange_name
+        );
         return Err(sell_exchange_name.to_string());
     }
     let Some(networks) = find_intersection_from_networks(&buy_networks, &sell_networks) else {
@@ -345,4 +355,11 @@ pub fn format_duration(nanos: u128) -> String {
         // наносекунды
         format!("{} ns", nanos)
     }
+}
+
+pub fn decompress_gzip(data: &[u8]) -> Result<String, Box<dyn std::error::Error>> {
+    let mut decoder = GzDecoder::new(data);
+    let mut decompressed = String::new();
+    decoder.read_to_string(&mut decompressed)?;
+    Ok(decompressed)
 }

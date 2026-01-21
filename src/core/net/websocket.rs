@@ -10,6 +10,7 @@ use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 
 use crate::config::parameters::{ERROR_CODE, INFO_CODE, RESET_CODE, SUCCESS_CODE};
+use crate::core::utils::decompress_gzip;
 
 pub type BinaryMessageHandler = Arc<dyn Fn(prost::bytes::Bytes) -> Option<String> + Send + Sync>;
 pub type PingPongHandler = Arc<dyn Fn(&str) -> Option<String> + Send + Sync>;
@@ -221,7 +222,6 @@ impl WebSocketClient {
                     Ok(Message::Text(text)) => {
                         // Проверяем, не является ли это ping-сообщением
                         let mut is_ping_pong = false;
-
                         if let Some(handler) = &ping_pong_handler {
                             if let Some(response) = handler(&text) {
                                 // Отправляем ответный pong
@@ -273,7 +273,6 @@ impl WebSocketClient {
                         break;
                     }
                     Ok(Message::Binary(data)) => {
-                        // Используем обработчик если он есть
                         if let Some(handler) = &binary_handler {
                             if let Some(processed_data) = handler(data) {
                                 let mut state_guard = state.write().await;

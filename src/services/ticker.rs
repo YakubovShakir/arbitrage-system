@@ -194,12 +194,16 @@ async fn handle_ws_interface(
     let _ = establish_ws_connection_and_sub(client, exchange).await?;
 
     tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
+
     if is_streamed_state {
         if let Some(streamed_state) = client.get_streamed_state().await {
             return Ok(read_streamed_ws_state(&streamed_state, &exchange)?);
         }
     } else {
         if let Some(state) = client.get_state().await {
+            if exchange.config().name == "Huobi" {
+                println!("State: {}", state);
+            }
             return Ok(read_ws_state(&state, &exchange)?);
         }
     };
@@ -295,6 +299,9 @@ fn read_ws_state(
                 }
             }
         }
+        Exchange::Huobi(cfg) => {
+            println!("STATE from huobi {}", state);
+        }
         _ => {
             return Err(format!(
                 "WebSocket interface is not available for {} or STRING reader not implemented yet",
@@ -351,7 +358,17 @@ async fn establish_ws_connection_and_sub(
                     .await;
             });
         }
-
+        Exchange::Huobi(_) => {
+            tokio::spawn(async move {
+                client_clone
+                    .run_with_reconnect(Some(
+                        r#"{
+                            "sub": "market.tickers"
+                        }"#,
+                    ))
+                    .await;
+            });
+        }
         _ => {
             return Err(format!(
                 "WebSocket interface is not available for {}",

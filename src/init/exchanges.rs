@@ -14,7 +14,7 @@ use crate::core::net::websocket::{BinaryMessageHandler, ConnectionHandler, WebSo
 use crate::core::types::Exchanges;
 use crate::core::types::api::CacheData;
 use crate::core::types::exchanges::{CachedConfig, Exchange, ExchangeConfig};
-use crate::core::utils::find_value_from_json_key;
+use crate::core::utils::{decompress_gzip, find_value_from_json_key};
 
 pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     let mut exchanges: Exchanges = HashMap::new();
@@ -237,24 +237,68 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     });
     exchanges.insert(config::gate::NAME.to_owned(), gate);
 
-    // // Huobi
-    // let huobi = Exchange::Huobi(ExchangeConfig {
-    //     name: config::huobi::NAME.to_owned(),
-    //     api_key: config::huobi::API_KEY.to_owned(),
-    //     secret_key: config::huobi::SECRET_KEY.to_owned(),
-    //     http_client: HttpClient::new(config::huobi::BASE_URL)?,
-    //     websocket_client: None,
-    //     cached_data: CachedConfig {
-    //         networks: CacheData::new(
-    //             json::JsonValue::Null,
-    //             Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-    //         ),
-    //         margin_info: CacheData::new(
-    //             json::JsonValue::Null,
-    //             Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-    //         ),
-    //     },
-    // });
+    // Huobi
+    let huobi_binary_handler: BinaryMessageHandler = Arc::new(|data: prost::bytes::Bytes| {
+        let mut message = String::new();
+        println!("Binary {:#?}", data);
+        let Ok(decompressed) = decompress_gzip(&data.clone()) else {
+            return None;
+        };
+        let Ok(parsed) = json::parse(&decompressed) else {
+            return None;
+        };
+        // if parsed.has_key("subbed") {
+        //     if parsed["subbed"] == "market.tickers" {
+        //         return None;
+        //     }
+        // }
+
+        println!("Decompressed data from huobi - {}", parsed.pretty(4));
+
+        Some(message)
+        // match crate::config::mexc_protocol_buffers::decode_message(&data) {
+        //     Ok(message) => {
+        //         let tickers =
+        //             crate::config::mexc_protocol_buffers::handle_protobuf_message(message);
+
+        //         // Преобразуем тикеры в строку для состояния
+        //         if !tickers.is_empty() {
+        //             let ticker_strings: Vec<String> = tickers
+        //                 .iter()
+        //                 .map(|t| format!("{}:{}", t.symbol, t.price))
+        //                 .collect();
+        //             Some(ticker_strings.join("|"))
+        //         } else {
+        //             None
+        //         }
+        //     }
+        //     Err(e) => {
+        //         eprintln!("Ошибка декодирования protobuf MEXC: {}", e);
+        //         None
+        //     }
+        // }
+    });
+    let huobi = Exchange::Huobi(ExchangeConfig {
+        name: config::huobi::NAME.to_owned(),
+        api_key: config::huobi::API_KEY.to_owned(),
+        secret_key: config::huobi::SECRET_KEY.to_owned(),
+        http_client: HttpClient::new(config::huobi::BASE_URL)?,
+        // websocket_client: Some(
+        //     WebSocketClient::new(config::huobi::WEBSOCKET_URL)
+        //         .with_binary_handler(huobi_binary_handler),
+        // ),
+        websocket_client: None,
+        cached_data: CachedConfig {
+            networks: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+            ),
+            margin_info: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+            ),
+        },
+    });
     // exchanges.insert(config::huobi::NAME.to_owned(), huobi);
 
     Ok(exchanges)
