@@ -432,54 +432,57 @@ impl NetworkService for Exchange {
                 }
             }
             Exchange::Huobi(cfg) => {
-                let cur = coin.to_lowercase();
                 let headers = &[("Content-Type", "application/json")];
 
-                // let data = match cache_data {
-                //     Some(cached) => cached,
-                //     None => {
-                //         let response = cfg
-                //             .http_client
-                //             .get(endpoint, Some(query), Some(headers), None)
-                //             .await?;
-                //         cfg.cached_data.networks.set(response.clone()).await;
-                //         response
-                //     }
-                // };
-
-                let res = cfg
-                    .http_client
-                    .get(endpoint, None, Some(headers), None)
-                    .await?;
-                println!("RES! {}", res);
-                let data = find_value_from_json_key(&res, &["data"])?;
-                let chains = find_value_from_json_key(&data[0], &["chains"])?;
-                for chain in chains.members() {
-                    if chain["depositStatus"] != "allowed" || chain["withdrawStatus"] != "allowed" {
-                        continue;
+                let data = match cache_data {
+                    Some(cached) => cached,
+                    None => {
+                        let response = cfg
+                            .http_client
+                            .get(endpoint, None, Some(headers), None)
+                            .await?;
+                        if response["code"].to_string() == "200" {
+                            cfg.cached_data.networks.set(response.clone()).await;
+                        }
+                        response
                     }
+                };
 
-                    let (Ok(name), Ok(full_name)) = (
-                        parse_json_as_str(&chain["chain"]),
-                        parse_json_as_str(&chain["fullName"]),
-                    ) else {
-                        println!(
-                            "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
-                            cfg.name, chain
-                        );
+                for item in data["data"].members() {
+                    if item["currency"].to_string().to_uppercase() != coin {
                         continue;
                     };
-                    let Some(mut network) = Network::parse(name, full_name, coin.to_owned()) else {
-                        continue;
-                    };
-                    if let Ok(withdraw_fee) = parse_json_as_f64(&chain["transactFeeWithdraw"]) {
-                        network.set_withdraw_fee(withdraw_fee);
-                    }
-                    if let Ok(address) = parse_json_as_str(&chain["contractAddress"]) {
-                        network.set_contract(address);
-                    }
+                    let chains = &item["chains"];
+                    for chain in chains.members() {
+                        if chain["depositStatus"] != "allowed"
+                            || chain["withdrawStatus"] != "allowed"
+                        {
+                            continue;
+                        }
 
-                    fetched_networks.push(network);
+                        let (Ok(name), Ok(full_name)) = (
+                            parse_json_as_str(&chain["chain"]),
+                            parse_json_as_str(&chain["fullName"]),
+                        ) else {
+                            println!(
+                                "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
+                                cfg.name, chain
+                            );
+                            continue;
+                        };
+                        let Some(mut network) = Network::parse(name, full_name, coin.to_owned())
+                        else {
+                            continue;
+                        };
+                        if let Ok(withdraw_fee) = parse_json_as_f64(&chain["transactFeeWithdraw"]) {
+                            network.set_withdraw_fee(withdraw_fee);
+                        }
+                        if let Ok(address) = parse_json_as_str(&chain["contractAddress"]) {
+                            network.set_contract(address);
+                        }
+
+                        fetched_networks.push(network);
+                    }
                 }
             }
         }
