@@ -462,7 +462,7 @@ impl NetworkService for Exchange {
 
                         let (Ok(name), Ok(full_name)) = (
                             parse_json_as_str(&chain["chain"]),
-                            parse_json_as_str(&chain["fullName"]),
+                            parse_json_as_str(&chain["chain"]),
                         ) else {
                             println!(
                                 "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
