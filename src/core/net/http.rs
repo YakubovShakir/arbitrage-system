@@ -171,7 +171,7 @@ impl HttpClient {
         // 3. Проверяем целостность JSON
         if !text.trim().ends_with("}]}") && text.contains("\"status\":\"ok\"") {
             // Ответ обрезан - логируем для отладки
-            eprintln!("⚠️ HTX response may be truncated: {} chars", text.len());
+            // eprintln!("⚠️ HTX response may be truncated: {} chars", text.len());
             // Но продолжаем обработку - возможно, JSON валиден
         }
 

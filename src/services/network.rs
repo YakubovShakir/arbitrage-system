@@ -433,12 +433,25 @@ impl NetworkService for Exchange {
             }
             Exchange::Huobi(cfg) => {
                 let cur = coin.to_lowercase();
-                let query = &[("currency", cur.as_str())];
                 let headers = &[("Content-Type", "application/json")];
+
+                // let data = match cache_data {
+                //     Some(cached) => cached,
+                //     None => {
+                //         let response = cfg
+                //             .http_client
+                //             .get(endpoint, Some(query), Some(headers), None)
+                //             .await?;
+                //         cfg.cached_data.networks.set(response.clone()).await;
+                //         response
+                //     }
+                // };
+
                 let res = cfg
                     .http_client
-                    .get(endpoint, Some(query), Some(headers), None)
+                    .get(endpoint, None, Some(headers), None)
                     .await?;
+                println!("RES! {}", res);
                 let data = find_value_from_json_key(&res, &["data"])?;
                 let chains = find_value_from_json_key(&data[0], &["chains"])?;
                 for chain in chains.members() {
