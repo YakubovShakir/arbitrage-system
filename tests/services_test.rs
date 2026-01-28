@@ -158,7 +158,7 @@ async fn test_network_service() -> Result<(), Box<dyn std::error::Error>> {
         let mut networks_count = 0;
 
         while attempt <= attempts {
-            match exchange.networks("BTC").await {
+            match exchange.networks("USDT").await {
                 Ok(networks) => {
                     assert!(
                         networks.len() > 0,
