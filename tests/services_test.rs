@@ -53,6 +53,8 @@ async fn test_ticker_service() -> Result<(), Box<dyn std::error::Error>> {
 
 #[tokio::test]
 async fn test_orderbook_service() -> Result<(), Box<dyn std::error::Error>> {
+    load_env();
+
     let exchanges = get_exchanges()?;
 
     for (exchange_name, exchange) in exchanges {
@@ -100,6 +102,8 @@ async fn test_orderbook_service() -> Result<(), Box<dyn std::error::Error>> {
 
 #[tokio::test]
 async fn test_margin_info_service() -> Result<(), Box<dyn std::error::Error>> {
+    load_env();
+
     let exchanges = get_exchanges()?;
 
     for (exchange_name, exchange) in exchanges {
@@ -144,6 +148,8 @@ async fn test_margin_info_service() -> Result<(), Box<dyn std::error::Error>> {
 
 #[tokio::test]
 async fn test_network_service() -> Result<(), Box<dyn std::error::Error>> {
+    load_env();
+
     let exchanges = get_exchanges()?;
 
     for (exchange_name, exchange) in exchanges {
