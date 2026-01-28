@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::env;
 use std::error::Error;
 use std::sync::Arc;
 use std::time::Duration;
@@ -14,7 +15,8 @@ use crate::core::net::websocket::{BinaryMessageHandler, ConnectionHandler, WebSo
 use crate::core::types::Exchanges;
 use crate::core::types::api::CacheData;
 use crate::core::types::exchanges::{CachedConfig, Exchange, ExchangeConfig};
-use crate::core::utils::{decompress_gzip, find_value_from_json_key};
+use crate::core::utils::decompress_gzip;
+use crate::core::utils::json_utils::find_value_from_json_key;
 
 pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     let mut exchanges: Exchanges = HashMap::new();
@@ -22,8 +24,8 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     // Binance
     let binance = Exchange::Binance(ExchangeConfig {
         name: config::binance::NAME.to_owned(),
-        api_key: config::binance::API_KEY.to_owned(),
-        secret_key: config::binance::SECRET_KEY.to_owned(),
+        api_key: env::var("BINANCE_API_KEY")?.to_owned(),
+        secret_key: env::var("BINANCE_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::binance::BASE_URL)?,
         websocket_client: Some(WebSocketClient::new(config::binance::WEBSOCKET_URL)),
         cached_data: CachedConfig {
@@ -42,8 +44,8 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     // Bybit
     let bybit = Exchange::Bybit(ExchangeConfig {
         name: config::bybit::NAME.to_owned(),
-        api_key: config::bybit::API_KEY.to_owned(),
-        secret_key: config::bybit::SECRET_KEY.to_owned(),
+        api_key: env::var("BYBIT_API_KEY")?.to_owned(),
+        secret_key: env::var("BYBIT_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::bybit::BASE_URL)?,
         websocket_client: None,
         cached_data: CachedConfig {
@@ -86,8 +88,8 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     });
     let mexc = Exchange::Mexc(ExchangeConfig {
         name: config::mexc::NAME.to_owned(),
-        api_key: config::mexc::API_KEY.to_owned(),
-        secret_key: config::mexc::SECRET_KEY.to_owned(),
+        api_key: env::var("MEXC_API_KEY")?.to_owned(),
+        secret_key: env::var("MEXC_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::mexc::BASE_URL)?,
         websocket_client: Some(
             WebSocketClient::new(config::mexc::WEBSOCKET_URL)
@@ -110,8 +112,8 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     // Bitget
     let bitget = Exchange::Bitget(ExchangeConfig {
         name: config::bitget::NAME.to_owned(),
-        api_key: config::bitget::API_KEY.to_owned(),
-        secret_key: config::bitget::SECRET_KEY.to_owned(),
+        api_key: env::var("BITGET_API_KEY")?.to_owned(),
+        secret_key: env::var("BITGET_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::bitget::BASE_URL)?,
         websocket_client: None,
         cached_data: CachedConfig {
@@ -192,8 +194,8 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     });
     let kucoin = Exchange::Kucoin(ExchangeConfig {
         name: kucoin_name.to_owned(),
-        api_key: config::kucoin::API_KEY.to_owned(),
-        secret_key: config::kucoin::SECRET_KEY.to_owned(),
+        api_key: env::var("KUCOIN_API_KEY")?.to_owned(),
+        secret_key: env::var("KUCOIN_SECRET_KEY")?.to_owned(),
         http_client: kucoin_http_client,
         websocket_client: Some(
             WebSocketClient::new(config::kucoin::BASE_URL)
@@ -220,8 +222,8 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     // Gate.io
     let gate = Exchange::Gate(ExchangeConfig {
         name: config::gate::NAME.to_owned(),
-        api_key: config::gate::API_KEY.to_owned(),
-        secret_key: config::gate::SECRET_KEY.to_owned(),
+        api_key: env::var("GATE_API_KEY")?.to_owned(),
+        secret_key: env::var("GATE_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::gate::BASE_URL)?,
         websocket_client: None,
         cached_data: CachedConfig {
@@ -280,8 +282,8 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     });
     let huobi = Exchange::Huobi(ExchangeConfig {
         name: config::huobi::NAME.to_owned(),
-        api_key: config::huobi::API_KEY.to_owned(),
-        secret_key: config::huobi::SECRET_KEY.to_owned(),
+        api_key: env::var("HUOBI_API_KEY")?.to_owned(),
+        secret_key: env::var("HUOBI_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::huobi::BASE_URL)?,
         // websocket_client: Some(
         //     WebSocketClient::new(config::huobi::WEBSOCKET_URL)

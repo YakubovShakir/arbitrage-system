@@ -268,6 +268,14 @@ pub enum NetworkType {
     Blast,
     AlephZero,
     Somnia,
+    ZetaChain,
+    Stratos,
+    BitcoinCash,
+    Taiko,
+    Arch,
+    Mat,
+    OpBNB,
+    Mitosis,
 }
 
 #[derive(Debug, Clone)]
@@ -524,6 +532,14 @@ pub enum Network {
     Blast(NetworkConfig),
     AlephZero(NetworkConfig),
     Somnia(NetworkConfig),
+    ZetaChain(NetworkConfig),
+    Stratos(NetworkConfig),
+    BitcoinCash(NetworkConfig),
+    Taiko(NetworkConfig),
+    Arch(NetworkConfig),
+    Mat(NetworkConfig),
+    OpBNB(NetworkConfig),
+    Mitosis(NetworkConfig),
 }
 
 impl Network {
@@ -793,6 +809,14 @@ impl Network {
                 NetworkType::Blast => Some(Self::Blast(config)),
                 NetworkType::AlephZero => Some(Self::AlephZero(config)),
                 NetworkType::Somnia => Some(Self::Somnia(config)),
+                NetworkType::ZetaChain => Some(Self::ZetaChain(config)),
+                NetworkType::Stratos => Some(Self::Stratos(config)),
+                NetworkType::BitcoinCash => Some(Self::BitcoinCash(config)),
+                NetworkType::Taiko => Some(Self::Taiko(config)),
+                NetworkType::Arch => Some(Self::Arch(config)),
+                NetworkType::Mat => Some(Self::Mat(config)),
+                NetworkType::OpBNB => Some(Self::OpBNB(config)),
+                NetworkType::Mitosis => Some(Self::Mitosis(config)),
             },
 
             None => {
@@ -1077,6 +1101,14 @@ impl Network {
             Self::Blast(cfg) => cfg,
             Self::AlephZero(cfg) => cfg,
             Self::Somnia(cfg) => cfg,
+            Self::ZetaChain(cfg) => cfg,
+            Self::Stratos(cfg) => cfg,
+            Self::BitcoinCash(cfg) => cfg,
+            Self::Taiko(cfg) => cfg,
+            Self::Arch(cfg) => cfg,
+            Self::Mat(cfg) => cfg,
+            Self::OpBNB(cfg) => cfg,
+            Self::Mitosis(cfg) => cfg,
         }
     }
 

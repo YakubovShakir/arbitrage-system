@@ -20,8 +20,9 @@ impl CacheData {
         }
     }
     pub async fn get(&self) -> Option<JsonValue> {
-        let value_guard = self.value.read().await;
+        // ВСЕГДА сначала timestamp, потом value (как в set)
         let timestamp_guard = self.timestamp.read().await;
+        let value_guard = self.value.read().await;
 
         if !value_guard.is_null() && timestamp_guard.elapsed() <= self.ttl {
             Some(value_guard.clone())
@@ -31,8 +32,8 @@ impl CacheData {
     }
 
     pub async fn set(&self, value: JsonValue) {
-        let (mut timestamp_quard, mut value_quard) =
-            (self.timestamp.write().await, self.value.write().await);
+        let mut timestamp_quard = self.timestamp.write().await;
+        let mut value_quard = self.value.write().await;
         *value_quard = value;
         *timestamp_quard = Instant::now();
     }

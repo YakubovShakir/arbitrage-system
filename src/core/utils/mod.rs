@@ -1,89 +1,22 @@
-use base64::{Engine, engine::general_purpose};
 use chrono::{DateTime, Utc};
 use flate2::read::GzDecoder;
-use futures_util::{StreamExt, stream::iter};
-use ring::{
-    digest,
-    rand::SystemRandom,
-    signature::{RSA_PKCS1_SHA256, RsaKeyPair},
-};
+use json::JsonValue;
 use std::{
     io::Read,
     mem,
-    sync::Arc,
     time::{SystemTime, UNIX_EPOCH},
 };
 
-use data_encoding::BASE64;
-use hmac::Mac;
-use json::JsonValue;
-use sha2::{Digest, Sha256};
+pub mod crypto;
+pub mod json_utils;
 
 use crate::{
     config::parameters::{DEBUG_CODE, RESET_CODE, WARNING_CODE},
     core::{
-        traits::exchange_service::{MarginInfoService, NetworkService},
-        types::{
-            ExchangeName, Glass, HmacSha256, HmacSha512, Network, TradingPair, exchanges::Exchange,
-        },
+        traits::exchange_service::NetworkService,
+        types::{ExchangeName, Glass, Network, TradingPair, exchanges::Exchange},
     },
 };
-pub async fn execute_in_chunks_simple<I, F, T>(futures_iter: I, max_concurrent: usize) -> Vec<T>
-where
-    I: IntoIterator<Item = F>,
-    F: std::future::Future<Output = T>,
-{
-    // Просто используем buffered напрямую
-    iter(futures_iter)
-        .buffered(max_concurrent)
-        .collect::<Vec<_>>()
-        .await
-}
-
-// pub async fn execute_in_chunks_ref<'a, I, F, T>(futures_iter: I, max_concurrent: usize) -> Vec<T>
-// where
-//     I: IntoIterator<Item = F>,
-//     F: std::future::Future<Output = T> + Send + 'a,
-//     T: Send + 'a,
-// {
-//     // Явно указываем времена жизни
-//     iter(futures_iter)
-//         .buffered(max_concurrent)
-//         .collect::<Vec<_>>()
-//         .await
-// }
-// pub async fn execute_in_chunks<I, F, T>(futures_iter: I, max_concurrent: usize) -> Vec<T>
-// where
-//     I: IntoIterator<Item = F>,
-//     F: std::future::Future<Output = T> + Send + 'static,
-//     T: Send + 'static,
-// {
-//     // buffered ОГРАНИЧИВАЕТ количество одновременно выполняемых фьючеров
-//     iter(futures_iter)
-//         .buffered(max_concurrent) // ← КЛЮЧЕВОЕ ОТЛИЧИЕ!
-//         .collect::<Vec<_>>()
-//         .await
-// }
-
-pub fn find_value_from_json_key(
-    json: &JsonValue,
-    key_order: &[&str],
-) -> Result<JsonValue, Box<dyn std::error::Error>> {
-    let mut value = json;
-    for key in key_order {
-        if value.has_key(key) {
-            value = &value[*key];
-        } else {
-            return Err(format!(
-                "Could not find key <{:?}> in {}",
-                key_order.last(),
-                json.pretty(4),
-            )
-            .into());
-        }
-    }
-    Ok(value.clone())
-}
 
 // pub fn find_best_network_by_fee()
 
@@ -217,47 +150,6 @@ pub fn calculate_price_by_glass(quote_limit: &f64, glass: &Glass) -> Option<f64>
     Some(quote_limit / total_quantity)
 }
 
-pub fn parse_json_as_str(value: &JsonValue) -> Result<String, Box<dyn std::error::Error>> {
-    let parsed = value
-        .as_str()
-        .ok_or("Cannot parse value as str")?
-        .to_string();
-    if parsed.is_empty() || parsed.to_lowercase() == "null" || parsed.to_lowercase() == "none" {
-        return Err(format!("Cannot parse value as str: value is empty or null or none").into());
-    }
-    Ok(parsed)
-}
-
-pub fn parse_json_as_f64(value: &JsonValue) -> Result<f64, Box<dyn std::error::Error>> {
-    value
-        .to_string()
-        .parse::<f64>()
-        .map_err(|e| format!("Failed to parse '{}' as f64: {}", value, e).into())
-}
-pub fn parse_json_as_bool(value: &JsonValue) -> Result<bool, Box<dyn std::error::Error>> {
-    // Сначала пытаемся как булево значение
-    if let Some(bool_val) = value.as_bool() {
-        return Ok(bool_val);
-    }
-    if let Some(int_val) = value.as_u8() {
-        match int_val {
-            0 => return Ok(false),
-            1 => return Ok(true),
-            _ => {}
-        }
-    }
-    // Если не получилось, пытаемся как строку
-    if let Some(str_val) = value.as_str() {
-        match str_val.to_lowercase().as_str() {
-            "true" => return Ok(true),
-            "false" => return Ok(false),
-            _ => {}
-        }
-    }
-
-    Err("Could not parse value as boolean".into())
-}
-
 pub fn get_timestamp_iso_8601() -> Result<String, Box<dyn std::error::Error>> {
     let now: DateTime<Utc> = Utc::now();
     Ok(now.format("%Y-%m-%dT%H:%M:%S").to_string())
@@ -275,70 +167,6 @@ pub fn get_current_timestamp_secs() -> Result<String, Box<dyn std::error::Error>
         .duration_since(UNIX_EPOCH)?
         .as_secs()
         .to_string())
-}
-
-pub fn sha512_with_ring_return_hex(input: &str) -> String {
-    let digest = digest::digest(&digest::SHA512, input.as_bytes());
-    hex::encode(digest.as_ref())
-}
-pub fn encrypt_hmac_sha256(
-    secret_key: &str,
-    signature: &str,
-) -> Result<[u8; 32], Box<dyn std::error::Error>> {
-    Ok(HmacSha256::new_from_slice(secret_key.as_bytes())?
-        .chain_update(signature.as_bytes())
-        .finalize()
-        .into_bytes()
-        .into())
-}
-
-pub fn encrypt_hmac_sha512(
-    secret_key: &str,
-    signature: &str,
-) -> Result<[u8; 64], Box<dyn std::error::Error>> {
-    Ok(HmacSha512::new_from_slice(secret_key.as_bytes())?
-        .chain_update(signature.as_bytes())
-        .finalize()
-        .into_bytes()
-        .into())
-}
-
-pub fn hex_encode<T: AsRef<[u8]>>(data: T) -> String {
-    hex::encode(data)
-}
-
-pub fn sign_rsa_sha256(
-    private_key_str: &str,
-    message: &str,
-) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
-    // Декодируем base64 приватного ключа
-    let der_bytes = general_purpose::STANDARD.decode(private_key_str)?;
-
-    // Создаем RSA ключевую пару с явным преобразованием ошибки
-    let key_pair = Arc::new(
-        RsaKeyPair::from_pkcs8(&der_bytes).map_err(|e| format!("Invalid private key: {:?}", e))?,
-    );
-
-    let rng = SystemRandom::new();
-
-    // Вычисляем SHA256 хеш сообщения
-    let mut hasher = Sha256::new();
-    hasher.update(message.as_bytes());
-    let digest = hasher.finalize();
-
-    // Получаем длину модуля
-    let modulus_len = key_pair.public().modulus_len();
-
-    // Подписываем с явным преобразованием ошибки
-    let mut signature = vec![0; modulus_len];
-    key_pair
-        .sign(&RSA_PKCS1_SHA256, &rng, &digest, &mut signature)
-        .map_err(|e| format!("Signing failed: {:?}", e))?;
-
-    Ok(signature)
-}
-pub fn base64_encode(data: &[u8]) -> String {
-    BASE64.encode(data)
 }
 
 pub fn format_duration(nanos: u128) -> String {

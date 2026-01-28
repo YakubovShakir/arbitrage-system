@@ -4,7 +4,7 @@ use crate::{
         net::websocket::WebSocketClient,
         traits::exchange_service::TickerService,
         types::{API, TickerPrice, Tickers, TradingPair, exchanges::Exchange},
-        utils::{find_value_from_json_key, parse_json_as_f64},
+        utils::json_utils::{find_value_from_json_key, parse_json_as_f64},
     },
 };
 use async_trait::async_trait;

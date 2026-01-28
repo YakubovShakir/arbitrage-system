@@ -12,8 +12,8 @@ use crate::{
         traits::exchange_service::MarginInfoService,
         types::{API, TradingPair, exchanges::Exchange, signature_params::SignatureParams},
         utils::{
-            find_value_from_json_key, get_current_timestamp, get_timestamp_iso_8601,
-            parse_json_as_bool, parse_json_as_str,
+            get_current_timestamp, get_timestamp_iso_8601,
+            json_utils::{find_value_from_json_key, parse_json_as_bool, parse_json_as_str},
         },
     },
 };

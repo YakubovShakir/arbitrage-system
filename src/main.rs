@@ -4,7 +4,7 @@ use arbitrage_system::{
         traits::Workable,
         types::{TradingPairs, blacklist::Blacklist},
     },
-    init::exchanges::get_exchanges,
+    init::{exchanges::get_exchanges, load_env::load_env},
     workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
 };
 use dashmap::DashMap;
@@ -12,6 +12,7 @@ use std::sync::Arc;
 
 #[tokio::main]
 async fn main() {
+    load_env();
     // Получаем список бирж из init
     let exchanges = Arc::new(get_exchanges().unwrap());
 

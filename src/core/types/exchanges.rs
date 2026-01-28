@@ -1,7 +1,7 @@
 use crate::core::{
     net::{http::HttpClient, websocket::WebSocketClient},
     types::{api::CacheData, signature_params::SignatureParams},
-    utils::{
+    utils::crypto::{
         base64_encode, encrypt_hmac_sha256, encrypt_hmac_sha512, hex_encode,
         sha512_with_ring_return_hex,
     },

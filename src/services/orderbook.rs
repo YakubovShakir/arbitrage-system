@@ -1,3 +1,5 @@
+use std::env;
+
 use async_trait::async_trait;
 use json::JsonValue;
 
@@ -10,8 +12,9 @@ use crate::{
             signature_params::SignatureParams,
         },
         utils::{
-            base64_encode, encrypt_hmac_sha256, find_value_from_json_key, get_current_timestamp,
-            parse_json_as_f64,
+            crypto::{base64_encode, encrypt_hmac_sha256},
+            get_current_timestamp,
+            json_utils::{find_value_from_json_key, parse_json_as_f64},
         },
     },
 };
@@ -123,7 +126,7 @@ impl OrderBookService for Exchange {
                 // kc-api-passphrase
                 let kc_api_passphrase = base64_encode(&encrypt_hmac_sha256(
                     &cfg.secret_key,
-                    &config::kucoin::PASSPHRASE.to_string(),
+                    &env::var("KUCOIN_PASSPHRASE")?.to_string(),
                 )?);
                 let symbol = format!("{}-{}", base.to_uppercase(), quote.to_uppercase());
                 let queries = &[("symbol", symbol.as_str())];

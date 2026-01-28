@@ -1,5 +1,3 @@
 pub const NAME: &str = "Lbank";
-pub const API_KEY: &str = "28965597-8a05-4f36-b4c5-c949322f9ca7";
-pub const SECRET_KEY: &str = "MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAIZAUdqgmpXaZqgW/NfyLlvAiw2PLqsbWR9VC46qTDgxHlIFvJ7L4wbgDkPZ4TjrMT/ApyidObgPiAtA+a6btUblcdIdjwRWdjPtznvZc/w60zKg7Tu6MI50ZcxHT9uF9zjOsZc9ACxcbbubjoGRlpwB2qITnt/Q7hfdo/1/Ip93AgMBAAECgYA4z30T7ESeR0aLuPaUF0rgztDJEx8njzIenSl/3LbWTIrNINpZxGO05BmFQu0Y3gYAOXFDMY1cQ05JnNxLtF54G9Kt6adeqqZDMkk/o1cnatsBKrzeZ7FT10lGYRmg5UtYAevTvvVRy1NkWLQO0cZrhvS6UKCBa7Tf9EepD2qqiQJBANqq4e/FXhgzTdaE9R9zUhIzMCO81sjU1G5yJKrCu0i3tWWlLB9KLpqctDsrigdtkCWnhxOeTPgs0Hguxte8masCQQCdK+0s/cE3NadmJHvDmskjLyS/SCTgFKAf/bN15Gwi4essFtyTJUM2qMamERfsVBsIQZrMW2xqpXXMbDN1lP1lAkEA2LczZSb+so1mP41WQu1QEamZtFGbrT8BqtSFcpe8db1ckni42enzdliIZ3wnOGVlz2vRe6gQMIZ5tiLl/zp0MQJBAJmGHtajx+g18J5FZN9cgrxrgGmX/u0jOIYHOxUdWsN4Ck+2xR62d0Ec+22bpNKkFQOrkZmsc+p4VOipiFqCfkECQQCVeudtNYPILLeBUQQG5Ec0WgUK7alLFLdbVOwlr2GIoPWD+Vo8bzCL95HiYBTXW25SNyl3K+MrN+fM7JOscvic";
 pub const BASE_URL: &str = "https://www.lbkex.net/";
 pub const WEBSOCKET_URL: &str = "wss://www.lbkex.net/ws/V2/";

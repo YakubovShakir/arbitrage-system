@@ -11,8 +11,10 @@ use crate::{
         traits::exchange_service::NetworkService,
         types::{API, Network, exchanges::Exchange, signature_params::SignatureParams},
         utils::{
-            find_value_from_json_key, get_current_timestamp, parse_json_as_bool, parse_json_as_f64,
-            parse_json_as_str,
+            get_current_timestamp,
+            json_utils::{
+                find_value_from_json_key, parse_json_as_bool, parse_json_as_f64, parse_json_as_str,
+            },
         },
     },
 };

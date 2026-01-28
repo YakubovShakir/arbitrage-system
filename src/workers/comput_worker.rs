@@ -1,11 +1,9 @@
 use futures_util::future::join_all;
 
 use crate::{
-    config::{
-        parameters::{
-            ERROR_CODE, INFO_CODE, REQUESTS_CHUNK_SIZE, REQUIRED_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE, SUCCESS_CODE
+    config::parameters::{
+            DEBUG_CODE, ERROR_CODE, INFO_CODE, REQUESTS_CHUNK_SIZE, REQUIRED_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE, SUCCESS_CODE
         },
-    },
     core::{
         traits::{Workable, exchange_service::OrderBookService},
         types::{
@@ -158,17 +156,20 @@ impl Workable for ComputWorker {
             let start_time = Instant::now();
             // stat_info += &format!("├──── Trading Pairs: {}\n", self.trading_pairs.len());
 
+            println!("{DEBUG_CODE}[DEBUG] ComputWorker - Call collect_pairs_to_check(){RESET_CODE}");
             // Сбор непроверенные тикеры
             let (pairs, elapsed) = self.collect_pairs_to_check().await;
             check_total_elapsed += elapsed;
             check_passed += pairs.len();
 
+            println!("{DEBUG_CODE}[DEBUG] ComputWorker - Call filter_pairs_by_spread(){RESET_CODE}");
             // Фильтрация по тикер спреду
             let (pairs, prices_elapsed, spread_elapsed) = self.filter_pairs_by_spread(pairs).await;
             prices_quard_total_elapsed += prices_elapsed;
             ticker_spread_total_elapsed += spread_elapsed;
             ticker_spread_passed += pairs.len();
 
+            println!("{DEBUG_CODE}[DEBUG] ComputWorker - Call verify_arbitrage_conditions_and_get_networks(){RESET_CODE}");
             // Параллельное выполнение верификации
             let verify_futures: Vec<_> = pairs
                 .into_iter()
@@ -214,6 +215,7 @@ impl Workable for ComputWorker {
                     .collect();
             verify_passed += verify_passed_pairs.len();
 
+            println!("{DEBUG_CODE}[DEBUG] ComputWorker - Call orderbook() {RESET_CODE}");
             let mut orderbook_futures: Vec<_>  = verify_passed_pairs.into_iter().map(
                 |(pair, buy_exchange, sell_exchange, networks)| async move {
                     
@@ -312,6 +314,7 @@ impl Workable for ComputWorker {
                 .collect();
             orderbook_passed += orderbook_passed_pairs.len();
 
+            println!("{DEBUG_CODE}[DEBUG] ComputWorker - Start comput orderbook spread {RESET_CODE}");
             for (pair, buy_exchange, sell_exchange, networks, buy_orderbook, sell_orderbook) in
                 orderbook_passed_pairs
             {   

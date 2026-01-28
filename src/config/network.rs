@@ -383,7 +383,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             "ASTAR NETWORK",
             "ASTAR CHAIN",
             "ASTAR BLOCKCHAIN",
-            "ASTREVM",
+            "ASTAREVM",
             "ASTAR EVM",
             "ASTAR EVM CHAIN",
             "ASTAR EVM NETWORK",
@@ -676,11 +676,12 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Asset Hub Polkadot (Statemint) (новый)
-        const ASSET_HUB_POLKADOT_MAPPING: [&str; 9] = [
+        const ASSET_HUB_POLKADOT_MAPPING: [&str; 10] = [
             "STATEMINT",
             "ASSET HUB",
             "ASSET HUB POLKADOT",
             "POLKADOT ASSET HUB",
+            "POLKADOTASSETHUB",
             "STATEMINT ASSET HUB",
             "ASSET HUB DOT",
             "DOTAH",
@@ -1064,7 +1065,14 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             m.insert(mapped, NetworkType::Avalanche);
         }
         // Metal DAO L2
-        const METAL_MAPPING: [&str; 5] = ["METALDAOL2", "METAL", "METALDAO", "METALL2", "METAL L2"];
+        const METAL_MAPPING: [&str; 6] = [
+            "METALDAOL2",
+            "METAL",
+            "METALDAO",
+            "METALL2",
+            "METAL L2",
+            "METAL DAO L2",
+        ];
         for mapped in METAL_MAPPING {
             m.insert(mapped, NetworkType::Metal);
         }
@@ -1306,11 +1314,120 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         for mapped in CHILIZ_MAPPING {
             m.insert(mapped, NetworkType::Chiliz);
         }
-        const DOGECOIN_MAPPING: [&str; 5] = [
+
+        // ZetaChain (ZETA) (новый)
+        const ZETACHAIN_MAPPING: [&str; 8] = [
+            "ZETA",
+            "ZETACHAIN",
+            "ZETA CHAIN",
+            "ZETACHAIN NETWORK",
+            "ZETACHAIN PROTOCOL",
+            "ZETAEVM",
+            "ZETACHAIN EVM",
+            "ZETACHAIN BLOCKCHAIN",
+        ];
+        for mapped in ZETACHAIN_MAPPING {
+            m.insert(mapped, NetworkType::ZetaChain);
+        }
+
+        // Stratos (STOS) (новый)
+        const STRATOS_MAPPING: [&str; 6] = [
+            "STOS",
+            "STRATOS",
+            "STRATOS NETWORK",
+            "STRATOS CHAIN",
+            "STRATOS BLOCKCHAIN",
+            "STRATOS PROTOCOL",
+        ];
+        for mapped in STRATOS_MAPPING {
+            m.insert(mapped, NetworkType::Stratos);
+        }
+
+        // Bitcoin Cash (BCH) - ОТДЕЛЬНАЯ СЕТЬ от Bitcoin!
+        const BITCOIN_CASH_MAPPING: [&str; 7] = [
+            "BCH",
+            "BITCOIN CASH",
+            "BITCOINCASH",
+            "BCH NETWORK",
+            "BCH CHAIN",
+            "BCH BLOCKCHAIN",
+            "BITCOIN CASH NETWORK",
+        ];
+        for mapped in BITCOIN_CASH_MAPPING {
+            m.insert(mapped, NetworkType::BitcoinCash);
+        }
+
+        // Taiko (TAIKO) (новый)
+        const TAIKO_MAPPING: [&str; 7] = [
+            "TAIKO",
+            "TAIKOETH",
+            "TAIKO ETH",
+            "TAIKO NETWORK",
+            "TAIKO CHAIN",
+            "TAIKO BLOCKCHAIN",
+            "TAIKO L2",
+        ];
+        for mapped in TAIKO_MAPPING {
+            m.insert(mapped, NetworkType::Taiko);
+        }
+
+        // Arch (ARCH) (новый)
+        const ARCH_MAPPING: [&str; 5] = [
+            "ARCH",
+            "ARCH NETWORK",
+            "ARCH CHAIN",
+            "ARCH BLOCKCHAIN",
+            "ARCH PROTOCOL",
+        ];
+        for mapped in ARCH_MAPPING {
+            m.insert(mapped, NetworkType::Arch);
+        }
+
+        // My Master War (MAT) (новый)
+        const MAT_MAPPING: [&str; 6] = [
+            "MAT",
+            "MY MASTER WAR",
+            "MAT NETWORK",
+            "MAT CHAIN",
+            "MAT BLOCKCHAIN",
+            "MAT PROTOCOL",
+        ];
+        for mapped in MAT_MAPPING {
+            m.insert(mapped, NetworkType::Mat);
+        }
+
+        // opBNB (новый - Optimistic Rollup на BSC)
+        const OPBNB_MAPPING: [&str; 6] = [
+            "OPBNB",
+            "OP BNB",
+            "OPBNB NETWORK",
+            "OPBNB CHAIN",
+            "OPBNB L2",
+            "BINANCE OP ROLLUP",
+        ];
+        for mapped in OPBNB_MAPPING {
+            m.insert(mapped, NetworkType::OpBNB);
+        }
+
+        // Mitosis (MITO) (новый)
+        const MITOSIS_MAPPING: [&str; 6] = [
+            "MITO",
+            "MITOSIS",
+            "MITOSIS NETWORK",
+            "MITOSIS CHAIN",
+            "MITOSIS BLOCKCHAIN",
+            "MITOSIS PROTOCOL",
+        ];
+        for mapped in MITOSIS_MAPPING {
+            m.insert(mapped, NetworkType::Mitosis);
+        }
+
+        const DOGECOIN_MAPPING: [&str; 6] = [
             "DOGE",
             "DOGECOIN",
             "DOGE COIN",
             "DOGE CHAIN",
+            "DOGECHAIN",
             "DOGECOIN NETWORK", // Добавил новое название
         ];
         for mapped in DOGECOIN_MAPPING {
