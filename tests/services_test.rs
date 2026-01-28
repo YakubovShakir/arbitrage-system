@@ -5,11 +5,12 @@ use arbitrage_system::{
         },
         types::{API, TradingPair},
     },
-    init::exchanges::get_exchanges,
+    init::{exchanges::get_exchanges, load_env::load_env},
 };
 
 #[tokio::test]
 async fn test_ticker_service() -> Result<(), Box<dyn std::error::Error>> {
+    load_env();
     let exchanges = get_exchanges()?;
 
     for (exchange_name, exchange) in exchanges {
