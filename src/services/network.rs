@@ -460,16 +460,20 @@ impl NetworkService for Exchange {
                             continue;
                         }
 
-                        let (Ok(name), Ok(full_name)) = (
-                            parse_json_as_str(&chain["chain"]),
-                            parse_json_as_str(&chain["chain"]),
-                        ) else {
+                        let Ok(name) = parse_json_as_str(&chain["chain"])
+                        // parse_json_as_str(&chain["fullName"]),
+                        else {
                             println!(
                                 "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
                                 cfg.name, chain
                             );
                             continue;
                         };
+                        let full_name = match parse_json_as_str(&chain["fullName"]) {
+                            Ok(full_name) => full_name,
+                            Err(_) => name.clone(),
+                        };
+
                         let Some(mut network) = Network::parse(name, full_name, coin.to_owned())
                         else {
                             continue;
