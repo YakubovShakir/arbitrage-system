@@ -301,7 +301,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    // exchanges.insert(config::huobi::NAME.to_owned(), huobi);
+    exchanges.insert(config::huobi::NAME.to_owned(), huobi);
 
     Ok(exchanges)
 }
