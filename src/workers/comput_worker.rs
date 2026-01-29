@@ -345,7 +345,7 @@ impl Workable for ComputWorker {
                     continue;
                 }
                 final_spread_passed += 1;
-                let profit = quote_volume * (final_spread /100.0);
+                let profit = (quote_volume / 2.0) * (final_spread /100.0);
                  
                 println!(
                     "{SUCCESS_CODE}[INFO] ✅ {}/{}. \nSpread {:.2}% Profit: {:.2} {} \nBuy: {} Sell: {} \nNetworks: {:#?}{RESET_CODE}",
