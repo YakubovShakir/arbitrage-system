@@ -375,12 +375,18 @@ impl Workable for ComputWorker {
                         Some(number) => number.to_string(),
                         None => String::from("Not provided")
                     };
+                    let contract_message = match withdraw_network.base.config.contract_address.or_else(|| deposit_network.base.config.contract_address) {
+                        Some(contract_address)=> contract_address,
+                        None => String::from("Not provided")
+                    };
 
                     let message = format!("[-] {:?}\nTransfer fee: {}\n
+                    Contract address: {}\n
                     Number of confirmations: {}\n
                     Profit {} ~ {}", 
                     withdraw_network.base.network_type, 
                     fee_message,
+                    contract_message,
                     num_of_conf_message,
                     profit_with_fee, final_spread_percent
                     );
