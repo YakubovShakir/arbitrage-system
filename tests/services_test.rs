@@ -1,4 +1,5 @@
 use arbitrage_system::{
+    config::parameters::{INFO_CODE, RESET_CODE},
     core::{
         traits::exchange_service::{
             MarginInfoService, NetworkService, OrderBookService, TickerService,
@@ -155,17 +156,20 @@ async fn test_network_service() -> Result<(), Box<dyn std::error::Error>> {
     for (exchange_name, exchange) in exchanges {
         let mut attempt = 1;
         let attempts = 5;
-        let mut networks_count = 0;
+        let mut withdraw_networks_count = 0;
+        let mut deposit_networks_count = 0;
 
         while attempt <= attempts {
             match exchange.networks("USDT").await {
                 Ok(networks) => {
                     assert!(
-                        networks.len() > 0,
+                        networks.0.len() + networks.1.len() > 0,
                         "❗ Empty networks from {}",
                         exchange_name
                     );
-                    networks_count = networks.len();
+                    println!("{:#?}", networks);
+                    withdraw_networks_count = networks.0.len();
+                    deposit_networks_count = networks.1.len();
                     break;
                 }
                 Err(e) => {
@@ -186,8 +190,8 @@ async fn test_network_service() -> Result<(), Box<dyn std::error::Error>> {
             );
         } else {
             println!(
-                "🟢 Receive {} networks from {} for {} attempt",
-                networks_count, exchange_name, attempt
+                "{INFO_CODE}[INFO] {} networks\nWithdraw: {}\nDeposit: {}\nAttempts: {}{RESET_CODE}",
+                exchange_name, withdraw_networks_count, deposit_networks_count, attempt
             );
         }
     }

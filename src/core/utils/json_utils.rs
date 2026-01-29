@@ -37,6 +37,14 @@ pub fn parse_json_as_f64(value: &JsonValue) -> Result<f64, Box<dyn std::error::E
         .parse::<f64>()
         .map_err(|e| format!("Failed to parse '{}' as f64: {}", value, e).into())
 }
+
+pub fn parse_json_as_u64(value: &JsonValue) -> Result<u64, Box<dyn std::error::Error>> {
+    value
+        .to_string()
+        .parse::<u64>()
+        .map_err(|e| format!("Failed to parse '{}' as u64: {}", value, e).into())
+}
+
 pub fn parse_json_as_bool(value: &JsonValue) -> Result<bool, Box<dyn std::error::Error>> {
     // Сначала пытаемся как булево значение
     if let Some(bool_val) = value.as_bool() {
@@ -53,6 +61,8 @@ pub fn parse_json_as_bool(value: &JsonValue) -> Result<bool, Box<dyn std::error:
     if let Some(str_val) = value.as_str() {
         match str_val.to_lowercase().as_str() {
             "true" => return Ok(true),
+            "1" => return Ok(true),
+            "0" => return Ok(false),
             "false" => return Ok(false),
             _ => {}
         }

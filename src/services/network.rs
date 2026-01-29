@@ -9,11 +9,17 @@ use crate::{
     },
     core::{
         traits::exchange_service::NetworkService,
-        types::{API, Network, exchanges::Exchange, signature_params::SignatureParams},
+        types::{
+            API, ExchangeNetworks, Network,
+            exchanges::Exchange,
+            network::{DepositNetwork, WithdrawNetwork},
+            signature_params::SignatureParams,
+        },
         utils::{
             get_current_timestamp,
             json_utils::{
                 find_value_from_json_key, parse_json_as_bool, parse_json_as_f64, parse_json_as_str,
+                parse_json_as_u64,
             },
         },
     },
@@ -21,7 +27,7 @@ use crate::{
 
 #[async_trait]
 impl NetworkService for Exchange {
-    async fn networks(&self, coin: &str) -> Result<Vec<Network>, Box<dyn std::error::Error>> {
+    async fn networks(&self, coin: &str) -> Result<ExchangeNetworks, Box<dyn std::error::Error>> {
         let Some(endpoint) = API::GetNetworks.endpoint(self) else {
             return Err(format!(
                 "Error: GetNetworks endpoint is not set for the exchange {}",
@@ -29,7 +35,9 @@ impl NetworkService for Exchange {
             )
             .into());
         };
-        let mut fetched_networks: Vec<Network> = Vec::new();
+        let mut withdraw_networks: Vec<WithdrawNetwork> = Vec::new();
+        let mut deposit_networks: Vec<DepositNetwork> = Vec::new();
+
         let cache_data = self.config().cached_data.networks.get().await;
 
         match self {
@@ -69,38 +77,49 @@ impl NetworkService for Exchange {
                         continue;
                     }
 
-                    let deposit_enabled = parse_json_as_bool(&item["depositAllEnable"])?;
-                    let withdraw_enabled = parse_json_as_bool(&item["withdrawAllEnable"])?;
-                    if !deposit_enabled || !withdraw_enabled {
-                        break;
-                    }
-
                     let networks = &item["networkList"];
-                    for fetched_network in networks.members() {
+                    for network in networks.members() {
+                        let (Ok(withdraw_enabled), Ok(deposit_enabled)) = (
+                            parse_json_as_bool(&network["withdrawEnable"]),
+                            parse_json_as_bool(&network["depositEnable"]),
+                        ) else {
+                            continue;
+                        };
+                        if !withdraw_enabled && !deposit_enabled {
+                            continue;
+                        }
+
                         let (Ok(name), Ok(full_name)) = (
-                            parse_json_as_str(&fetched_network["network"]),
-                            parse_json_as_str(&fetched_network["name"]),
+                            parse_json_as_str(&network["network"]),
+                            parse_json_as_str(&network["name"]),
                         ) else {
                             println!(
                                 "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
-                                cfg.name, fetched_network
+                                cfg.name, network
                             );
                             continue;
                         };
-                        let Some(mut network) = Network::parse(name, full_name, coin.to_owned())
-                        else {
+                        let Some(mut parsed_network) = Network::parse(name, full_name) else {
                             continue;
                         };
-                        if let Ok(withdraw_fee) = parse_json_as_f64(&fetched_network["withdrawFee"])
-                        {
-                            network.set_withdraw_fee(withdraw_fee);
-                        }
-                        if let Ok(address) = parse_json_as_str(&fetched_network["contractAddress"])
-                        {
-                            network.set_contract(address);
+                        if let Ok(address) = parse_json_as_str(&network["contractAddress"]) {
+                            parsed_network.set_contract(address);
                         }
 
-                        fetched_networks.push(network);
+                        if withdraw_enabled {
+                            let withdraw_fee = parse_json_as_f64(&network["withdrawFee"]).ok();
+                            withdraw_networks
+                                .push(parsed_network.clone().make_withdraw_type(withdraw_fee));
+                        }
+                        if deposit_enabled {
+                            let number_of_confirmation =
+                                parse_json_as_u64(&network["minConfirm"]).ok();
+                            deposit_networks.push(parsed_network.make_deposit_type(
+                                None,
+                                None,
+                                number_of_confirmation,
+                            ));
+                        }
                     }
                 }
             }
@@ -141,38 +160,51 @@ impl NetworkService for Exchange {
                     if asset_name != coin {
                         continue;
                     }
-                    let networks = find_value_from_json_key(&item, &["chains"])?;
-                    for fetched_network in networks.members() {
-                        if fetched_network["chainDeposit"] != "1"
-                            || fetched_network["chainWithdraw"] != "1"
-                        {
+                    for network in item["chains"].members() {
+                        let (Ok(withdraw_enabled), Ok(deposit_enabled)) = (
+                            parse_json_as_bool(&network["chainWithdraw"]),
+                            parse_json_as_bool(&network["chainDeposit"]),
+                        ) else {
+                            continue;
+                        };
+
+                        if !withdraw_enabled && !deposit_enabled {
                             continue;
                         }
 
                         let (Ok(name), Ok(full_name)) = (
-                            parse_json_as_str(&fetched_network["chain"]),
-                            parse_json_as_str(&fetched_network["chainType"]),
+                            parse_json_as_str(&network["chain"]),
+                            parse_json_as_str(&network["chainType"]),
                         ) else {
                             println!(
                                 "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
-                                cfg.name, fetched_network
+                                network, cfg.name,
                             );
                             continue;
                         };
-                        let Some(mut network) = Network::parse(name, full_name, coin.to_owned())
-                        else {
+
+                        let Some(mut parsed_network) = Network::parse(name, full_name) else {
                             continue;
                         };
-                        if let Ok(withdraw_fee) = parse_json_as_f64(&fetched_network["withdrawFee"])
-                        {
-                            network.set_withdraw_fee(withdraw_fee);
-                        }
-                        if let Ok(address) = parse_json_as_str(&fetched_network["contractAddress"])
-                        {
-                            network.set_contract(address);
+
+                        if let Ok(address) = parse_json_as_str(&network["contractAddress"]) {
+                            parsed_network.set_contract(address);
                         }
 
-                        fetched_networks.push(network);
+                        if withdraw_enabled {
+                            let withdraw_fee = parse_json_as_f64(&network["withdrawFee"]).ok();
+                            withdraw_networks
+                                .push(parsed_network.clone().make_withdraw_type(withdraw_fee));
+                        };
+                        if deposit_enabled {
+                            let number_of_confirmation =
+                                parse_json_as_u64(&network["confirmation"]).ok();
+                            deposit_networks.push(parsed_network.make_deposit_type(
+                                None,
+                                None,
+                                number_of_confirmation,
+                            ));
+                        };
                     }
                 }
             }
@@ -203,49 +235,60 @@ impl NetworkService for Exchange {
                     if asset_name != coin {
                         continue;
                     }
-
-                    let chains = find_value_from_json_key(&item, &["chains"])?;
-                    if !chains.is_array() {
+                    let networks = find_value_from_json_key(&item, &["chains"])?;
+                    if !networks.is_array() {
                         return Err(format!(
                             "{} Invalid response: 'chains' is not an array",
                             cfg.name
                         )
                         .into());
                     }
-                    for chain in chains.members() {
-                        if let (Ok(withrawable), Ok(rechargeable)) = (
-                            parse_json_as_bool(&chain["withdrawable"]),
-                            parse_json_as_bool(&chain["rechargeable"]),
-                        ) {
-                            if !withrawable || !rechargeable {
-                                continue;
-                            }
-                        } else {
+                    for network in networks.members() {
+                        let (Ok(withrawable), Ok(rechargeable)) = (
+                            parse_json_as_bool(&network["withdrawable"]),
+                            parse_json_as_bool(&network["rechargeable"]),
+                        ) else {
                             continue;
                         };
 
+                        if !withrawable && !rechargeable {
+                            continue;
+                        }
+
                         let (Ok(name), Ok(full_name)) = (
-                            parse_json_as_str(&chain["chain"]),
-                            parse_json_as_str(&chain["chain"]),
+                            parse_json_as_str(&network["chain"]),
+                            parse_json_as_str(&network["chain"]),
                         ) else {
                             println!(
                                 "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
-                                cfg.name, chain
+                                cfg.name, network
                             );
                             continue;
                         };
-                        let Some(mut network) = Network::parse(name, full_name, coin.to_owned())
-                        else {
+                        let Some(mut parsed_network) = Network::parse(name, full_name) else {
                             continue;
                         };
-                        if let Ok(withdraw_fee) = parse_json_as_f64(&chain["withdrawFee"]) {
-                            network.set_withdraw_fee(withdraw_fee);
-                        }
-                        if let Ok(address) = parse_json_as_str(&chain["contractAddress"]) {
-                            network.set_contract(address);
+
+                        if let Ok(address) = parse_json_as_str(&network["contractAddress"]) {
+                            parsed_network.set_contract(address);
                         }
 
-                        fetched_networks.push(network);
+                        if withrawable {
+                            let withdraw_fee = parse_json_as_f64(&network["withdrawFee"]).ok();
+                            withdraw_networks
+                                .push(parsed_network.clone().make_withdraw_type(withdraw_fee));
+                        };
+                        if rechargeable {
+                            let number_of_confirmation =
+                                parse_json_as_u64(&network["depositConfirm"]).ok();
+                            deposit_networks.push(parsed_network.make_deposit_type(
+                                None,
+                                None,
+                                number_of_confirmation,
+                            ));
+                        };
+
+                        // fetched_networks.push(network);
                     }
                 }
             }
@@ -255,48 +298,54 @@ impl NetworkService for Exchange {
                     ("Accept", "application/json"),
                     ("Content-Type", "application/json"),
                 ];
-                let chains = cfg
+                let networks = cfg
                     .http_client
                     .get(endpoint, Some(query), Some(headers), None)
                     .await?;
 
-                if chains.is_empty() {
+                if networks.is_empty() {
                     return Err(
                         format!("{} Invalid response: 'chains' is not an array", cfg.name).into(),
                     );
                 }
 
-                for chain in chains.members() {
-                    if let (Ok(is_disabled), Ok(deposit_disabled), Ok(withdraw_disabled)) = (
-                        parse_json_as_bool(&chain["is_disabled"]),
-                        parse_json_as_bool(&chain["is_deposit_disabled"]),
-                        parse_json_as_bool(&chain["is_withdraw_disabled"]),
-                    ) {
-                        if is_disabled || deposit_disabled || withdraw_disabled {
-                            continue;
-                        }
-                    } else {
+                for network in networks.members() {
+                    let (Ok(withdraw_disabled), Ok(deposit_disabled)) = (
+                        parse_json_as_bool(&network["is_withdraw_disabled"]),
+                        parse_json_as_bool(&network["is_deposit_disabled"]),
+                    ) else {
+                        continue;
+                    };
+
+                    if deposit_disabled && withdraw_disabled {
                         continue;
                     }
 
                     let (Ok(name), Ok(full_name)) = (
-                        parse_json_as_str(&chain["chain"]),
-                        parse_json_as_str(&chain["name_en"]),
+                        parse_json_as_str(&network["chain"]),
+                        parse_json_as_str(&network["name_en"]),
                     ) else {
                         println!(
                             "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
-                            cfg.name, chain
+                            cfg.name, network
                         );
                         continue;
                     };
-                    let Some(mut network) = Network::parse(name, full_name, coin.to_owned()) else {
+                    let Some(mut parsed_network) = Network::parse(name, full_name) else {
                         continue;
                     };
-                    if let Ok(address) = parse_json_as_str(&chain["contract_address"]) {
-                        network.set_contract(address);
+
+                    if let Ok(address) = parse_json_as_str(&network["contract_address"]) {
+                        parsed_network.set_contract(address);
                     }
 
-                    fetched_networks.push(network);
+                    if !withdraw_disabled {
+                        withdraw_networks.push(parsed_network.clone().make_withdraw_type(None));
+                    };
+
+                    if !deposit_disabled {
+                        deposit_networks.push(parsed_network.make_deposit_type(None, None, None));
+                    };
                 }
             }
             Exchange::Kucoin(cfg) => {
@@ -317,41 +366,49 @@ impl NetworkService for Exchange {
                     if asset_name != coin {
                         continue;
                     }
-                    let chains = find_value_from_json_key(&item, &["chains"])?;
-                    for chain in chains.members() {
-                        if let (Ok(withdraw_enabled), Ok(deposit_enabled)) = (
-                            parse_json_as_bool(&chain["isWithdrawEnabled"]),
-                            parse_json_as_bool(&chain["isDepositEnabled"]),
-                        ) {
-                            if !withdraw_enabled || !deposit_enabled {
-                                continue;
-                            }
-                        } else {
+
+                    let networks = find_value_from_json_key(&item, &["chains"])?;
+                    for network in networks.members() {
+                        let (Ok(withdraw_enabled), Ok(deposit_enabled)) = (
+                            parse_json_as_bool(&network["isWithdrawEnabled"]),
+                            parse_json_as_bool(&network["isDepositEnabled"]),
+                        ) else {
                             continue;
                         };
 
+                        if !withdraw_enabled && !deposit_enabled {
+                            continue;
+                        }
                         let (Ok(name), Ok(full_name)) = (
-                            parse_json_as_str(&chain["chainId"]),
-                            parse_json_as_str(&chain["chainName"]),
+                            parse_json_as_str(&network["chainId"]),
+                            parse_json_as_str(&network["chainName"]),
                         ) else {
                             println!(
                                 "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
-                                cfg.name, chain
+                                cfg.name, network
                             );
                             continue;
                         };
-                        let Some(mut network) = Network::parse(name, full_name, coin.to_owned())
-                        else {
+                        let Some(mut parsed_network) = Network::parse(name, full_name) else {
                             continue;
                         };
-                        if let Ok(withdraw_fee) = parse_json_as_f64(&chain["withdrawMinFee"]) {
-                            network.set_withdraw_fee(withdraw_fee);
+                        if let Ok(address) = parse_json_as_str(&network["contractAddress"]) {
+                            parsed_network.set_contract(address);
                         }
-                        if let Ok(address) = parse_json_as_str(&chain["contractAddress"]) {
-                            network.set_contract(address);
-                        }
-
-                        fetched_networks.push(network);
+                        if withdraw_enabled {
+                            let withdraw_fee = parse_json_as_f64(&network["withdrawMinFee"]).ok();
+                            withdraw_networks
+                                .push(parsed_network.clone().make_withdraw_type(withdraw_fee));
+                        };
+                        if deposit_enabled {
+                            let number_of_confirmation =
+                                parse_json_as_u64(&network["preConfirms"]).ok();
+                            deposit_networks.push(parsed_network.make_deposit_type(
+                                None,
+                                None,
+                                number_of_confirmation,
+                            ));
+                        };
                     }
                 }
             }
@@ -398,36 +455,48 @@ impl NetworkService for Exchange {
                     if item["coin"] != coin {
                         continue;
                     }
-
                     let networks = find_value_from_json_key(item, &["networkList"])?;
-                    for chain in networks.members() {
-                        let withdraw_enabled = parse_json_as_bool(&chain["withdrawEnable"])?;
-                        if !withdraw_enabled {
+                    for network in networks.members() {
+                        let (Ok(withdraw_enabled), Ok(deposit_enabled)) = (
+                            parse_json_as_bool(&network["withdrawEnable"]),
+                            parse_json_as_bool(&network["depositEnable"]),
+                        ) else {
+                            continue;
+                        };
+
+                        if !withdraw_enabled && !deposit_enabled {
                             continue;
                         }
-
                         let (Ok(name), Ok(full_name)) = (
-                            parse_json_as_str(&chain["netWork"]),
-                            parse_json_as_str(&chain["netWork"]),
+                            parse_json_as_str(&network["netWork"]),
+                            parse_json_as_str(&network["netWork"]),
                         ) else {
                             println!(
                                 "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
-                                cfg.name, chain
+                                cfg.name, network
                             );
                             continue;
                         };
-                        let Some(mut network) = Network::parse(name, full_name, coin.to_owned())
-                        else {
+                        let Some(mut parsed_network) = Network::parse(name, full_name) else {
                             continue;
                         };
-                        if let Ok(withdraw_fee) = parse_json_as_f64(&chain["withdrawFee"]) {
-                            network.set_withdraw_fee(withdraw_fee);
+                        if let Ok(address) = parse_json_as_str(&network["contract"]) {
+                            parsed_network.set_contract(address);
                         }
-                        if let Ok(address) = parse_json_as_str(&chain["contract"]) {
-                            network.set_contract(address);
-                        }
-
-                        fetched_networks.push(network);
+                        if withdraw_enabled {
+                            let withdraw_fee = parse_json_as_f64(&network["withdrawFee"]).ok();
+                            withdraw_networks
+                                .push(parsed_network.clone().make_withdraw_type(withdraw_fee));
+                        };
+                        if deposit_enabled {
+                            let number_of_confirmation =
+                                parse_json_as_u64(&network["minConfirm"]).ok();
+                            deposit_networks.push(parsed_network.make_deposit_type(
+                                None,
+                                None,
+                                number_of_confirmation,
+                            ));
+                        };
                     }
                 }
             }
@@ -452,40 +521,44 @@ impl NetworkService for Exchange {
                     if item["currency"].to_string().to_uppercase() != coin {
                         continue;
                     };
-                    let chains = &item["chains"];
-                    for chain in chains.members() {
-                        if chain["depositStatus"] != "allowed"
-                            || chain["withdrawStatus"] != "allowed"
-                        {
-                            continue;
-                        }
 
-                        let Ok(name) = parse_json_as_str(&chain["chain"])
-                        // parse_json_as_str(&chain["fullName"]),
-                        else {
+                    for network in item["chains"].members() {
+                        let deposit_enabled: bool = network["depositStatus"] == "allowed";
+                        let withdraw_enabled: bool = network["withdrawStatus"] == "allowed";
+
+                        let Ok(name) = parse_json_as_str(&network["chain"]) else {
                             println!(
                                 "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
-                                cfg.name, chain
+                                cfg.name, network
                             );
                             continue;
                         };
-                        let full_name = match parse_json_as_str(&chain["fullName"]) {
+                        let full_name = match parse_json_as_str(&network["fullName"]) {
                             Ok(full_name) => full_name,
                             Err(_) => name.clone(),
                         };
-
-                        let Some(mut network) = Network::parse(name, full_name, coin.to_owned())
-                        else {
+                        let Some(mut parsed_network) = Network::parse(name, full_name) else {
                             continue;
                         };
-                        if let Ok(withdraw_fee) = parse_json_as_f64(&chain["transactFeeWithdraw"]) {
-                            network.set_withdraw_fee(withdraw_fee);
-                        }
-                        if let Ok(address) = parse_json_as_str(&chain["contractAddress"]) {
-                            network.set_contract(address);
-                        }
 
-                        fetched_networks.push(network);
+                        if let Ok(address) = parse_json_as_str(&network["contractAddress"]) {
+                            parsed_network.set_contract(address);
+                        }
+                        if withdraw_enabled {
+                            let withdraw_fee =
+                                parse_json_as_f64(&network["transactFeeWithdraw"]).ok();
+                            withdraw_networks
+                                .push(parsed_network.clone().make_withdraw_type(withdraw_fee));
+                        };
+                        if deposit_enabled {
+                            let number_of_confirmation =
+                                parse_json_as_u64(&network["numOfFastConfirmations"]).ok();
+                            deposit_networks.push(parsed_network.make_deposit_type(
+                                None,
+                                None,
+                                number_of_confirmation,
+                            ));
+                        };
                     }
                 }
             }
@@ -497,6 +570,6 @@ impl NetworkService for Exchange {
         //     )
         //     .into());
         // };
-        Ok(fetched_networks)
+        Ok((withdraw_networks, deposit_networks))
     }
 }

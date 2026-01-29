@@ -1,6 +1,5 @@
 use chrono::{DateTime, Utc};
 use flate2::read::GzDecoder;
-use json::JsonValue;
 use std::{
     io::Read,
     mem,
@@ -14,23 +13,29 @@ use crate::{
     config::parameters::{DEBUG_CODE, RESET_CODE, WARNING_CODE},
     core::{
         traits::exchange_service::NetworkService,
-        types::{ExchangeName, Glass, Network, TradingPair, exchanges::Exchange},
+        types::{
+            ExchangeName, Glass, Network, TradingPair,
+            exchanges::Exchange,
+            network::{DepositNetwork, WithdrawNetwork},
+        },
     },
 };
 
 // pub fn find_best_network_by_fee()
 
 pub fn find_intersection_from_networks(
-    withdraw_networks: &[Network],
-    deposit_networks: &[Network],
-) -> Option<Vec<Network>> {
-    let mut intersection: Vec<Network> = Vec::new();
+    withdraw_networks: &[WithdrawNetwork],
+    deposit_networks: &[DepositNetwork],
+) -> Option<Vec<(WithdrawNetwork, DepositNetwork)>> {
+    let mut intersection: Vec<(WithdrawNetwork, DepositNetwork)> = Vec::new();
 
     for w_network in withdraw_networks {
         // ← из withdraw_networks
         for d_network in deposit_networks {
-            if mem::discriminant(w_network) == mem::discriminant(d_network) {
-                intersection.push(w_network.clone()); // ← клонируем w_network
+            if mem::discriminant(&w_network.base.network_type)
+                == mem::discriminant(&d_network.base.network_type)
+            {
+                intersection.push((w_network.clone(), d_network.clone())); // ← клонируем w_network
                 break;
             }
         }
@@ -46,7 +51,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     buy_exchange: &Exchange,
     sell_exchange: &Exchange,
     trading_pair_name: &TradingPair,
-) -> Result<Vec<Network>, ExchangeName> {
+) -> Result<Vec<(WithdrawNetwork, DepositNetwork)>, ExchangeName> {
     let buy_exchange_name = &buy_exchange.config().name;
     let sell_exchange_name = &sell_exchange.config().name;
     // let is_margin_available = match sell_exchange.borrowable(&trading_pair_name).await {
@@ -69,8 +74,8 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     //     return Err(sell_exchange_name.to_string());
     // }
 
-    let buy_networks = match buy_exchange.networks(&trading_pair_name.base).await {
-        Ok(networks) => networks,
+    let withdraw_networks = match buy_exchange.networks(&trading_pair_name.base).await {
+        Ok(networks) => networks.0,
         Err(e) => {
             println!(
                 "{WARNING_CODE}[WARNING] {}/{} verify returns empty networks. REASON: Can't get buy {} networks. ERROR: {} {RESET_CODE}",
@@ -79,15 +84,16 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
             return Ok(Vec::new());
         }
     };
-    if buy_networks.len() == 0 {
+    if withdraw_networks.len() == 0 {
         println!(
             "{DEBUG_CODE}[DEBUG] {}/{} verify - failed. REASON: Empty buy networks {} {RESET_CODE}",
             trading_pair_name.base, trading_pair_name.quote, buy_exchange_name
         );
         return Err(buy_exchange_name.to_string());
     }
-    let sell_networks = match sell_exchange.networks(&trading_pair_name.base).await {
-        Ok(networks) => networks,
+
+    let deposit_networks = match sell_exchange.networks(&trading_pair_name.base).await {
+        Ok(networks) => networks.1,
         Err(e) => {
             println!(
                 "{WARNING_CODE}[WARNING] {}/{} verify returns empty networks. REASON: Can't get sell {} networks. ERROR: {}{RESET_CODE}",
@@ -96,14 +102,16 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
             return Ok(Vec::new());
         }
     };
-    if sell_networks.len() == 0 {
+    if deposit_networks.len() == 0 {
         println!(
             "{DEBUG_CODE}[DEBUG] {}/{} verify - failed. REASON: Empty sell networks {} {RESET_CODE}",
             trading_pair_name.base, trading_pair_name.quote, sell_exchange_name
         );
         return Err(sell_exchange_name.to_string());
     }
-    let Some(networks) = find_intersection_from_networks(&buy_networks, &sell_networks) else {
+
+    let Some(networks) = find_intersection_from_networks(&withdraw_networks, &deposit_networks)
+    else {
         // println!(
         //     "No network intersection beetween {}:{:#?} and {}:{:#?} at {}/{}",
         //     buy_exchange.config().name,

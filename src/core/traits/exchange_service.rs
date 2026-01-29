@@ -1,4 +1,4 @@
-use crate::core::types::{Network, OrderBook, Tickers, TradingPair};
+use crate::core::types::{ExchangeNetworks, OrderBook, Tickers, TradingPair};
 use async_trait::async_trait;
 
 #[async_trait]
@@ -16,7 +16,7 @@ pub trait OrderBookService {
 
 #[async_trait]
 pub trait NetworkService {
-    async fn networks(&self, coin: &str) -> Result<Vec<Network>, Box<dyn std::error::Error>>;
+    async fn networks(&self, coin: &str) -> Result<ExchangeNetworks, Box<dyn std::error::Error>>;
 }
 
 #[async_trait]

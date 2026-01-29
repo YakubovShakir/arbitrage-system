@@ -3,19 +3,16 @@ use std::env;
 use async_trait::async_trait;
 use json::JsonValue;
 
-use crate::{
-    config,
-    core::{
-        traits::exchange_service::OrderBookService,
-        types::{
-            API, Asks, Bids, OrderBook, Price, Quantity, exchanges::Exchange,
-            signature_params::SignatureParams,
-        },
-        utils::{
-            crypto::{base64_encode, encrypt_hmac_sha256},
-            get_current_timestamp,
-            json_utils::{find_value_from_json_key, parse_json_as_f64},
-        },
+use crate::core::{
+    traits::exchange_service::OrderBookService,
+    types::{
+        API, Asks, Bids, OrderBook, Price, Quantity, exchanges::Exchange,
+        signature_params::SignatureParams,
+    },
+    utils::{
+        crypto::{base64_encode, encrypt_hmac_sha256},
+        get_current_timestamp,
+        json_utils::{find_value_from_json_key, parse_json_as_f64},
     },
 };
 

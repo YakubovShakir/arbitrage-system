@@ -3,8 +3,11 @@ use hmac::Hmac;
 use sha2::{Sha256, Sha512};
 use std::collections::HashMap;
 
-use super::{PriceData, TradingPair};
-use crate::core::types::exchanges::Exchange;
+use super::{PriceData, TickerPrice, TradingPair};
+use crate::core::types::{
+    exchanges::Exchange,
+    network::{DepositNetwork, WithdrawNetwork},
+};
 
 pub type Price = f64;
 pub type Quantity = f64;
@@ -25,10 +28,7 @@ pub type ExchangeName = String;
 
 pub type Exchanges = HashMap<ExchangeName, Exchange>;
 
-#[derive(Clone)]
-pub struct TickerPrice {
-    pub buy_price: (ExchangeName, Price),
-    pub sell_price: (ExchangeName, Price),
-}
 pub type TradingPairs = DashMap<TradingPair, PriceData>;
 pub type Tickers = HashMap<TradingPair, TickerPrice>;
+
+pub type ExchangeNetworks = (Vec<WithdrawNetwork>, Vec<DepositNetwork>);

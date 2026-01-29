@@ -1,4 +1,4 @@
-use futures_util::future::join_all;
+use futures_util::{future::join_all, sink::With};
 
 use crate::{
     config::parameters::{
@@ -8,7 +8,7 @@ use crate::{
         traits::{Workable, exchange_service::OrderBookService},
         types::{
             ExchangeName, Exchanges, Network, OrderBook, TradingPair, TradingPairs,
-            blacklist::Blacklist, exchanges::Exchange,
+            blacklist::Blacklist, exchanges::Exchange, network::{DepositNetwork, WithdrawNetwork},
         },
         utils::{
             calculate_price_by_glass, comput_spread_percent, format_duration, verify_arbitrage_conditions_and_get_networks
@@ -204,11 +204,11 @@ impl Workable for ComputWorker {
                 .collect();
 
             let verify_time = Instant::now();
-            let verify_results: Vec<Option<(TradingPair, &Exchange, &Exchange, Vec<Network>)>> =
+            let verify_results: Vec<Option<(TradingPair, &Exchange, &Exchange, Vec<(WithdrawNetwork, DepositNetwork)>)>> =
                 join_all(verify_futures).await;
             verify_total_elapsed += verify_time.elapsed().as_nanos();
 
-            let verify_passed_pairs: Vec<(TradingPair, &Exchange, &Exchange, Vec<Network>)> =
+            let verify_passed_pairs: Vec<(TradingPair, &Exchange, &Exchange, Vec<(WithdrawNetwork, DepositNetwork)>)> =
                 verify_results
                     .into_iter()
                     .filter_map(|result| result)
@@ -265,7 +265,7 @@ impl Workable for ComputWorker {
                 TradingPair,
                 &Exchange,
                 &Exchange,
-                Vec<Network>,
+                Vec<(WithdrawNetwork, DepositNetwork)>,
                 Result<OrderBook, ()>,
                 Result<OrderBook, ()>,
             )> = Vec::new();
@@ -284,7 +284,7 @@ impl Workable for ComputWorker {
                 TradingPair,
                 &Exchange,
                 &Exchange,
-                Vec<Network>,
+                Vec<(WithdrawNetwork, DepositNetwork)>,
                 OrderBook,
                 OrderBook,
             )> = orderbook_results
@@ -345,7 +345,7 @@ impl Workable for ComputWorker {
                     continue;
                 }
                 final_spread_passed += 1;
-
+                
                 println!(
                     "{SUCCESS_CODE}[INFO] ✅ {}/{}. \nSpread {:.2}% \nBuy: {} Sell: {} \nNetworks: {:#?}{RESET_CODE}",
                     pair.base,
@@ -394,21 +394,17 @@ impl Workable for ComputWorker {
 
                 println!("{}", stat_info);
 
-                loop_count = 0;
-                check_passed = 0;
-                check_total_elapsed = 0;
-                prices_quard_total_elapsed = 0;
-                ticker_spread_passed = 0;
-                ticker_spread_total_elapsed = 0;
-                verify_passed = 0;
-                verify_total_elapsed = 0;
-                orderbook_passed = 0;
-                orderbook_total_elapsed = 0;
-                calc_books_passed = 0;
-                calc_books_total_elapsed = 0;
-                final_spread_passed = 0;
-                final_spread_total_elapsed = 0;
-                loop_elapsed = 0;
+                (   loop_count,
+                    check_passed, check_total_elapsed, 
+                    prices_quard_total_elapsed, 
+                    ticker_spread_passed, ticker_spread_total_elapsed, 
+                    verify_passed, verify_total_elapsed, 
+                    orderbook_passed, orderbook_total_elapsed,
+                    calc_books_passed, calc_books_total_elapsed, 
+                    final_spread_passed, final_spread_total_elapsed, 
+                    loop_elapsed
+                ) = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+
                 stat_info = format!(
                     "{INFO_CODE}┌── СomputWorker:{} Statistics for {} iteration\n",
                     self.id, loop_to_update_stat
