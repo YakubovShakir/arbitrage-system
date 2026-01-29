@@ -347,19 +347,13 @@ impl Workable for ComputWorker {
                 orderbook_spread_passed += 1;
                 let base_profit = (quote_volume / QUOTE_RATE) * (orderbook_spread / 100.0);
                  
-                let mut spread_message = format!("{SUCCESS_CODE}[INFO] ✅ {}/{}\n
-                Buy exchange: {}\n
-                Sell exchange: {}\n
-                Quote volume: {} {}\n
-                Сalculated buy price: {}\n
-                Calculated sell price: {}\n
-                Networks:\n", 
+                let mut spread_message = format!("{SUCCESS_CODE}[INFO] ✅ {}/{}\nBuy exchange: {}\nSell exchange: {}\nQuote volume: {} {}\nСalculated buy price: {:.3} {}\nCalculated sell price: {:.3} {}\nNetworks:\n", 
                 pair.base,pair.quote,
                 buy_exchange.config().name, 
                 sell_exchange.config().name, 
                 quote_volume / QUOTE_RATE, pair.quote, 
-                calculated_buy_price, 
-                calculated_sell_price,
+                calculated_buy_price, pair.quote, 
+                calculated_sell_price, pair.quote
             );
 
                 for (withdraw_network, deposit_network) in networks {
@@ -368,7 +362,7 @@ impl Workable for ComputWorker {
                     let final_spread_percent = profit_with_fee / (quote_volume/ QUOTE_RATE) * 100.0;
 
                     let fee_message = match  withdraw_network.withdraw_fee {
-                        Some(fee) => format!("{} {} ~ {} {}", fee, pair.base, fee_quote_volume, pair.quote),
+                        Some(fee) => format!("{} {} ~ {:.3} {}", fee, pair.base, fee_quote_volume, pair.quote),
                         None => String::from("Not provided")
                     };
                     let num_of_conf_message = match deposit_network.number_of_confirmation {
@@ -380,15 +374,12 @@ impl Workable for ComputWorker {
                         None => String::from("Not provided")
                     };
 
-                    let message = format!("[-] {:?}\nTransfer fee: {}\n
-                    Contract address: {}\n
-                    Number of confirmations: {}\n
-                    Profit {} ~ {}", 
+                    let message = format!("[-] {:?}\nTransfer fee: {}\nContract address: {}\nNumber of confirmations: {}\nProfit {:.2} {} ~ {:.2}%", 
                     withdraw_network.base.network_type, 
                     fee_message,
                     contract_message,
                     num_of_conf_message,
-                    profit_with_fee, final_spread_percent
+                    profit_with_fee, pair.quote, final_spread_percent
                     );
                     spread_message += &message;
                 }
