@@ -2,7 +2,7 @@ use futures_util::{future::join_all, sink::With};
 
 use crate::{
     config::parameters::{
-            DEBUG_CODE, ERROR_CODE, INFO_CODE, REQUESTS_CHUNK_SIZE, REQUIRED_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE, SUCCESS_CODE
+            DEBUG_CODE, ERROR_CODE, INFO_CODE, QUOTE_RATE, REQUESTS_CHUNK_SIZE, REQUIRED_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE, SUCCESS_CODE
         },
     core::{
         traits::{Workable, exchange_service::OrderBookService},
@@ -141,8 +141,8 @@ impl Workable for ComputWorker {
         let mut calc_books_passed = 0;
         let mut calc_books_total_elapsed: u128 = 0;
 
-        let mut final_spread_passed = 0;
-        let mut final_spread_total_elapsed: u128 = 0;
+        let mut orderbook_spread_passed = 0;
+        let mut orderbook_spread_total_elapsed: u128 = 0;
 
         let mut loop_count = 0;
         let loop_to_update_stat = 10;
@@ -336,28 +336,69 @@ impl Workable for ComputWorker {
                 };
                 calc_books_passed += 1;
 
-                let final_spread_time = Instant::now();
-                let final_spread =
+                let orderbook_spread_time = Instant::now();
+                let orderbook_spread =
                     comput_spread_percent(&calculated_buy_price, &calculated_sell_price);
-                final_spread_total_elapsed += final_spread_time.elapsed().as_nanos();
+                orderbook_spread_total_elapsed += orderbook_spread_time.elapsed().as_nanos();
 
-                if final_spread < REQUIRED_ORDERBOOK_SPREAD_PERCENT || final_spread > 10.0 {
+                if orderbook_spread < REQUIRED_ORDERBOOK_SPREAD_PERCENT || orderbook_spread > 10.0 {
                     continue;
                 }
-                final_spread_passed += 1;
-                let profit = (quote_volume / 2.0) * (final_spread /100.0);
+                orderbook_spread_passed += 1;
+                let base_profit = (quote_volume / QUOTE_RATE) * (orderbook_spread / 100.0);
                  
-                println!(
-                    "{SUCCESS_CODE}[INFO] ✅ {}/{}. \nSpread {:.2}% Profit: {:.2} {} \nBuy: {} Sell: {} \nNetworks: {:#?}{RESET_CODE}",
-                    pair.base,
-                    pair.quote,
-                    final_spread,
-                    profit,
-                    pair.quote,
-                    buy_exchange.config().name,
-                    sell_exchange.config().name,
-                    networks
-                );
+                let mut spread_message = format!("{SUCCESS_CODE}[INFO] ✅ {}/{}\n
+                Buy exchange: {}\n
+                Sell exchange: {}\n
+                Quote volume: {} {}\n
+                Сalculated buy price: {}\n
+                Calculated sell price: {}\n
+                Networks:\n", 
+                pair.base,pair.quote,
+                buy_exchange.config().name, 
+                sell_exchange.config().name, 
+                quote_volume / QUOTE_RATE, pair.quote, 
+                calculated_buy_price, 
+                calculated_sell_price,
+            );
+
+                for (withdraw_network, deposit_network) in networks {
+                    let fee_quote_volume = withdraw_network.withdraw_fee.unwrap_or(0.0) * calculated_sell_price;
+                    let profit_with_fee = base_profit - fee_quote_volume;
+                    let final_spread_percent = profit_with_fee / (quote_volume/ QUOTE_RATE) * 100.0;
+
+                    let fee_message = match  withdraw_network.withdraw_fee {
+                        Some(fee) => format!("{} {} ~ {} {}", fee, pair.base, fee_quote_volume, pair.quote),
+                        None => String::from("Not provided")
+                    };
+                    let num_of_conf_message = match deposit_network.number_of_confirmation {
+                        Some(number) => number.to_string(),
+                        None => String::from("Not provided")
+                    };
+
+                    let message = format!("[-] {:?}\nTransfer fee: {}\n
+                    Number of confirmations: {}\n
+                    Profit {} ~ {}", 
+                    withdraw_network.base.network_type, 
+                    fee_message,
+                    num_of_conf_message,
+                    profit_with_fee, final_spread_percent
+                    );
+                    spread_message += &message;
+                }
+                spread_message += RESET_CODE;
+                println!("{}",spread_message);
+                // println!(
+                //     "{SUCCESS_CODE}[INFO] ✅ {}/{}. \nSpread {:.2}% Profit: {:.2} {} \nBuy: {} Sell: {} \nNetworks: {:#?}{RESET_CODE}",
+                //     pair.base,
+                //     pair.quote,
+                //     orderbook_spread,
+                //     profit,
+                //     pair.quote,
+                //     buy_exchange.config().name,
+                //     sell_exchange.config().name,
+                //     networks
+                // );
             }
             loop_elapsed += start_time.elapsed().as_nanos();
 
@@ -369,7 +410,7 @@ impl Workable for ComputWorker {
                 let formated_total_verify = format_duration(verify_total_elapsed);
                 let formated_total_orderbook = format_duration(orderbook_total_elapsed);
                 let formated_total_calc_books = format_duration(calc_books_total_elapsed);
-                let formated_total_final = format_duration(final_spread_total_elapsed);
+                let formated_total_final = format_duration(orderbook_spread_total_elapsed);
                 let formated_total_loop = format_duration(loop_elapsed);
 
                 // "│ ├─ └─"
@@ -392,7 +433,7 @@ impl Workable for ComputWorker {
                 stat_info += &format!("│        └─ Total passed: {}\n", calc_books_passed);
                 stat_info += &format!("├──── Final spread stat\n");
                 stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_final);
-                stat_info += &format!("│        └─ Total passed: {}\n", final_spread_passed);
+                stat_info += &format!("│        └─ Total passed: {}\n", orderbook_spread_passed);
                 stat_info += &format!("└── Total elapsed: {}\n{RESET_CODE}", formated_total_loop);
 
                 println!("{}", stat_info);
@@ -404,7 +445,7 @@ impl Workable for ComputWorker {
                     verify_passed, verify_total_elapsed, 
                     orderbook_passed, orderbook_total_elapsed,
                     calc_books_passed, calc_books_total_elapsed, 
-                    final_spread_passed, final_spread_total_elapsed, 
+                    orderbook_spread_passed, orderbook_spread_total_elapsed, 
                     loop_elapsed
                 ) = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
