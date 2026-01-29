@@ -345,12 +345,15 @@ impl Workable for ComputWorker {
                     continue;
                 }
                 final_spread_passed += 1;
-                
+                let profit = quote_volume * final_spread;
+                 
                 println!(
-                    "{SUCCESS_CODE}[INFO] ✅ {}/{}. \nSpread {:.2}% \nBuy: {} Sell: {} \nNetworks: {:#?}{RESET_CODE}",
+                    "{SUCCESS_CODE}[INFO] ✅ {}/{}. \nSpread {:.2}% Profit: {:.2} {} \nBuy: {} Sell: {} \nNetworks: {:#?}{RESET_CODE}",
                     pair.base,
                     pair.quote,
                     final_spread,
+                    profit,
+                    pair.quote,
                     buy_exchange.config().name,
                     sell_exchange.config().name,
                     networks
