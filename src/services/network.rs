@@ -39,9 +39,7 @@ impl NetworkService for Exchange {
         let mut deposit_networks: Vec<DepositNetwork> = Vec::new();
 
         let cache_data = self.config().cached_data.networks.get().await;
-        if cache_data.is_some() {
-            println!("Беру данные из кеша для биржи {} ", self.config().name);
-        }
+
         match self {
             Exchange::Binance(cfg) => {
                 let timestamp = get_current_timestamp()?;
