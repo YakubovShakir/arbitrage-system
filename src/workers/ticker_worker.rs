@@ -1,4 +1,4 @@
-use std::{sync::Arc, time::Instant};
+use std::{collections::HashMap, sync::Arc, time::Instant};
 
 use futures_util::future::join_all;
 
@@ -137,17 +137,24 @@ impl Workable for TickerWorker {
         let mut loop_count = 0;
         let loop_to_update_stat = 10;
         let mut total_elapsed = 0;
-        let mut stat_info = format!("{INFO_CODE}----TickerWorker:{} Statistics ----", self.id);
+        let mut stat_info = format!(
+            "{INFO_CODE}----TickerWorker:{} Statistics ----\n| {:<8} | {:<8} |",
+            self.id, "Exchange", "Tickers"
+        );
+        let mut stat_map: HashMap<String, usize> = HashMap::new();
+
         loop {
-            stat_info += &format!("\n       loop: {}", loop_count + 1);
             let start = Instant::now();
-            stat_info += &format!("\n| {:<8} | {:<8} |", "Exchange", "Tickers");
 
             // Получение тикеров с бирж
             let raw_tickers: Vec<Tickers> = self.fetch_tickers().await;
             for tickers in &raw_tickers {
                 if let Some(pair) = tickers.iter().nth(0) {
-                    stat_info += &format!("\n| {:<8} | {:<8} |", pair.1.buy_price.0, tickers.len());
+                    if let Some(count) = stat_map.get_mut(&pair.1.buy_price.0) {
+                        *count += tickers.len();
+                    } else {
+                        stat_map.insert(pair.1.buy_price.0.clone(), tickers.len());
+                    };
                 }
             }
 
@@ -157,6 +164,9 @@ impl Workable for TickerWorker {
             loop_count += 1;
             total_elapsed += start.elapsed().as_nanos();
             if loop_count == loop_to_update_stat {
+                for (exchange_name, count) in &stat_map {
+                    stat_info += &format!("\n| {:<8} | {:<8} |", exchange_name, count);
+                }
                 stat_info += &format!(
                     "\n---- Total elapsed:{} ----{RESET_CODE}",
                     format_duration(total_elapsed)
@@ -165,7 +175,11 @@ impl Workable for TickerWorker {
                 println!("{}", stat_info);
                 total_elapsed = 0;
                 loop_count = 0;
-                stat_info = format!("{INFO_CODE}----TickerWorker:{} statistics ----", self.id);
+                stat_map.clear();
+                stat_info = format!(
+                    "{INFO_CODE}----TickerWorker:{} Statistics ----\n| {:<8} | {:<8} |",
+                    self.id, "Exchange", "Tickers"
+                );
             }
 
             tokio::time::sleep(std::time::Duration::from_millis(1000)).await;

@@ -347,7 +347,7 @@ impl Workable for ComputWorker {
                 orderbook_spread_passed += 1;
                 let base_profit = (quote_volume / QUOTE_RATE) * (orderbook_spread / 100.0);
                  
-                let mut spread_message = format!("{SUCCESS_CODE}[INFO] ✅ {}/{}\nBuy exchange: {}\nSell exchange: {}\nQuote volume: {} {}\nСalculated buy price: {:.3} {}\nCalculated sell price: {:.3} {}\nNetworks:\n", 
+                let mut spread_message = format!("{SUCCESS_CODE}[INFO] ✅ {}/{}\nBuy exchange: {}\nSell exchange: {}\nQuote volume: {} {}\nСalculated buy price: {:.5} {}\nCalculated sell price: {:.5} {}\nNetworks:\n", 
                 pair.base,pair.quote,
                 buy_exchange.config().name, 
                 sell_exchange.config().name, 
@@ -385,17 +385,7 @@ impl Workable for ComputWorker {
                 }
                 spread_message += RESET_CODE;
                 println!("{}",spread_message);
-                // println!(
-                //     "{SUCCESS_CODE}[INFO] ✅ {}/{}. \nSpread {:.2}% Profit: {:.2} {} \nBuy: {} Sell: {} \nNetworks: {:#?}{RESET_CODE}",
-                //     pair.base,
-                //     pair.quote,
-                //     orderbook_spread,
-                //     profit,
-                //     pair.quote,
-                //     buy_exchange.config().name,
-                //     sell_exchange.config().name,
-                //     networks
-                // );
+              
             }
             loop_elapsed += start_time.elapsed().as_nanos();
 
