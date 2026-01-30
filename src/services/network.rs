@@ -39,7 +39,9 @@ impl NetworkService for Exchange {
         let mut deposit_networks: Vec<DepositNetwork> = Vec::new();
 
         let cache_data = self.config().cached_data.networks.get().await;
-
+        if cache_data.is_some() {
+            println!("Беру данные из кеша для биржи {} ", self.config().name);
+        }
         match self {
             Exchange::Binance(cfg) => {
                 let timestamp = get_current_timestamp()?;
@@ -67,7 +69,9 @@ impl NetworkService for Exchange {
                                 Some(Duration::from_secs(BINANCE_NETWORKS_HTTP_TIMEOUT_SECONDS)),
                             )
                             .await?;
-                        cfg.cached_data.networks.set(response.clone()).await;
+                        if response.is_array() {
+                            cfg.cached_data.networks.set(response.clone()).await;
+                        }
                         response
                     }
                 };
@@ -304,9 +308,7 @@ impl NetworkService for Exchange {
                     .await?;
 
                 if networks.is_empty() {
-                    return Err(
-                        format!("{} Invalid response: 'chains' is not an array", cfg.name).into(),
-                    );
+                    return Err(format!("{} Invalid response: networks is empty", cfg.name).into());
                 }
 
                 for network in networks.members() {
@@ -413,8 +415,6 @@ impl NetworkService for Exchange {
                 }
             }
             Exchange::Mexc(cfg) => {
-                let cache_data = cfg.cached_data.networks.get().await;
-
                 let recv_window = "5000";
                 let timestamp = get_current_timestamp()?;
                 let query_string = format!("recvWindow={}&timestamp={}", recv_window, timestamp);
@@ -446,7 +446,9 @@ impl NetworkService for Exchange {
                                 Some(Duration::from_secs(MEXC_NETWORKS_HTTP_TIMEOUT_SECONDS)),
                             )
                             .await?;
-                        cfg.cached_data.networks.set(response.clone()).await;
+                        if response.is_array() {
+                            cfg.cached_data.networks.set(response.clone()).await;
+                        }
                         response
                     }
                 };
