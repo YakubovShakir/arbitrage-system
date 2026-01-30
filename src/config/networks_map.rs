@@ -1310,7 +1310,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Avalanche C-Chain
-        const AVALANCHE_MAPPING: [&str; 11] = [
+        const AVALANCHE_MAPPING: [&str; 12] = [
             "CAVAX",
             "AVAXC",
             "AVAX",
@@ -1322,6 +1322,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             "AVALANCHE C CHAIN",
             "AVAX_XCHAIN",
             "AVAXC-CHAIN",
+            "AVAXCCHAIN",
         ];
         for mapped in AVALANCHE_MAPPING {
             m.insert(mapped, NetworkType::Avalanche);

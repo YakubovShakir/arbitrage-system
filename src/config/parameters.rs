@@ -15,7 +15,7 @@ pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.3;
 pub const NETWORKS_CACHE_TTL_SECS: u64 = 600;
 pub const MARGIN_INFO_CACHE_TTL_SECS: u64 = 600;
 
-pub const REQUESTS_CHUNK_SIZE: usize = 5;
+pub const REQUESTS_CHUNK_SIZE: usize = 3;
 
 pub const HTTP_MAX_POOL_IDLE_PER_HOST: usize = 20;
 pub const HTTP_RETRY_AFTER_MILLIS: u64 = 300;

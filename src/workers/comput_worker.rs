@@ -174,7 +174,6 @@ impl Workable for ComputWorker {
             let verify_futures: Vec<_> = pairs
                 .into_iter()
                 .map(|(pair, buy_exchange, sell_exchange)| async move {
-                    tokio::time::sleep(std::time::Duration::from_millis(30)).await;
 
                     match verify_arbitrage_conditions_and_get_networks(
                         &buy_exchange,
