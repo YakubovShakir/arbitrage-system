@@ -1,0 +1,115 @@
+2026-01-31T15:14:11.761935+03:00 INFO - 📡 Подключаемся к https://api.kucoin.com
+2026-01-31T15:14:11.762399+03:00 INFO - 📡 Подключаемся к wss://wbs-api.mexc.com/ws
+2026-01-31T15:14:11.762690+03:00 INFO - 📡 Подключаемся к wss://stream.binance.com:9443/ws
+2026-01-31T15:14:12.697897+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://wbs-api.mexc.com/ws установлено
+2026-01-31T15:14:13.309198+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://stream.binance.com:9443/ws установлено
+2026-01-31T15:15:57.675016+03:00 INFO - 📡 Подключаемся к wss://wbs-api.mexc.com/ws
+2026-01-31T15:15:57.675356+03:00 INFO - 📡 Подключаемся к https://api.kucoin.com
+2026-01-31T15:15:57.675537+03:00 INFO - 📡 Подключаемся к wss://stream.binance.com:9443/ws
+2026-01-31T15:15:58.609867+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://wbs-api.mexc.com/ws установлено
+2026-01-31T15:15:59.102856+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://stream.binance.com:9443/ws установлено
+2026-01-31T15:17:35.258470+03:00 INFO - 📡 Подключаемся к https://api.kucoin.com
+2026-01-31T15:17:35.258921+03:00 INFO - 📡 Подключаемся к wss://stream.binance.com:9443/ws
+2026-01-31T15:17:35.259178+03:00 INFO - 📡 Подключаемся к wss://wbs-api.mexc.com/ws
+2026-01-31T15:17:36.263093+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://wbs-api.mexc.com/ws установлено
+2026-01-31T15:17:36.737789+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://stream.binance.com:9443/ws установлено
+2026-01-31T15:17:36.823524+03:00 INFO - 🔗 WebSocket соединение c wss://ws-api-spot.kucoin.com/ установлено
+2026-01-31T15:27:13.326415+03:00 INFO - Running in DEVELOPMENT mode
+2026-01-31T15:27:13.327692+03:00 INFO - 📡 Подключаемся к wss://stream.binance.com:9443/ws
+2026-01-31T15:27:13.334576+03:00 INFO - 📡 Подключаемся к wss://wbs-api.mexc.com/ws
+2026-01-31T15:27:13.334731+03:00 INFO - 📡 Подключаемся к https://api.kucoin.com
+2026-01-31T15:27:14.275877+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://wbs-api.mexc.com/ws установлено
+2026-01-31T15:27:14.753190+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://stream.binance.com:9443/ws установлено
+2026-01-31T15:27:14.775180+03:00 INFO - 🔗 WebSocket соединение c wss://ws-api-spot.kucoin.com/ установлено
+2026-01-31T15:27:42.494475+03:00 INFO - ┌── СomputWorker:1 Statistics for 10 iteration
+├──── Updated tickers
+│        ├─ Total elapsed: 9.057 ms
+│        └─ Total passed: 1480
+├──── Prices stat
+│        └─ Total elapsed: 2.791 ms
+├──── Ticker spread stat
+│        ├─ Total elapsed: 192.864 µs
+│        └─ Total passed: 25
+├──── Verify stat
+│        ├─ Total elapsed: 10.121 s
+│        └─ Total passed: 8
+├──── Orderbook stat
+│        ├─ Total elapsed: 1.009 s
+│        └─ Total passed: 8
+├──── Calculated Books stat
+│        ├─ Total elapsed: 6.296 µs
+│        └─ Total passed: 8
+├──── Final spread stat
+│        ├─ Total elapsed: 968 ns
+│        └─ Total passed: 0
+└── Total elapsed: 11.159 s
+
+2026-01-31T15:28:04.474115+03:00 INFO - ┌── СomputWorker:1 Statistics for 10 iteration
+├──── Updated tickers
+│        ├─ Total elapsed: 17.186 ms
+│        └─ Total passed: 854
+├──── Prices stat
+│        └─ Total elapsed: 1.239 ms
+├──── Ticker spread stat
+│        ├─ Total elapsed: 60.526 µs
+│        └─ Total passed: 20
+├──── Verify stat
+│        ├─ Total elapsed: 609.381 ms
+│        └─ Total passed: 17
+├──── Orderbook stat
+│        ├─ Total elapsed: 1.321 s
+│        └─ Total passed: 17
+├──── Calculated Books stat
+│        ├─ Total elapsed: 18.650 µs
+│        └─ Total passed: 17
+├──── Final spread stat
+│        ├─ Total elapsed: 1.044 µs
+│        └─ Total passed: 0
+└── Total elapsed: 1.970 s
+
+2026-01-31T15:28:28.488371+03:00 INFO - ┌── СomputWorker:1 Statistics for 10 iteration
+├──── Updated tickers
+│        ├─ Total elapsed: 24.402 ms
+│        └─ Total passed: 1025
+├──── Prices stat
+│        └─ Total elapsed: 1.309 ms
+├──── Ticker spread stat
+│        ├─ Total elapsed: 97.372 µs
+│        └─ Total passed: 33
+├──── Verify stat
+│        ├─ Total elapsed: 622.935 ms
+│        └─ Total passed: 30
+├──── Orderbook stat
+│        ├─ Total elapsed: 3.326 s
+│        └─ Total passed: 30
+├──── Calculated Books stat
+│        ├─ Total elapsed: 27.074 µs
+│        └─ Total passed: 29
+├──── Final spread stat
+│        ├─ Total elapsed: 2.870 µs
+│        └─ Total passed: 0
+└── Total elapsed: 4.003 s
+
+2026-01-31T15:28:54.690490+03:00 INFO - ┌── СomputWorker:1 Statistics for 10 iteration
+├──── Updated tickers
+│        ├─ Total elapsed: 16.219 ms
+│        └─ Total passed: 1208
+├──── Prices stat
+│        └─ Total elapsed: 1.289 ms
+├──── Ticker spread stat
+│        ├─ Total elapsed: 88.692 µs
+│        └─ Total passed: 55
+├──── Verify stat
+│        ├─ Total elapsed: 1.112 s
+│        └─ Total passed: 52
+├──── Orderbook stat
+│        ├─ Total elapsed: 5.054 s
+│        └─ Total passed: 52
+├──── Calculated Books stat
+│        ├─ Total elapsed: 67.524 µs
+│        └─ Total passed: 51
+├──── Final spread stat
+│        ├─ Total elapsed: 3.485 µs
+│        └─ Total passed: 0
+└── Total elapsed: 6.204 s
+

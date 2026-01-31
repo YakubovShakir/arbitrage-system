@@ -1,4 +1,5 @@
 use dotenv::dotenv;
+use log::info;
 use std::env;
 
 pub fn load_env() {
@@ -7,10 +8,10 @@ pub fn load_env() {
 
     match environment.as_str() {
         "PRODUCTION" => {
-            println!("Running in PRODUCTION mode");
+            info!(target: "info_module", "Running in PRODUCTION mode");
         }
         _ => {
-            println!("Running in DEVELOPMENT mode");
+            info!(target: "info_module", "Running in DEVELOPMENT mode");
             dotenv().ok();
         }
     }

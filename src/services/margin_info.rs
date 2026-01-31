@@ -1,7 +1,7 @@
-use std::time::Duration;
-
 use async_trait::async_trait;
 use json::JsonValue;
+use log::debug;
+use std::time::Duration;
 
 use crate::{
     config::parameters::{
@@ -33,10 +33,7 @@ impl MarginInfoService for Exchange {
         let cache_data = self.config().cached_data.margin_info.get().await;
 
         if cache_data.is_none() {
-            println!(
-                "{DEBUG_CODE}[DEBUG] Cache not given for margin_info {}{RESET_CODE}",
-                self.config().name,
-            );
+            debug!(target:"debug_module", "Cache not given for margin_info {}", self.config().name);
         }
 
         let raw_borrowable: JsonValue = match self {

@@ -2,6 +2,7 @@ use crate::config::{
     NetworkType, get_map,
     parameters::{ERROR_CODE, RESET_CODE},
 };
+use log::error;
 
 #[derive(Debug, Clone)]
 pub struct NetworkConfig {
@@ -34,10 +35,7 @@ impl Network {
                 })
             }
             None => {
-                println!(
-                    "{ERROR_CODE}[ERROR] Не удалось распознать сеть name: {} full_name: {}{RESET_CODE}",
-                    name, full_name
-                );
+                error!(target: "unknown_networks_module", "Не удалось распознать сеть name: {} full_name: {}",name, full_name);
                 None
             }
         }

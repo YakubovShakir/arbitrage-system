@@ -4,6 +4,7 @@ use std::error::Error;
 use std::sync::Arc;
 use std::time::Duration;
 
+use log::info;
 use tokio_tungstenite::connect_async;
 
 use crate::config;
@@ -183,10 +184,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 let url = format!("{}?token={}", endpoint, token);
 
                 let result = connect_async(&url).await?;
-                println!(
-                    "{SUCCESS_CODE}[INFO] 🔗 WebSocket соединение c {} установлено{RESET_CODE}",
-                    endpoint
-                );
+                info!(target: "info_module", "🔗 WebSocket соединение c {} установлено", endpoint);
 
                 Ok(result)
             })
@@ -239,47 +237,6 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     });
     exchanges.insert(config::gate::NAME.to_owned(), gate);
 
-    // Huobi
-    let huobi_binary_handler: BinaryMessageHandler = Arc::new(|data: prost::bytes::Bytes| {
-        let mut message = String::new();
-        println!("Binary {:#?}", data);
-        let Ok(decompressed) = decompress_gzip(&data.clone()) else {
-            return None;
-        };
-        let Ok(parsed) = json::parse(&decompressed) else {
-            return None;
-        };
-        // if parsed.has_key("subbed") {
-        //     if parsed["subbed"] == "market.tickers" {
-        //         return None;
-        //     }
-        // }
-
-        println!("Decompressed data from huobi - {}", parsed.pretty(4));
-
-        Some(message)
-        // match crate::config::mexc_protocol_buffers::decode_message(&data) {
-        //     Ok(message) => {
-        //         let tickers =
-        //             crate::config::mexc_protocol_buffers::handle_protobuf_message(message);
-
-        //         // Преобразуем тикеры в строку для состояния
-        //         if !tickers.is_empty() {
-        //             let ticker_strings: Vec<String> = tickers
-        //                 .iter()
-        //                 .map(|t| format!("{}:{}", t.symbol, t.price))
-        //                 .collect();
-        //             Some(ticker_strings.join("|"))
-        //         } else {
-        //             None
-        //         }
-        //     }
-        //     Err(e) => {
-        //         eprintln!("Ошибка декодирования protobuf MEXC: {}", e);
-        //         None
-        //     }
-        // }
-    });
     let huobi = Exchange::Huobi(ExchangeConfig {
         name: config::huobi::NAME.to_owned(),
         api_key: env::var("HUOBI_API_KEY")?.to_owned(),

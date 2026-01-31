@@ -201,9 +201,6 @@ async fn handle_ws_interface(
         }
     } else {
         if let Some(state) = client.get_state().await {
-            if exchange.config().name == "Huobi" {
-                println!("State: {}", state);
-            }
             return Ok(read_ws_state(&state, &exchange)?);
         }
     };
@@ -298,9 +295,6 @@ fn read_ws_state(
                     }
                 }
             }
-        }
-        Exchange::Huobi(cfg) => {
-            println!("STATE from huobi {}", state);
         }
         _ => {
             return Err(format!(

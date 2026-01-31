@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use flate2::read::GzDecoder;
+use log::{debug, error};
 use std::{
     io::Read,
     mem,
@@ -77,16 +78,16 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     let withdraw_networks = match buy_exchange.networks(&trading_pair_name.base).await {
         Ok(networks) => networks.0,
         Err(e) => {
-            println!(
-                "{WARNING_CODE}[WARNING] {}/{} verify returns empty networks. REASON: Can't get buy {} networks. ERROR: {} {RESET_CODE}",
+            error!(
+                "{}/{} verify returns empty networks. REASON: Can't get buy {} networks. ERROR: {}",
                 trading_pair_name.base, trading_pair_name.quote, buy_exchange_name, e
             );
             return Ok(Vec::new());
         }
     };
     if withdraw_networks.len() == 0 {
-        println!(
-            "{DEBUG_CODE}[DEBUG] {}/{} verify - failed. REASON: Empty buy networks {} {RESET_CODE}",
+        debug!(target: "debug_module",
+            "{}/{} verify - failed. REASON: Empty buy networks {}",
             trading_pair_name.base, trading_pair_name.quote, buy_exchange_name
         );
         return Err(buy_exchange_name.to_string());
@@ -95,18 +96,15 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     let deposit_networks = match sell_exchange.networks(&trading_pair_name.base).await {
         Ok(networks) => networks.1,
         Err(e) => {
-            println!(
-                "{WARNING_CODE}[WARNING] {}/{} verify returns empty networks. REASON: Can't get sell {} networks. ERROR: {}{RESET_CODE}",
+            error!(
+                "{}/{} verify returns empty networks. REASON: Can't get sell {} networks. ERROR: {}",
                 trading_pair_name.base, trading_pair_name.quote, sell_exchange_name, e
             );
             return Ok(Vec::new());
         }
     };
     if deposit_networks.len() == 0 {
-        println!(
-            "{DEBUG_CODE}[DEBUG] {}/{} verify - failed. REASON: Empty sell networks {} {RESET_CODE}",
-            trading_pair_name.base, trading_pair_name.quote, sell_exchange_name
-        );
+        debug!(target: "debug_module", "{}/{} verify - failed. REASON: Empty sell networks {}",  trading_pair_name.base, trading_pair_name.quote, sell_exchange_name );
         return Err(sell_exchange_name.to_string());
     }
 

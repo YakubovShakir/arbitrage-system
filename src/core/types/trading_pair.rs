@@ -32,7 +32,7 @@ impl TradingPair {
                 }
             }
         }
-        // println!("Не удалось распарсить пару {}", symbol);
+        // error!("Не удалось распарсить пару {}", symbol);
         None
     }
     pub fn from_str_with_separator(symbol: &str, separator: char) -> Option<Self> {

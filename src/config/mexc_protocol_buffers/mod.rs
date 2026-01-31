@@ -1,5 +1,6 @@
 // src/config/mexc_protocol_buffers/mod.rs
 
+use log::error;
 use prost::Message;
 
 // Импортируем сгенерированный код через корневой proto модуль
@@ -25,7 +26,7 @@ pub fn handle_protobuf_message(message: PushDataV3ApiWrapper) -> Vec<PublicMiniT
                 tickers = tickers_data.items;
             }
             _ => {
-                println!("📨 Другой тип сообщения from Mexc binary");
+                error!("📨 Другой тип сообщения from Mexc binary");
             }
         }
     }

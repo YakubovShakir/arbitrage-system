@@ -9,9 +9,10 @@ use arbitrage_system::{
 };
 use dashmap::DashMap;
 use std::sync::Arc;
-
 #[tokio::main]
 async fn main() {
+    log4rs::init_file("./src/config/log4rs.yaml", Default::default()).unwrap();
+
     load_env();
     // Получаем список бирж из init
     let exchanges = Arc::new(get_exchanges().unwrap());
@@ -50,58 +51,6 @@ async fn main() {
     });
 
     tasks.extend([ticker_task, comput_task]);
-
-    // let mut tasks = Vec::new();
-
-    // let exchanges_clone = exchanges.clone();
-    // let trading_pairs_clone = trading_pairs.clone();
-
-    // let explorer_task = tokio::spawn(async move {
-    //     loop {
-    //         print_dashboard(trading_pairs_clone.clone(), exchanges_clone.clone());
-    //         tokio::time::sleep(std::time::Duration::from_millis(15000)).await;
-    //     }
-    // });
-    // tasks.push(explorer_task);
-
-    // let mut i = 0;
-
-    // while i < trading_pairs.len() {
-    //     let fetchers_exchanges = exchanges.clone();
-    //     let comput_exchanges = exchanges.clone();
-
-    //     let end = std::cmp::min(i + PAIRS_PER_THREAD, trading_pairs.len());
-
-    //     let fetchers_pairs = trading_pairs[i..end].to_vec();
-    //     let comput_pairs = trading_pairs[i..end].to_vec();
-
-    //     let fetcher_task = tokio::spawn(async move {
-    //         let fetcher = FetchWorker::new(
-    //             i as usize / PAIRS_PER_THREAD,
-    //             fetchers_pairs,
-    //             fetchers_exchanges,
-    //         );
-    //         fetcher.run().await;
-    //     });
-    //     let comput_task = tokio::spawn(async move {
-    //         let comput = ComputWorker::new(
-    //             i as usize / PAIRS_PER_THREAD,
-    //             comput_pairs,
-    //             comput_exchanges,
-    //         );
-    //         comput.run().await;
-    //     });
-
-    //     tasks.push(fetcher_task);
-    //     tasks.push(comput_task);
-
-    //     i += PAIRS_PER_THREAD;
-    // }
-    // println!(
-    //     "\nКоличество потоков: {}\nВ каждом потоке до {} торговых пар",
-    //     tasks.len() - 1,
-    //     PAIRS_PER_THREAD
-    // );
 
     for task in tasks {
         task.await.unwrap();

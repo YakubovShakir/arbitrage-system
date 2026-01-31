@@ -1,0 +1,25 @@
+2026-01-31T15:14:21.762794+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:16:07.676246+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:17:45.258608+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:17:56.282493+03:00 WARN Failed GET https://api.gateio.ws/api/v4/spot/tickers. Retry after 300ms..
+2026-01-31T15:17:57.618719+03:00 ERROR Не удалось получить orderbook с Bitget - Error status code HTTP 400 Bad Request - {"code":"40034","msg":"Parameter lotusdt does not exist","requestTime":1769861877479,"data":null}
+2026-01-31T15:18:06.586659+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:18:12.887263+03:00 ERROR Не удалось получить orderbook с Bitget - Error status code HTTP 400 Bad Request - {"code":"40034","msg":"Parameter lotusdt does not exist","requestTime":1769861892763,"data":null}
+2026-01-31T15:18:17.615745+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:18:28.484247+03:00 ERROR Не удалось получить orderbook с Bitget - Error status code HTTP 400 Bad Request - {"code":"40034","msg":"Parameter lotusdt does not exist","requestTime":1769861908359,"data":null}
+2026-01-31T15:27:23.335586+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:27:26.557745+03:00 ERROR SXRPS/USDT verify returns empty networks. REASON: Can't get buy Bitget networks. ERROR: Error status code HTTP 429 Too Many Requests - {"code":"429","msg":"Too Many Requests","requestTime":1769862446386,"data":null}
+2026-01-31T15:27:30.350507+03:00 ERROR ELA/USDT verify returns empty networks. REASON: Can't get buy Kucoin networks. ERROR: error decoding response body
+2026-01-31T15:27:30.350725+03:00 ERROR AURORA/USDT verify returns empty networks. REASON: Can't get buy Bybit networks. ERROR: error decoding response body
+2026-01-31T15:27:34.353950+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:27:35.347681+03:00 ERROR LOT/USDT verify returns empty networks. REASON: Can't get buy Bitget networks. ERROR: error decoding response body
+2026-01-31T15:27:35.348251+03:00 ERROR RWA/USDT verify returns empty networks. REASON: Can't get buy Bitget networks. ERROR: error decoding response body
+2026-01-31T15:27:35.348682+03:00 ERROR PIPE/USDT verify returns empty networks. REASON: Can't get buy Bitget networks. ERROR: error decoding response body
+2026-01-31T15:27:35.349127+03:00 ERROR U2U/USDT verify returns empty networks. REASON: Can't get buy Bitget networks. ERROR: error decoding response body
+2026-01-31T15:27:45.377967+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:27:56.401840+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:28:07.428645+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:28:18.464754+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:28:29.505248+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:28:40.519486+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-01-31T15:28:51.542203+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body

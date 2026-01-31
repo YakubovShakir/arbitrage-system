@@ -10,7 +10,7 @@ use crate::{
         utils::format_duration,
     },
 };
-
+use log::{error, info};
 pub struct TickerWorker {
     id: usize,
     trading_pairs: Arc<TradingPairs>,
@@ -40,8 +40,8 @@ impl TickerWorker {
                 match exchange.tickers().await {
                     Ok(tickers) => Some(tickers),
                     Err(e) => {
-                        println!(
-                            "{ERROR_CODE}[ERROR] Не удалось получить тикеры от биржи {}, ошибка - {}{RESET_CODE}",
+                        error!(
+                            "Не удалось получить тикеры от биржи {}, ошибка - {}",
                             ex_name, e
                         );
                         None
@@ -138,7 +138,7 @@ impl Workable for TickerWorker {
         let loop_to_update_stat = 10;
         let mut total_elapsed = 0;
         let mut stat_info = format!(
-            "{INFO_CODE}----TickerWorker:{} Statistics ----\n| {:<8} | {:<8} |",
+            "----TickerWorker:{} Statistics ----\n| {:<8} | {:<8} |",
             self.id, "Exchange", "Tickers"
         );
         let mut stat_map: HashMap<String, usize> = HashMap::new();
@@ -168,16 +168,16 @@ impl Workable for TickerWorker {
                     stat_info += &format!("\n| {:<8} | {:<8} |", exchange_name, count);
                 }
                 stat_info += &format!(
-                    "\n---- Total elapsed:{} ----{RESET_CODE}",
+                    "\n---- Total elapsed:{} ----",
                     format_duration(total_elapsed)
                 );
 
-                println!("{}", stat_info);
+                info!(target:"info_module", "{}", stat_info);
                 total_elapsed = 0;
                 loop_count = 0;
                 stat_map.clear();
                 stat_info = format!(
-                    "{INFO_CODE}----TickerWorker:{} Statistics ----\n| {:<8} | {:<8} |",
+                    "----TickerWorker:{} Statistics ----\n| {:<8} | {:<8} |",
                     self.id, "Exchange", "Tickers"
                 );
             }

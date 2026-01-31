@@ -1,4 +1,5 @@
 use json::JsonValue;
+use log::{error, warn};
 use reqwest::{
     Client, RequestBuilder, StatusCode,
     header::{HeaderMap, HeaderName, HeaderValue},
@@ -8,8 +9,7 @@ use tokio::sync::OnceCell;
 
 use crate::{
     config::parameters::{
-        ERROR_CODE, GLOBAL_HTTP_TIMEOUT_SECS, HTTP_MAX_POOL_IDLE_PER_HOST, HTTP_RETRY_AFTER_MILLIS,
-        RESET_CODE,
+        GLOBAL_HTTP_TIMEOUT_SECS, HTTP_MAX_POOL_IDLE_PER_HOST, HTTP_RETRY_AFTER_MILLIS,
     },
     core::types::KeyValue,
 };
@@ -101,10 +101,11 @@ impl HttpClient {
         let response = match req_builder.send().await {
             Ok(resp) => resp,
             Err(_) => {
-                println!(
-                    "{ERROR_CODE}[ERROR] Failed GET {}{}. Retry after {}ms..{RESET_CODE}",
+                warn!(
+                    "Failed GET {}{}. Retry after {}ms..",
                     self._base_url, endpoint, HTTP_RETRY_AFTER_MILLIS
                 );
+
                 tokio::time::sleep(std::time::Duration::from_millis(HTTP_RETRY_AFTER_MILLIS)).await;
                 let req_builder = self
                     .build_get(endpoint, formated_headers.clone(), query, timeout)
@@ -113,15 +114,9 @@ impl HttpClient {
                 match req_builder.send().await {
                     Ok(res) => res,
                     Err(e) => {
-                        println!(
-                            "{ERROR_CODE}[ERROR] Failed GET after retry {}{} {RESET_CODE}",
-                            self._base_url, endpoint
-                        );
+                        error!("Failed GET after retry {}{}", self._base_url, endpoint);
                         if e.is_timeout() {
-                            eprintln!(
-                                "{ERROR_CODE}[ERROR] Timeout error {}{} - {}{RESET_CODE}",
-                                self._base_url, endpoint, e
-                            );
+                            error!("Timeout error {}{} - {}", self._base_url, endpoint, e);
                         }
                         return Err(Box::new(e));
                     }

@@ -1,7 +1,5 @@
 use std::time::Duration;
 
-use async_trait::async_trait;
-
 use crate::{
     config::parameters::{
         BINANCE_NETWORKS_HTTP_TIMEOUT_SECONDS, BITGET_NETWORKS_HTTP_TIMEOUT_SECONDS, ERROR_CODE,
@@ -24,6 +22,8 @@ use crate::{
         },
     },
 };
+use async_trait::async_trait;
+use log::error;
 
 #[async_trait]
 impl NetworkService for Exchange {
@@ -95,8 +95,8 @@ impl NetworkService for Exchange {
                             parse_json_as_str(&network["network"]),
                             parse_json_as_str(&network["name"]),
                         ) else {
-                            println!(
-                                "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
+                            error!(
+                                "Не удалось распарсить название сети {} с биржи {}",
                                 cfg.name, network
                             );
                             continue;
@@ -178,8 +178,8 @@ impl NetworkService for Exchange {
                             parse_json_as_str(&network["chain"]),
                             parse_json_as_str(&network["chainType"]),
                         ) else {
-                            println!(
-                                "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
+                            error!(
+                                "Не удалось распарсить название сети {} с биржи {}",
                                 network, cfg.name,
                             );
                             continue;
@@ -261,8 +261,8 @@ impl NetworkService for Exchange {
                             parse_json_as_str(&network["chain"]),
                             parse_json_as_str(&network["chain"]),
                         ) else {
-                            println!(
-                                "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
+                            error!(
+                                "Не удалось распарсить название сети {} с биржи {}",
                                 cfg.name, network
                             );
                             continue;
@@ -325,8 +325,8 @@ impl NetworkService for Exchange {
                         parse_json_as_str(&network["chain"]),
                         parse_json_as_str(&network["name_en"]),
                     ) else {
-                        println!(
-                            "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
+                        error!(
+                            "Не удалось распарсить название сети {} с биржи {}",
                             cfg.name, network
                         );
                         continue;
@@ -383,8 +383,8 @@ impl NetworkService for Exchange {
                             parse_json_as_str(&network["chainId"]),
                             parse_json_as_str(&network["chainName"]),
                         ) else {
-                            println!(
-                                "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
+                            error!(
+                                "Не удалось распарсить название сети {} с биржи {}",
                                 cfg.name, network
                             );
                             continue;
@@ -471,8 +471,8 @@ impl NetworkService for Exchange {
                             parse_json_as_str(&network["netWork"]),
                             parse_json_as_str(&network["netWork"]),
                         ) else {
-                            println!(
-                                "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
+                            error!(
+                                "Не удалось распарсить название сети {} с биржи {}",
                                 cfg.name, network
                             );
                             continue;
@@ -527,8 +527,8 @@ impl NetworkService for Exchange {
                         let withdraw_enabled: bool = network["withdrawStatus"] == "allowed";
 
                         let Ok(name) = parse_json_as_str(&network["chain"]) else {
-                            println!(
-                                "{ERROR_CODE} Не удалось распарсить название сети {} с биржи {} {RESET_CODE}",
+                            error!(
+                                "Не удалось распарсить название сети {} с биржи {}",
                                 cfg.name, network
                             );
                             continue;

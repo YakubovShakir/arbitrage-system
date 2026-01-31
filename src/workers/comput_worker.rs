@@ -2,21 +2,26 @@ use futures_util::{future::join_all, sink::With};
 
 use crate::{
     config::parameters::{
-            DEBUG_CODE, ERROR_CODE, INFO_CODE, QUOTE_RATE, REQUESTS_CHUNK_SIZE, REQUIRED_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE, SUCCESS_CODE
-        },
+        DEBUG_CODE, ERROR_CODE, INFO_CODE, QUOTE_RATE, REQUESTS_CHUNK_SIZE,
+        REQUIRED_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE,
+        SUCCESS_CODE,
+    },
     core::{
         traits::{Workable, exchange_service::OrderBookService},
         types::{
             ExchangeName, Exchanges, Network, OrderBook, TradingPair, TradingPairs,
-            blacklist::Blacklist, exchanges::Exchange, network::{DepositNetwork, WithdrawNetwork},
+            blacklist::Blacklist,
+            exchanges::Exchange,
+            network::{DepositNetwork, WithdrawNetwork},
         },
         utils::{
-            calculate_price_by_glass, comput_spread_percent, format_duration, verify_arbitrage_conditions_and_get_networks
+            calculate_price_by_glass, comput_spread_percent, format_duration,
+            verify_arbitrage_conditions_and_get_networks,
         },
     },
 };
-use std::{ sync::Arc, time::Instant};
-
+use log::{error, info};
+use std::{sync::Arc, time::Instant};
 pub struct ComputWorker {
     id: usize,
     trading_pairs: Arc<TradingPairs>,
@@ -147,7 +152,7 @@ impl Workable for ComputWorker {
         let mut loop_count = 0;
         let loop_to_update_stat = 10;
         let mut stat_info = format!(
-            "{INFO_CODE}┌── СomputWorker:{} Statistics for {} iteration\n",
+            "┌── СomputWorker:{} Statistics for {} iteration\n",
             self.id, loop_to_update_stat
         );
         let mut loop_elapsed = 0;
@@ -174,7 +179,6 @@ impl Workable for ComputWorker {
             let verify_futures: Vec<_> = pairs
                 .into_iter()
                 .map(|(pair, buy_exchange, sell_exchange)| async move {
-
                     match verify_arbitrage_conditions_and_get_networks(
                         &buy_exchange,
                         &sell_exchange,
@@ -203,28 +207,38 @@ impl Workable for ComputWorker {
                 .collect();
 
             let verify_time = Instant::now();
-            let verify_results: Vec<Option<(TradingPair, &Exchange, &Exchange, Vec<(WithdrawNetwork, DepositNetwork)>)>> =
-                join_all(verify_futures).await;
+            let verify_results: Vec<
+                Option<(
+                    TradingPair,
+                    &Exchange,
+                    &Exchange,
+                    Vec<(WithdrawNetwork, DepositNetwork)>,
+                )>,
+            > = join_all(verify_futures).await;
             verify_total_elapsed += verify_time.elapsed().as_nanos();
 
-            let verify_passed_pairs: Vec<(TradingPair, &Exchange, &Exchange, Vec<(WithdrawNetwork, DepositNetwork)>)> =
-                verify_results
-                    .into_iter()
-                    .filter_map(|result| result)
-                    .collect();
+            let verify_passed_pairs: Vec<(
+                TradingPair,
+                &Exchange,
+                &Exchange,
+                Vec<(WithdrawNetwork, DepositNetwork)>,
+            )> = verify_results
+                .into_iter()
+                .filter_map(|result| result)
+                .collect();
             verify_passed += verify_passed_pairs.len();
 
             // println!("{DEBUG_CODE}[DEBUG] ComputWorker - Call orderbook() {RESET_CODE}");
-            let mut orderbook_futures: Vec<_>  = verify_passed_pairs.into_iter().map(
-                |(pair, buy_exchange, sell_exchange, networks)| async move {
-                    
+            let mut orderbook_futures: Vec<_> = verify_passed_pairs
+                .into_iter()
+                .map(|(pair, buy_exchange, sell_exchange, networks)| async move {
                     let (buy_book, sell_book) = tokio::join!(
                         async {
                             match buy_exchange.orderbook(&pair.base, &pair.quote).await {
                                 Ok(book) => Ok(book),
                                 Err(e) => {
-                                    println!(
-                                        "{ERROR_CODE}[ERROR] Не удалось получить orderbook с {} - {}{RESET_CODE}",
+                                    error!(
+                                        "Не удалось получить orderbook с {} - {}",
                                         buy_exchange.config().name,
                                         e
                                     );
@@ -236,8 +250,8 @@ impl Workable for ComputWorker {
                             match sell_exchange.orderbook(&pair.base, &pair.quote).await {
                                 Ok(book) => Ok(book),
                                 Err(e) => {
-                                    println!(
-                                        "{ERROR_CODE}[ERROR] Не удалось получить orderbook с {} - {}{RESET_CODE}",
+                                    error!(
+                                        "Не удалось получить orderbook с {} - {}",
                                         sell_exchange.config().name,
                                         e
                                     );
@@ -254,12 +268,11 @@ impl Workable for ComputWorker {
                         buy_book,
                         sell_book,
                     )
-                },
-            ).collect();
-
+                })
+                .collect();
 
             let books_time = Instant::now();
-  
+
             let mut orderbook_results: Vec<(
                 TradingPair,
                 &Exchange,
@@ -316,9 +329,9 @@ impl Workable for ComputWorker {
             // println!("{DEBUG_CODE}[DEBUG] ComputWorker - Start comput orderbook spread {RESET_CODE}");
             for (pair, buy_exchange, sell_exchange, networks, buy_orderbook, sell_orderbook) in
                 orderbook_passed_pairs
-            {   
+            {
                 let Some(quote_volume) = pair.get_volume_by_quote() else {
-                    println!("{ERROR_CODE}[ERROR] Не удалось получить объем квота {:?}{RESET_CODE}", pair);  
+                    error!("Не удалось получить объем квота {:?}", pair);
                     continue;
                 };
                 let calc_books_time = Instant::now();
@@ -345,46 +358,63 @@ impl Workable for ComputWorker {
                 }
                 orderbook_spread_passed += 1;
                 let base_profit = (quote_volume / QUOTE_RATE) * (orderbook_spread / 100.0);
-                 
-                let mut spread_message = format!("{SUCCESS_CODE}[INFO] ✅ {}/{}\nBuy exchange: {}\nSell exchange: {}\nQuote volume: {} {}\nСalculated buy price: {:.5} {}\nCalculated sell price: {:.5} {}\nNetworks:\n", 
-                pair.base,pair.quote,
-                buy_exchange.config().name, 
-                sell_exchange.config().name, 
-                quote_volume / QUOTE_RATE, pair.quote, 
-                calculated_buy_price, pair.quote, 
-                calculated_sell_price, pair.quote
-            );
+
+                let mut spread_message = format!(
+                    "✅ {}/{}\nBuy exchange: {}\nSell exchange: {}\nQuote volume: {} {}\nСalculated buy price: {:.5} {}\nCalculated sell price: {:.5} {}\nNetworks:\n",
+                    pair.base,
+                    pair.quote,
+                    buy_exchange.config().name,
+                    sell_exchange.config().name,
+                    quote_volume / QUOTE_RATE,
+                    pair.quote,
+                    calculated_buy_price,
+                    pair.quote,
+                    calculated_sell_price,
+                    pair.quote
+                );
 
                 for (withdraw_network, deposit_network) in networks {
-                    let fee_quote_volume = withdraw_network.withdraw_fee.unwrap_or(0.0) * calculated_sell_price;
+                    let fee_quote_volume =
+                        withdraw_network.withdraw_fee.unwrap_or(0.0) * calculated_sell_price;
                     let profit_with_fee = base_profit - fee_quote_volume;
-                    let final_spread_percent = profit_with_fee / (quote_volume/ QUOTE_RATE) * 100.0;
+                    let final_spread_percent =
+                        profit_with_fee / (quote_volume / QUOTE_RATE) * 100.0;
 
-                    let fee_message = match  withdraw_network.withdraw_fee {
-                        Some(fee) => format!("{} {} ~ {:.3} {}", fee, pair.base, fee_quote_volume, pair.quote),
-                        None => String::from("Not provided")
+                    let fee_message = match withdraw_network.withdraw_fee {
+                        Some(fee) => format!(
+                            "{} {} ~ {:.3} {}",
+                            fee, pair.base, fee_quote_volume, pair.quote
+                        ),
+                        None => String::from("Not provided"),
                     };
                     let num_of_conf_message = match deposit_network.number_of_confirmation {
                         Some(number) => number.to_string(),
-                        None => String::from("Not provided")
+                        None => String::from("Not provided"),
                     };
-                    let contract_message = match withdraw_network.base.config.contract_address.or_else(|| deposit_network.base.config.contract_address) {
-                        Some(contract_address)=> contract_address,
-                        None => String::from("Not provided")
+                    let contract_message = match withdraw_network
+                        .base
+                        .config
+                        .contract_address
+                        .or_else(|| deposit_network.base.config.contract_address)
+                    {
+                        Some(contract_address) => contract_address,
+                        None => String::from("Not provided"),
                     };
 
-                    let message = format!("[-] {:?}\nTransfer fee: {}\nContract address: {}\nNumber of confirmations: {}\nProfit {:.2} {} ~ {:.2}%", 
-                    withdraw_network.base.network_type, 
-                    fee_message,
-                    contract_message,
-                    num_of_conf_message,
-                    profit_with_fee, pair.quote, final_spread_percent
+                    let message = format!(
+                        "[-] {:?}\nTransfer fee: {}\nContract address: {}\nNumber of confirmations: {}\nProfit {:.2} {} ~ {:.2}%",
+                        withdraw_network.base.network_type,
+                        fee_message,
+                        contract_message,
+                        num_of_conf_message,
+                        profit_with_fee,
+                        pair.quote,
+                        final_spread_percent
                     );
                     spread_message += &message;
                 }
                 spread_message += RESET_CODE;
-                println!("{}",spread_message);
-              
+                info!(target: "info_module", "{}", spread_message);
             }
             loop_elapsed += start_time.elapsed().as_nanos();
 
@@ -420,23 +450,30 @@ impl Workable for ComputWorker {
                 stat_info += &format!("├──── Final spread stat\n");
                 stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_final);
                 stat_info += &format!("│        └─ Total passed: {}\n", orderbook_spread_passed);
-                stat_info += &format!("└── Total elapsed: {}\n{RESET_CODE}", formated_total_loop);
+                stat_info += &format!("└── Total elapsed: {}\n", formated_total_loop);
 
-                println!("{}", stat_info);
+                info!(target: "info_module", "{}", stat_info);
 
-                (   loop_count,
-                    check_passed, check_total_elapsed, 
-                    prices_quard_total_elapsed, 
-                    ticker_spread_passed, ticker_spread_total_elapsed, 
-                    verify_passed, verify_total_elapsed, 
-                    orderbook_passed, orderbook_total_elapsed,
-                    calc_books_passed, calc_books_total_elapsed, 
-                    orderbook_spread_passed, orderbook_spread_total_elapsed, 
-                    loop_elapsed
-                ) = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+                (
+                    loop_count,
+                    check_passed,
+                    check_total_elapsed,
+                    prices_quard_total_elapsed,
+                    ticker_spread_passed,
+                    ticker_spread_total_elapsed,
+                    verify_passed,
+                    verify_total_elapsed,
+                    orderbook_passed,
+                    orderbook_total_elapsed,
+                    calc_books_passed,
+                    calc_books_total_elapsed,
+                    orderbook_spread_passed,
+                    orderbook_spread_total_elapsed,
+                    loop_elapsed,
+                ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
                 stat_info = format!(
-                    "{INFO_CODE}┌── СomputWorker:{} Statistics for {} iteration\n",
+                    "┌── СomputWorker:{} Statistics for {} iteration\n",
                     self.id, loop_to_update_stat
                 );
             }
