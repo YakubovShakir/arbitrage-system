@@ -414,7 +414,7 @@ impl Workable for ComputWorker {
                     spread_message += &message;
                 }
                 spread_message += RESET_CODE;
-                info!(target: "info_module", "{}", spread_message);
+                info!(target: "info_module", "\n{}\n", spread_message);
             }
             loop_elapsed += start_time.elapsed().as_nanos();
 

@@ -150,7 +150,7 @@ impl WebSocketClient {
             Some(handler) => handler().await?,
             None => {
                 let con = connect_async(&self.connection_url).await?;
-                info!(target:"info_module","[INFO] 🔗 WebSocket соединение c {} установлено",
+                info!(target:"info_module","🔗 WebSocket соединение c {} установлено",
                     self.connection_url
                 );
                 con
