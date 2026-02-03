@@ -12,7 +12,7 @@ use arbitrage_system::{
 #[tokio::test]
 async fn test_ticker_service() -> Result<(), Box<dyn std::error::Error>> {
     load_env();
-    log4rs::init_file("./src/config/log4rs.yaml", Default::default()).unwrap();
+    let _ = log4rs::init_file("./src/config/log4rs.yaml", Default::default());
 
     let exchanges = get_exchanges()?;
 
@@ -57,7 +57,7 @@ async fn test_ticker_service() -> Result<(), Box<dyn std::error::Error>> {
 #[tokio::test]
 async fn test_orderbook_service() -> Result<(), Box<dyn std::error::Error>> {
     load_env();
-    log4rs::init_file("./src/config/log4rs.yaml", Default::default()).unwrap();
+    let _ = log4rs::init_file("./src/config/log4rs.yaml", Default::default());
 
     let exchanges = get_exchanges()?;
 
@@ -107,7 +107,7 @@ async fn test_orderbook_service() -> Result<(), Box<dyn std::error::Error>> {
 #[tokio::test]
 async fn test_margin_info_service() -> Result<(), Box<dyn std::error::Error>> {
     load_env();
-    log4rs::init_file("./src/config/log4rs.yaml", Default::default()).unwrap();
+    let _ = log4rs::init_file("./src/config/log4rs.yaml", Default::default());
 
     let exchanges = get_exchanges()?;
 
@@ -154,7 +154,7 @@ async fn test_margin_info_service() -> Result<(), Box<dyn std::error::Error>> {
 #[tokio::test]
 async fn test_network_service() -> Result<(), Box<dyn std::error::Error>> {
     load_env();
-    log4rs::init_file("./src/config/log4rs.yaml", Default::default()).unwrap();
+    let _ = log4rs::init_file("./src/config/log4rs.yaml", Default::default());
 
     let exchanges = get_exchanges()?;
 
