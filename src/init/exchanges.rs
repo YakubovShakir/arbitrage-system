@@ -257,7 +257,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    // exchanges.insert(config::huobi::NAME.to_owned(), huobi);
+    exchanges.insert(config::huobi::NAME.to_owned(), huobi);
 
     let bitmart = Exchange::Bitmart(ExchangeConfig {
         name: config::bitmart::NAME.to_owned(),
