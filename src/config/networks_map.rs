@@ -306,6 +306,7 @@ pub enum NetworkType {
     Xterio,
     Zeta,
     Zkspace,
+    Heco,
 }
 
 static NETWORK_MAP: OnceLock<HashMap<&'static str, NetworkType>> = OnceLock::new();
@@ -313,6 +314,23 @@ static NETWORK_MAP: OnceLock<HashMap<&'static str, NetworkType>> = OnceLock::new
 pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
     NETWORK_MAP.get_or_init(|| {
         let mut m = HashMap::new();
+
+        // HECO (Huobi ECO Chain)
+        const HECO_MAPPING: [&str; 10] = [
+            "HECO",
+            "HECO_HT",
+            "HECO CHAIN",
+            "HUOBI ECO CHAIN",
+            "HUOBI CHAIN",
+            "HECO NETWORK",
+            "HT",
+            "HUOBI TOKEN",
+            "HECO MAINNET",
+            "HUOBI SMART CHAIN",
+        ];
+        for mapped in HECO_MAPPING {
+            m.insert(mapped, NetworkType::Heco);
+        }
 
         // Syscoin Rollux (L2 на Syscoin)
         const SYSCOIN_ROLLUX_MAPPING: [&str; 5] = [
@@ -1217,7 +1235,13 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // BinanceSmartChain
-        const BSC_MAPPING: [&str; 4] = ["BEP20", "BSC", "BINANCE SMART CHAIN", "BNB SMART CHAIN"];
+        const BSC_MAPPING: [&str; 5] = [
+            "BEP20",
+            "BSC",
+            "BINANCE SMART CHAIN",
+            "BNB SMART CHAIN",
+            "BSC_BNB",
+        ];
         for mapped in BSC_MAPPING {
             m.insert(mapped, NetworkType::BinanceSmartChain);
         }
@@ -1297,7 +1321,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // The Open Network
-        const TON_MAPPING: [&str; 3] = ["TON", "THE OPEN NETWORK", "TONCOIN"];
+        const TON_MAPPING: [&str; 4] = ["TON", "THE OPEN NETWORK", "TONCOIN", "OPENTON"];
         for mapped in TON_MAPPING {
             m.insert(mapped, NetworkType::Ton);
         }
@@ -1391,7 +1415,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Avalanche C-Chain
-        const AVALANCHE_MAPPING: [&str; 17] = [
+        const AVALANCHE_MAPPING: [&str; 18] = [
             "CAVAX",
             "AVAXC",
             "AVAX",
@@ -1409,6 +1433,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             "CCHAINAVAX",
             "AVAXNXPC",
             "AVALANCHE C-CHAIN",
+            "AVAX-C",
         ];
         for mapped in AVALANCHE_MAPPING {
             m.insert(mapped, NetworkType::Avalanche);
@@ -1458,7 +1483,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             m.insert(mapped, NetworkType::Bob);
         }
         // Arbitrum
-        const ARBITRUM_MAPPING: [&str; 12] = [
+        const ARBITRUM_MAPPING: [&str; 13] = [
             "ARBITRUMONE",
             "ARBITRUM ONE",
             "ARBITRUM",
@@ -1471,6 +1496,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             "ARC20GMX",
             "ARC20RDNT1",
             "ARC20SIS",
+            "ARBI",
         ];
         for mapped in ARBITRUM_MAPPING {
             m.insert(mapped, NetworkType::Arbitrum);
@@ -1760,13 +1786,14 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // opBNB (новый - Optimistic Rollup на BSC)
-        const OPBNB_MAPPING: [&str; 6] = [
+        const OPBNB_MAPPING: [&str; 7] = [
             "OPBNB",
             "OP BNB",
             "OPBNB NETWORK",
             "OPBNB CHAIN",
             "OPBNB L2",
             "BINANCE OP ROLLUP",
+            "OP-BNB",
         ];
         for mapped in OPBNB_MAPPING {
             m.insert(mapped, NetworkType::OpBNB);

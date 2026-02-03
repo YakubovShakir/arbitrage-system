@@ -158,6 +158,39 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                 }
             }
         }
+        Exchange::Bitmart(cfg) => {
+            let res = cfg
+                .http_client
+                .get(
+                    endpoint, None, None,
+                    None, // Some(Duration::from_secs(HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS)),
+                )
+                .await?;
+            if res["message"] != "success" {
+                return Err(format!(
+                    "Cannot get tickers from {} because response.message doesn't 'success'",
+                    cfg.name
+                )
+                .into());
+            }
+            for ticker in res["data"].members() {
+                let (Ok(best_bid), Ok(best_ask)) = (
+                    parse_json_as_f64(&ticker[8]),
+                    parse_json_as_f64(&ticker[10]),
+                ) else {
+                    continue;
+                };
+                let price: TickerPrice = TickerPrice {
+                    buy_price: (cfg.name.to_owned(), best_ask),
+                    sell_price: (cfg.name.to_owned(), best_bid),
+                };
+                if let Some(trading_pair) =
+                    TradingPair::from_str_with_separator(&ticker[0].to_string(), '_')
+                {
+                    trading_pairs.insert(trading_pair, price);
+                }
+            }
+        }
         _ => {
             return Err(format!(
                 "HTTP interface is not available for {}",

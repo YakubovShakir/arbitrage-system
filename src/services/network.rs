@@ -562,6 +562,63 @@ impl NetworkService for Exchange {
                     }
                 }
             }
+            Exchange::Bitmart(cfg) => {
+                let data = match cache_data {
+                    Some(cached) => cached,
+                    None => {
+                        let response = cfg.http_client.get(endpoint, None, None, None).await?;
+                        // if response["code"].to_string() == "200" {
+                        //     cfg.cached_data.networks.set(response.clone()).await;
+                        // }
+                        if response["message"] == "OK" && !response["data"]["currencies"].is_empty()
+                        {
+                            cfg.cached_data.networks.set(response.clone()).await;
+                        }
+                        response
+                    }
+                };
+
+                for item in data["data"]["currencies"].members() {
+                    let currency_name = item["currency"]
+                        .to_string()
+                        .split('-')
+                        .collect::<Vec<&str>>()[0]
+                        .to_owned();
+
+                    if currency_name.to_uppercase() != coin {
+                        continue;
+                    }
+
+                    let (Ok(deposit_enabled), Ok(withdraw_enabled)) = (
+                        parse_json_as_bool(&item["deposit_enabled"]),
+                        parse_json_as_bool(&item["withdraw_enabled"]),
+                    ) else {
+                        continue;
+                    };
+
+                    let Ok(network_name) = parse_json_as_str(&item["network"]) else {
+                        continue;
+                    };
+
+                    let Some(mut parsed_network) =
+                        Network::parse(network_name.clone(), network_name)
+                    else {
+                        continue;
+                    };
+
+                    if let Ok(address) = parse_json_as_str(&item["contract_address"]) {
+                        parsed_network.set_contract(address);
+                    }
+                    if withdraw_enabled {
+                        let withdraw_fee = parse_json_as_f64(&item["withdraw_fee"]).ok();
+                        withdraw_networks
+                            .push(parsed_network.clone().make_withdraw_type(withdraw_fee));
+                    };
+                    if deposit_enabled {
+                        deposit_networks.push(parsed_network.make_deposit_type(None, None, None));
+                    };
+                }
+            }
         }
         // if fetched_networks.len() == 0 {
         //     return Err(format!(

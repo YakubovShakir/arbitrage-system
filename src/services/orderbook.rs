@@ -176,6 +176,19 @@ impl OrderBookService for Exchange {
 
                 (raw_asks, raw_bids)
             }
+            Exchange::Bitmart(cfg) => {
+                let symbol = format!("{}_{}", base, quote);
+                let query = &[("symbol", symbol.as_str()), ("limit", "50")];
+
+                let res = cfg
+                    .http_client
+                    .get(endpoint, Some(query), None, None)
+                    .await?;
+                let raw_asks = find_value_from_json_key(&res, &["data", "asks"])?;
+                let raw_bids = find_value_from_json_key(&res, &["data", "bids"])?;
+
+                (raw_asks, raw_bids)
+            }
         };
 
         if raw_asks.is_empty() || raw_bids.is_empty() {

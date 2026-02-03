@@ -29,6 +29,7 @@ pub enum Exchange {
     Kucoin(ExchangeConfig),
     Mexc(ExchangeConfig),
     Huobi(ExchangeConfig),
+    Bitmart(ExchangeConfig),
 }
 impl Exchange {
     pub fn config(&self) -> &ExchangeConfig {
@@ -40,6 +41,7 @@ impl Exchange {
             Exchange::Kucoin(config) => config,
             Exchange::Mexc(config) => config,
             Exchange::Huobi(config) => config,
+            Exchange::Bitmart(config) => config,
         }
     }
 
