@@ -639,7 +639,6 @@ impl NetworkService for Exchange {
                             .http_client
                             .get(endpoint, None, Some(headers), None)
                             .await?;
-                        println!("{}", response.pretty(4));
                         if !response["data"].is_empty() {
                             cfg.cached_data.networks.set(response.clone()).await;
                         }
