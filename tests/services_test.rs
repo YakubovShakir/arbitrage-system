@@ -66,25 +66,28 @@ async fn test_orderbook_service() -> Result<(), Box<dyn std::error::Error>> {
         let attempts = 5;
 
         while attempt <= attempts {
-            if let Ok(orderbook) = exchange.orderbook("BTC", "USDT").await {
-                assert!(
-                    orderbook.0.len() > 0,
-                    "❗ Empty ASKS from {}",
-                    exchange_name
-                );
-                assert!(
-                    orderbook.1.len() > 0,
-                    "❗ Empty BIDS tickers from {}",
-                    exchange_name
-                );
-                break;
-            } else {
-                println!(
-                    "❗ {} attempt failed for {}. Retry after 2 secs.",
-                    attempt, exchange_name
-                );
-                attempt += 1;
-                tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+            match exchange.orderbook("BTC", "USDT").await {
+                Ok(orderbook) => {
+                    assert!(
+                        orderbook.0.len() > 0,
+                        "❗ Empty ASKS from {}",
+                        exchange_name
+                    );
+                    assert!(
+                        orderbook.1.len() > 0,
+                        "❗ Empty BIDS tickers from {}",
+                        exchange_name
+                    );
+                    break;
+                }
+                Err(e) => {
+                    println!(
+                        "❗ {} attempt failed for {} - {}. Retry after 2 secs.",
+                        attempt, exchange_name, e
+                    );
+                    attempt += 1;
+                    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+                }
             }
         }
 
