@@ -260,6 +260,7 @@ impl MarginInfoService for Exchange {
                 }
             }
             Exchange::Bitmart(_) => JsonValue::Boolean(false),
+            Exchange::Okx(_) => JsonValue::Boolean(false),
         };
 
         let borrowable = parse_json_as_bool(&raw_borrowable)?;

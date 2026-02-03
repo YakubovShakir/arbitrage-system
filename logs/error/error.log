@@ -23,3 +23,4 @@
 2026-01-31T15:28:29.505248+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
 2026-01-31T15:28:40.519486+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
 2026-01-31T15:28:51.542203+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-02-03T13:36:39.687736+03:00 ERROR Ошибка подключения: HTTP error: 404 Not Found. Повтор через 5 сек.

@@ -277,5 +277,24 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         },
     });
     exchanges.insert(config::bitmart::NAME.to_owned(), bitmart);
+
+    let okx = Exchange::Okx(ExchangeConfig {
+        name: config::okx::NAME.to_owned(),
+        api_key: env::var("OKX_API_KEY")?.to_owned(),
+        secret_key: env::var("OKX_SECRET_KEY")?.to_owned(),
+        http_client: HttpClient::new(config::okx::BASE_URL)?,
+        websocket_client: None,
+        cached_data: CachedConfig {
+            networks: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+            ),
+            margin_info: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+            ),
+        },
+    });
+    exchanges.insert(config::okx::NAME.to_owned(), okx);
     Ok(exchanges)
 }

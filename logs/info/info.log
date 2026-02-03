@@ -113,3 +113,34 @@
 │        └─ Total passed: 0
 └── Total elapsed: 6.204 s
 
+2026-02-03T13:21:43.516749+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:21:44.678779+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:23:18.173480+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:23:19.565054+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:23:55.307160+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:23:56.413950+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:24:51.328280+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:24:52.699320+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:25:37.087325+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:25:38.326283+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:26:07.515508+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:26:08.620100+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:29:40.378662+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:29:41.588662+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:30:52.425726+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:30:53.647588+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:33:15.594551+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:33:16.707821+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:33:47.947707+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:33:49.189506+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:35:05.318506+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:35:06.503393+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:36:38.457385+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v4/public
+2026-02-03T13:39:40.276475+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:39:41.513547+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:41:23.184790+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:41:24.490718+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:43:57.989108+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:43:59.124141+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-03T13:48:54.471235+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
+2026-02-03T13:48:55.716168+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено

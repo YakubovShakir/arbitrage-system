@@ -228,7 +228,7 @@ impl WebSocketClient {
                         }
 
                         // Если это было ping/pong сообщение, не сохраняем его в state
-                        if !is_ping_pong {
+                        if !is_ping_pong && text.to_string().to_lowercase() != "pong" {
                             if state_is_streamed {
                                 let mut state_guard = streamed_state.write().await;
                                 let vec = state_guard.get_or_insert_with(VecDeque::new);

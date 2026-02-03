@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{env, time::Duration};
 
 use crate::{
     config::parameters::{
@@ -14,7 +14,7 @@ use crate::{
             signature_params::SignatureParams,
         },
         utils::{
-            get_current_timestamp,
+            get_current_timestamp, get_timestamp_iso_8601, get_timestamp_iso_8601_with_ms,
             json_utils::{
                 find_value_from_json_key, parse_json_as_bool, parse_json_as_f64, parse_json_as_str,
                 parse_json_as_u64,
@@ -567,9 +567,7 @@ impl NetworkService for Exchange {
                     Some(cached) => cached,
                     None => {
                         let response = cfg.http_client.get(endpoint, None, None, None).await?;
-                        // if response["code"].to_string() == "200" {
-                        //     cfg.cached_data.networks.set(response.clone()).await;
-                        // }
+
                         if response["message"] == "OK" && !response["data"]["currencies"].is_empty()
                         {
                             cfg.cached_data.networks.set(response.clone()).await;
@@ -616,6 +614,74 @@ impl NetworkService for Exchange {
                     };
                     if deposit_enabled {
                         deposit_networks.push(parsed_network.make_deposit_type(None, None, None));
+                    };
+                }
+            }
+            Exchange::Okx(cfg) => {
+                let data = match cache_data {
+                    Some(cached) => cached,
+                    None => {
+                        let timestamp = get_timestamp_iso_8601_with_ms()?;
+                        let sign_params = SignatureParams::Okx {
+                            timestamp: &timestamp,
+                            method: "GET",
+                            request_path: &endpoint,
+                            body: "",
+                        };
+                        let sign = self.generate_signature(sign_params)?;
+                        let headers = &[
+                            ("OK-ACCESS-KEY", cfg.api_key.as_str()),
+                            ("OK-ACCESS-TIMESTAMP", timestamp.as_str()),
+                            ("OK-ACCESS-SIGN", sign.as_str()),
+                            ("OK-ACCESS-PASSPHRASE", &env::var("OKX_PASSPHRASE")?),
+                        ];
+                        let response = cfg
+                            .http_client
+                            .get(endpoint, None, Some(headers), None)
+                            .await?;
+                        println!("{}", response.pretty(4));
+                        if !response["data"].is_empty() {
+                            cfg.cached_data.networks.set(response.clone()).await;
+                        }
+                        response
+                    }
+                };
+
+                for item in data["data"].members() {
+                    if item["ccy"] != coin {
+                        continue;
+                    }
+                    let (Ok(deposit_allowed), Ok(withdraw_allowed)) = (
+                        parse_json_as_bool(&item["canDep"]),
+                        parse_json_as_bool(&item["canWd"]),
+                    ) else {
+                        continue;
+                    };
+
+                    let name =
+                        item["chain"].to_string().split('-').collect::<Vec<&str>>()[1].to_string();
+
+                    let Some(mut parsed_network) = Network::parse(name.clone(), name) else {
+                        continue;
+                    };
+
+                    if let Ok(address) = parse_json_as_str(&item["ctAddr"]) {
+                        parsed_network.set_contract(address);
+                    }
+
+                    if withdraw_allowed {
+                        let withdraw_fee = parse_json_as_f64(&item["fee"]).ok();
+                        withdraw_networks
+                            .push(parsed_network.clone().make_withdraw_type(withdraw_fee));
+                    };
+                    if deposit_allowed {
+                        let number_of_confirmation =
+                            parse_json_as_u64(&item["minDepArrivalConfirm"]).ok();
+                        deposit_networks.push(parsed_network.make_deposit_type(
+                            None,
+                            None,
+                            number_of_confirmation,
+                        ));
                     };
                 }
             }

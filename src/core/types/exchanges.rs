@@ -30,6 +30,7 @@ pub enum Exchange {
     Mexc(ExchangeConfig),
     Huobi(ExchangeConfig),
     Bitmart(ExchangeConfig),
+    Okx(ExchangeConfig),
 }
 impl Exchange {
     pub fn config(&self) -> &ExchangeConfig {
@@ -42,6 +43,7 @@ impl Exchange {
             Exchange::Mexc(config) => config,
             Exchange::Huobi(config) => config,
             Exchange::Bitmart(config) => config,
+            Exchange::Okx(config) => config,
         }
     }
 
@@ -151,6 +153,20 @@ impl Exchange {
                 let encrypted = encrypt_hmac_sha256(&cfg.secret_key, &prepared_str)?;
                 let signed = base64_encode(&encrypted);
                 Ok(signed)
+            }
+            (
+                Self::Okx(cfg),
+                SignatureParams::Okx {
+                    timestamp,
+                    method,
+                    request_path,
+                    body,
+                },
+            ) => {
+                let pre_hash = format!("{}{}{}{}", timestamp, method, request_path, body);
+                let encrypted = encrypt_hmac_sha256(&cfg.secret_key, &pre_hash)?;
+                let encoded = base64_encode(&encrypted);
+                Ok(encoded)
             }
             _ => Err(format!(
                 "Cannot generate Signature - method not implemented for this Exchange",

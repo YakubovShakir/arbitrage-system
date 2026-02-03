@@ -160,7 +160,10 @@ pub fn get_timestamp_iso_8601() -> Result<String, Box<dyn std::error::Error>> {
     let now: DateTime<Utc> = Utc::now();
     Ok(now.format("%Y-%m-%dT%H:%M:%S").to_string())
 }
-
+pub fn get_timestamp_iso_8601_with_ms() -> Result<String, Box<dyn std::error::Error>> {
+    let now: DateTime<Utc> = Utc::now();
+    Ok(now.format("%Y-%m-%dT%H:%M:%S.%3fZ").to_string())
+}
 pub fn get_current_timestamp() -> Result<String, Box<dyn std::error::Error>> {
     Ok(SystemTime::now()
         .duration_since(UNIX_EPOCH)?

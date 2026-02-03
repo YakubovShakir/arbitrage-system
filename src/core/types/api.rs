@@ -58,6 +58,7 @@ impl API {
                 Exchange::Mexc(_) => None,
                 Exchange::Huobi(_) => Some("/market/tickers"),
                 Exchange::Bitmart(_) => Some("/spot/quotation/v3/tickers"),
+                Exchange::Okx(_) => Some("/api/v5/market/tickers"),
             },
             API::GetMarginInfo => match exchange {
                 Exchange::Binance(_) => Some("/sapi/v1/margin/allAssets"),
@@ -68,6 +69,7 @@ impl API {
                 Exchange::Mexc(_) => None,
                 Exchange::Huobi(_) => Some("/v1/margin/loan-info"),
                 Exchange::Bitmart(_) => None,
+                Exchange::Okx(_) => None,
             },
             API::GetNetworks => match exchange {
                 Exchange::Binance(_) => Some("/sapi/v1/capital/config/getall"),
@@ -78,6 +80,7 @@ impl API {
                 Exchange::Mexc(_) => Some("/api/v3/capital/config/getall"),
                 Exchange::Huobi(_) => Some("/v2/reference/currencies"),
                 Exchange::Bitmart(_) => Some("/account/v1/currencies"),
+                Exchange::Okx(_) => Some("/api/v5/asset/currencies"),
             },
             API::GetOrderBook => match exchange {
                 Exchange::Binance(_) => Some("/api/v3/depth"),
@@ -88,6 +91,7 @@ impl API {
                 Exchange::Mexc(_) => Some("/api/v3/depth"),
                 Exchange::Huobi(_) => Some("/market/depth"),
                 Exchange::Bitmart(_) => Some("/spot/quotation/v3/books"),
+                Exchange::Okx(_) => Some("/api/v5/market/books"),
             },
         }
     }

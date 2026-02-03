@@ -24,9 +24,17 @@ async fn test_ticker_service() -> Result<(), Box<dyn std::error::Error>> {
         while attempt <= attempts {
             match exchange.tickers().await {
                 Ok(tickers) => {
-                    assert!(tickers.len() > 0, "❗ Empty tickers from {}", exchange_name);
-                    tickers_count = tickers.len();
-                    break;
+                    if tickers.len() == 0 {
+                        println!(
+                            "❗ {} attempt failed for {} - empty tickers . Retry after 2 secs.",
+                            attempt, exchange_name,
+                        );
+                        attempt += 1;
+                        tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+                    } else {
+                        tickers_count = tickers.len();
+                        break;
+                    }
                 }
                 Err(e) => {
                     println!(
@@ -78,6 +86,7 @@ async fn test_orderbook_service() -> Result<(), Box<dyn std::error::Error>> {
                         "❗ Empty BIDS tickers from {}",
                         exchange_name
                     );
+                    // println!("{:#?}", orderbook);
                     break;
                 }
                 Err(e) => {

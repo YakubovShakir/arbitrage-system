@@ -36,4 +36,10 @@ pub enum SignatureParams<'a> {
         path: &'a str,
         params: &'a [(&'a str, &'a str)],
     },
+    Okx {
+        timestamp: &'a str,
+        method: &'a str,
+        request_path: &'a str,
+        body: &'a str,
+    },
 }

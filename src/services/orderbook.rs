@@ -189,6 +189,24 @@ impl OrderBookService for Exchange {
 
                 (raw_asks, raw_bids)
             }
+            Exchange::Okx(cfg) => {
+                let symbol = format!("{}-{}", base, quote);
+                let query = &[("instId", symbol.as_str()), ("sz", "400")];
+
+                let res = cfg
+                    .http_client
+                    .get(endpoint, Some(query), None, None)
+                    .await?;
+                if !res["data"].is_array() || res["data"].len() == 0 {
+                    (JsonValue::Null, JsonValue::Null)
+                } else {
+                    let data = &res["data"][0];
+                    let raw_asks = find_value_from_json_key(&data, &["asks"])?;
+                    let raw_bids = find_value_from_json_key(&data, &["bids"])?;
+
+                    (raw_asks, raw_bids)
+                }
+            }
         };
 
         if raw_asks.is_empty() || raw_bids.is_empty() {

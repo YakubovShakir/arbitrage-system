@@ -5,5 +5,6 @@ pub mod bybit;
 pub mod gate;
 pub mod huobi;
 pub mod kucoin;
-pub mod lbank;
+// pub mod lbank;
 pub mod mexc;
+pub mod okx;

@@ -307,6 +307,7 @@ pub enum NetworkType {
     Zeta,
     Zkspace,
     Heco,
+    OkxChain,
 }
 
 static NETWORK_MAP: OnceLock<HashMap<&'static str, NetworkType>> = OnceLock::new();
@@ -314,6 +315,25 @@ static NETWORK_MAP: OnceLock<HashMap<&'static str, NetworkType>> = OnceLock::new
 pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
     NETWORK_MAP.get_or_init(|| {
         let mut m = HashMap::new();
+
+        // OKX Chain (OKTC)
+        const OKX_CHAIN_MAPPING: [&str; 12] = [
+            "OKTC",
+            "OKT",
+            "OKX CHAIN",
+            "OKEX CHAIN",
+            "OKT CHAIN",
+            "OKX",
+            "OKEX",
+            "OKX NETWORK",
+            "OKEX NETWORK",
+            "OKC",
+            "OKX MAINNET",
+            "OKEX MAINNET",
+        ];
+        for mapped in OKX_CHAIN_MAPPING {
+            m.insert(mapped, NetworkType::OkxChain);
+        }
 
         // HECO (Huobi ECO Chain)
         const HECO_MAPPING: [&str; 10] = [
@@ -1168,7 +1188,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Bera
-        const BERA_MAPPING: [&str; 2] = ["BERA", "BERACHAIN"];
+        const BERA_MAPPING: [&str; 3] = ["BERA", "BERACHAIN", "BERACHAIN (USDT0)"];
         for mapped in BERA_MAPPING {
             m.insert(mapped, NetworkType::Bera);
         }
@@ -1415,7 +1435,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Avalanche C-Chain
-        const AVALANCHE_MAPPING: [&str; 18] = [
+        const AVALANCHE_MAPPING: [&str; 19] = [
             "CAVAX",
             "AVAXC",
             "AVAX",
@@ -1434,6 +1454,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             "AVAXNXPC",
             "AVALANCHE C-CHAIN",
             "AVAX-C",
+            "AVALANCHE C",
         ];
         for mapped in AVALANCHE_MAPPING {
             m.insert(mapped, NetworkType::Avalanche);
@@ -1522,7 +1543,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Optimism
-        const OPTIMISM_MAPPING: [&str; 8] = [
+        const OPTIMISM_MAPPING: [&str; 9] = [
             "OPETH",
             "OPTIMISM",
             "OP",
@@ -1531,6 +1552,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             "OPTOP",
             "OPTVELO1",
             "OPTIMISM L2",
+            "OPTIMISM (USDT0)",
         ];
         for mapped in OPTIMISM_MAPPING {
             m.insert(mapped, NetworkType::Optimism);
@@ -2834,13 +2856,14 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // X Layer (новый)
-        const XLAYER_MAPPING: [&str; 6] = [
+        const XLAYER_MAPPING: [&str; 7] = [
             "XLAYER",
             "X LAYER",
             "XLAYER NETWORK",
             "XLAYER CHAIN",
             "XLAYER BLOCKCHAIN",
             "XLAYER PROTOCOL",
+            "X LAYER (USDT0)",
         ];
         for mapped in XLAYER_MAPPING {
             m.insert(mapped, NetworkType::XLayer);
@@ -3195,7 +3218,12 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Unichain
-        const UNICHAIN_MAPPING: [&str; 3] = ["UNICHAIN", "UNI CHAIN", "UNICHAIN NETWORK"];
+        const UNICHAIN_MAPPING: [&str; 4] = [
+            "UNICHAIN",
+            "UNI CHAIN",
+            "UNICHAIN NETWORK",
+            "UNICHAIN (USDT0)",
+        ];
         for mapped in UNICHAIN_MAPPING {
             m.insert(mapped, NetworkType::Unichain);
         }

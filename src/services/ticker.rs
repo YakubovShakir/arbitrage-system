@@ -191,6 +191,35 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                 }
             }
         }
+        Exchange::Okx(cfg) => {
+            let query = &[("instType", "SPOT")];
+            let res = cfg
+                .http_client
+                .get(
+                    endpoint,
+                    Some(query),
+                    None,
+                    None, // Some(Duration::from_secs(HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS)),
+                )
+                .await?;
+            for item in res["data"].members() {
+                let (Ok(best_bid), Ok(best_ask)) = (
+                    parse_json_as_f64(&item["bidPx"]),
+                    parse_json_as_f64(&item["askPx"]),
+                ) else {
+                    continue;
+                };
+                let price: TickerPrice = TickerPrice {
+                    buy_price: (cfg.name.to_owned(), best_ask),
+                    sell_price: (cfg.name.to_owned(), best_bid),
+                };
+                if let Some(trading_pair) =
+                    TradingPair::from_str_with_separator(&item["instId"].to_string(), '-')
+                {
+                    trading_pairs.insert(trading_pair, price);
+                }
+            }
+        }
         _ => {
             return Err(format!(
                 "HTTP interface is not available for {}",
@@ -226,7 +255,7 @@ async fn handle_ws_interface(
     // If any of state not readed -> establish connection
     let _ = establish_ws_connection_and_sub(client, exchange).await?;
 
-    tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(10000)).await;
 
     if is_streamed_state {
         if let Some(streamed_state) = client.get_streamed_state().await {
