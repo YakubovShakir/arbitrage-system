@@ -255,7 +255,7 @@ async fn handle_ws_interface(
     // If any of state not readed -> establish connection
     let _ = establish_ws_connection_and_sub(client, exchange).await?;
 
-    tokio::time::sleep(std::time::Duration::from_millis(10000)).await;
+    tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
 
     if is_streamed_state {
         if let Some(streamed_state) = client.get_streamed_state().await {
