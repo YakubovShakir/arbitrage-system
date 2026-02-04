@@ -15,7 +15,9 @@ pub struct Network {
 }
 impl Network {
     pub fn parse(name: String, full_name: String) -> Option<Self> {
-        let network_type = get_map().get(&name.to_uppercase()).map(|s| s.as_str());
+        let network_type = get_map()
+            .get(&name.to_uppercase())
+            .or_else(|| get_map().get(&full_name.to_uppercase()));
 
         match network_type {
             Some(network_type) => {
