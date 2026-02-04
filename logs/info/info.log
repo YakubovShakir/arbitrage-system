@@ -144,3 +144,54 @@
 2026-02-03T13:43:59.124141+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
 2026-02-03T13:48:54.471235+03:00 INFO - 📡 Подключаемся к wss://ws.okx.com:8443/ws/v5/public
 2026-02-03T13:48:55.716168+03:00 INFO - [INFO] 🔗 WebSocket соединение c wss://ws.okx.com:8443/ws/v5/public установлено
+2026-02-04T14:12:21.780353+03:00 INFO - Running in DEVELOPMENT mode
+2026-02-04T14:12:21.783390+03:00 INFO - 📡 Подключаемся к https://api.kucoin.com
+2026-02-04T14:12:21.790339+03:00 INFO - 📡 Подключаемся к wss://wbs-api.mexc.com/ws
+2026-02-04T14:12:22.792302+03:00 INFO - 🔗 WebSocket соединение c wss://wbs-api.mexc.com/ws установлено
+2026-02-04T14:12:23.393456+03:00 INFO - 🔗 WebSocket соединение c wss://ws-api-spot.kucoin.com/ установлено
+2026-02-04T14:12:39.795803+03:00 INFO - ┌── СomputWorker:1 Statistics for 10 iteration
+├──── Updated tickers
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+├──── Prices stat
+│        └─ Total elapsed: 0 ns
+├──── Ticker spread stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+├──── Verify stat
+│        ├─ Total elapsed: 87.488 µs
+│        └─ Total passed: 0
+├──── Orderbook stat
+│        ├─ Total elapsed: 2.122 µs
+│        └─ Total passed: 0
+├──── Calculated Books stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+├──── Final spread stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+└── Total elapsed: 697.796 µs
+
+2026-02-04T14:13:08.482681+03:00 INFO - ┌── СomputWorker:1 Statistics for 10 iteration
+├──── Updated tickers
+│        ├─ Total elapsed: 6.790 ms
+│        └─ Total passed: 1055
+├──── Prices stat
+│        └─ Total elapsed: 900.921 µs
+├──── Ticker spread stat
+│        ├─ Total elapsed: 67.861 µs
+│        └─ Total passed: 22
+├──── Verify stat
+│        ├─ Total elapsed: 8.656 s
+│        └─ Total passed: 0
+├──── Orderbook stat
+│        ├─ Total elapsed: 2.023 µs
+│        └─ Total passed: 0
+├──── Calculated Books stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+├──── Final spread stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+└── Total elapsed: 8.674 s
+

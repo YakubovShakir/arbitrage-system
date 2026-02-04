@@ -1,0 +1,1892 @@
+[
+  {
+    "name": "Bitcoin",
+    "mappings": [
+      "BTC",
+      "BITCOIN",
+      "BTCBRC",
+      "BRC20",
+      "ORDIBTC",
+      "ORDI BRC20",
+      "ORDI-BRC20",
+      "BITCOIN BRC20",
+      "BTCRUNES",
+      "BITCOIN RUNES",
+      "RUNES",
+      "BTC RUNES",
+      "BITCOIN RUNES PROTOCOL",
+      "BTC-SEGWIT",
+      "BECH32",
+      "BTCB",
+      "BITCOIN SEGWIT",
+      "SEGWITBTC",
+      "BTC SEGWIT",
+      "SEGWIT",
+      "BTC (SEGWIT)"
+    ],
+    "tokens": ["SATS", "ORDI", "RATS", "RUNES-BTC", "ARRR"]
+  },
+  {
+    "name": "Ethereum",
+    "mappings": [
+      "ETHEREUM",
+      "ETH",
+      "ERC20",
+      "ERC20APR",
+      "ERC20BREV",
+      "ERC20CA",
+      "ERC20CLORE",
+      "ERC20DYP",
+      "ERC20ELA",
+      "ERC20EVER",
+      "ERC20FUN",
+      "ERC20GALA2",
+      "ERC20ID",
+      "ERC20LSK",
+      "ERC20MASA",
+      "ERC20MEME",
+      "ERC20MYTH",
+      "ERC20NFT",
+      "ERC20POL",
+      "ERC20PROM",
+      "ERC20ROUTE",
+      "ERC20SENT",
+      "ERC20SXT",
+      "ERC20SYRUP",
+      "ERC20WAX",
+      "ERC20WLD",
+      "ERC20ZRC"
+    ],
+    "tokens": [
+      "ACU",
+      "REACT",
+      "ENSO",
+      "WMTX",
+      "ARTY",
+      "BEBE",
+      "BEBE1",
+      "SWAP",
+      "RACA",
+      "PIXELMON",
+      "LWA",
+      "FURY",
+      "UXLINKNEW",
+      "SOON",
+      "SIS",
+      "PSTAKE",
+      "ZKPASS",
+      "DAO",
+      "BIO",
+      "DARK",
+      "PAAL",
+      "AIDOGE",
+      "WTMLL",
+      "ELON",
+      "MERL",
+      "MEMEFI",
+      "ELX",
+      "AI",
+      "HIPPO",
+      "PCI2",
+      "MANEKI",
+      "SPK",
+      "HOUSE",
+      "CHECK",
+      "MICHI",
+      "LF",
+      "MANYU",
+      "CLAWNCH",
+      "STETH",
+      "XFI1",
+      "CSIX",
+      "DSYNC",
+      "ORDER",
+      "STO",
+      "ACX",
+      "SUPER",
+      "SCA",
+      "DBR",
+      "UFD",
+      "SYND",
+      "A8",
+      "GHST",
+      "SKR",
+      "JASMY",
+      "PEOPLE",
+      "B2",
+      "PING",
+      "MOODENGETH",
+      "EIGEN",
+      "MOG",
+      "FLZ",
+      "VC",
+      "ME",
+      "IP",
+      "T",
+      "REEF",
+      "REEF1",
+      "BAKE",
+      "LDO",
+      "AMP",
+      "CVX",
+      "SKY",
+      "LADYS",
+      "DUSK",
+      "CHEQ",
+      "EUL",
+      "RATS",
+      "BARD",
+      "NIGHT",
+      "TORN",
+      "SWTCH",
+      "CLORE",
+      "PAXI",
+      "RWA",
+      "EURR",
+      "EGP1",
+      "MAS",
+      "KYO",
+      "LQTY",
+      "BANK",
+      "LVVA",
+      "MOCA",
+      "PALU",
+      "AI3",
+      "ATH",
+      "MOLT",
+      "RSS3",
+      "ARC",
+      "VSC",
+      "PLANCK",
+      "TOWNS",
+      "ROOT",
+      "GRASS",
+      "L3",
+      "WSDM",
+      "ICBX",
+      "AIC",
+      "NEUTARO",
+      "BLUE1",
+      "SAROS",
+      "BSCBLUAI",
+      "ZENT",
+      "HTR",
+      "VARA",
+      "OPENETH",
+      "SHM-EVM",
+      "OBOL",
+      "MODE",
+      "ERC20ZAMA",
+      "XR",
+      "TREE",
+      "TRAC",
+      "A",
+      "FF",
+      "CTC",
+      "ANI",
+      "ALU",
+      "NEWTON",
+      "XTER",
+      "ZBT",
+      "CBK",
+      "ZBCN",
+      "PONKE",
+      "SWARMS",
+      "CTA",
+      "OZO",
+      "BFC1",
+      "OMAX",
+      "WBT",
+      "SSV",
+      "WELL",
+      "OBT",
+      "REDSTONE",
+      "SYN",
+      "PLAYA3ULL",
+      "C98",
+      "XYO",
+      "LA",
+      "POPCAT",
+      "MELANIA",
+      "HOLO",
+      "AE",
+      "ZEREBRO",
+      "MORPHO",
+      "DIAMOND",
+      "HANA",
+      "IR",
+      "ZKC",
+      "AIXBT",
+      "OGY2",
+      "MBX",
+      "VSN",
+      "CRTS",
+      "JOY",
+      "GWEI",
+      "GOR",
+      "NPC",
+      "JOE",
+      "LAYER",
+      "GMMT",
+      "ALI",
+      "AVNT",
+      "EDGEN",
+      "DEGEN",
+      "SKYAI",
+      "ZKL",
+      "NOM",
+      "FCT2",
+      "VELO",
+      "A2Z",
+      "PYR1",
+      "MAGIC",
+      "KAITO",
+      "OHO",
+      "ASTER",
+      "WADZ",
+      "AITECH",
+      "GRIFFAIN"
+    ]
+  },
+  {
+    "name": "BinanceSmartChain",
+    "mappings": [
+      "BEP20",
+      "BSC",
+      "BINANCE SMART CHAIN",
+      "BNB SMART CHAIN",
+      "BSC_BNB",
+      "BEP20BEAT",
+      "BEP20BTCB",
+      "BEP20EPT",
+      "BEP20FHE",
+      "BEP20GAIN",
+      "BEP20NXPC",
+      "BEP20RIVER",
+      "BEP20SOMI",
+      "BEP20SOPH",
+      "BEP20U1",
+      "BEP204",
+      "BSCCOOKIE",
+      "BSCGIGGLE",
+      "BSCSTABLE"
+    ],
+    "tokens": ["BABYDOGE", "BSCSFUND", "LAIKA-DOGE", "BNCPOLKA", "GOMINING", "BNLIFE", "BSCLISTA", "BSCMUBARAK", "BSBROCCOLI"]
+  },
+  {
+    "name": "Solana",
+    "mappings": [
+      "SOLANA",
+      "SOLBMT",
+      "SOLCUDIS",
+      "SOLPAYAI",
+      "SOLTRX",
+      "SOLWBTC",
+      "TRUMPSOL",
+      "SOL",
+      "SOLANA CHAIN",
+      "SOLANA NETWORK",
+      "SOLANA MAINNET"
+    ],
+    "tokens": ["NEON", "PUMPFUN", "BAN", "BANANA", "BANANAS31", "ORCA", "JTO", "MONAD", "SOCHILLGUY", "MATCHAIN", "MNDE"]
+  },
+  {
+    "name": "Sui",
+    "mappings": ["SUI"],
+    "tokens": []
+  },
+  {
+    "name": "Stacks",
+    "mappings": ["STX", "STACKS"],
+    "tokens": []
+  },
+  {
+    "name": "Mina",
+    "mappings": ["MINA", "MINA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Vanar",
+    "mappings": ["VANRY", "VANAR", "VANAR CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "MultiversX",
+    "mappings": ["EGLD", "MULTIVERSX", "ELROND"],
+    "tokens": []
+  },
+  {
+    "name": "Rootstock",
+    "mappings": ["SOVRBTC", "RSK", "ROOTSTOCK"],
+    "tokens": ["RSKX"]
+  },
+  {
+    "name": "Scroll",
+    "mappings": ["SCROLLETH", "SCROLL"],
+    "tokens": []
+  },
+  {
+    "name": "Ton",
+    "mappings": ["TON", "THE OPEN NETWORK", "TONCOIN", "OPENTON"],
+    "tokens": ["EVER", "FREETON"]
+  },
+  {
+    "name": "Icon",
+    "mappings": ["ICX", "ICON"],
+    "tokens": []
+  },
+  {
+    "name": "Polygon",
+    "mappings": ["MATIC", "POLYGON", "POLYGON MATIC", "MATIC NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Harmony",
+    "mappings": ["ONE", "HARMONY"],
+    "tokens": []
+  },
+  {
+    "name": "ZkLinkNova",
+    "mappings": ["ZKLETH", "ZKLINK", "ZKLINKNOVA"],
+    "tokens": []
+  },
+  {
+    "name": "Base",
+    "mappings": ["BASE", "BASE MAINNET", "BASECARV", "BASEELSA", "BASEZEN", "BASE L2", "BASE NETWORK", "BASE-ETH"],
+    "tokens": []
+  },
+  {
+    "name": "Hemi",
+    "mappings": ["HEMI", "HEMI NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "GunzNetwork",
+    "mappings": ["GUN", "GUNZ", "GUNZ NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Avalanche",
+    "mappings": [
+      "CAVAX",
+      "AVAXC",
+      "AVAX",
+      "AVALANCHE",
+      "AVAX C-CHAIN",
+      "AVAX_C",
+      "AVAX_CCHAIN",
+      "AVALANCHE C-CHAIN",
+      "AVALANCHE C CHAIN",
+      "AVAX_XCHAIN",
+      "AVAXC-CHAIN",
+      "AVAXCCHAIN",
+      "AVA",
+      "AVAXX-CHAIN",
+      "CCHAINAVAX",
+      "AVAXNXPC",
+      "AVALANCHE C-CHAIN",
+      "AVAX-C",
+      "AVALANCHE C"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "Arbitrum",
+    "mappings": [
+      "ARBITRUMONE",
+      "ARBITRUM ONE",
+      "ARBITRUM",
+      "ARBITRUM L2",
+      "ARBITRUM MAINNET",
+      "ARBITRUM1",
+      "ARB",
+      "ARBIANIME",
+      "ARBIMLK",
+      "ARC20GMX",
+      "ARC20RDNT1",
+      "ARC20SIS",
+      "ARBI"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "WorldChain",
+    "mappings": ["WLD", "WORLD", "WORLDCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Optimism",
+    "mappings": ["OPETH", "OPTIMISM", "OP", "OPTIMISTIC ETHEREUM", "OPTETH", "OPTOP", "OPTVELO1", "OPTIMISM L2", "OPTIMISM (USDT0)"],
+    "tokens": []
+  },
+  {
+    "name": "Flux",
+    "mappings": ["FLUX", "FLUX NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Celestia",
+    "mappings": ["TIA", "CELESTIA", "CELESTIA NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Metis",
+    "mappings": ["METIS TOKEN", "METIS", "METIS NETWORK", "METISTOKEN"],
+    "tokens": []
+  },
+  {
+    "name": "Linea",
+    "mappings": ["LINEA", "LINEA NETWORK", "CONSENSYS LINEA"],
+    "tokens": []
+  },
+  {
+    "name": "Iost",
+    "mappings": ["IOST", "IOST NETWORK", "INTERNET OF SERVICES"],
+    "tokens": []
+  },
+  {
+    "name": "Coti",
+    "mappings": ["COTI", "COTI NETWORK", "CURRENCY OF INTERNET"],
+    "tokens": []
+  },
+  {
+    "name": "Neo",
+    "mappings": ["GAS", "NEO GAS", "NEO3", "NEO", "NEON3", "NEO BLOCKCHAIN"],
+    "tokens": ["GAS1"]
+  },
+  {
+    "name": "Moonbeam",
+    "mappings": ["GLMR", "MOONBEAM", "MOON"],
+    "tokens": []
+  },
+  {
+    "name": "Chiliz",
+    "mappings": ["CAP20", "CHZ2", "CHZ", "CHILIZ", "CHILIZ CHAIN", "CHILIZ 2.0 CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Bifrost",
+    "mappings": ["BNCDOT", "BNC", "BIFROST"],
+    "tokens": []
+  },
+  {
+    "name": "Dydx",
+    "mappings": ["DYDX", "DYDX CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Nero",
+    "mappings": ["NERO"],
+    "tokens": []
+  },
+  {
+    "name": "Decred",
+    "mappings": ["DCR", "DECRED"],
+    "tokens": []
+  },
+  {
+    "name": "Tron",
+    "mappings": ["TRX", "TRON", "TRON NETWORK", "TRC20BTC", "TRC20ROCK1", "TRC20TRUMP", "TRC20WBT", "TRC20WBTC", "TRONBTC", "TRC20"],
+    "tokens": []
+  },
+  {
+    "name": "Ontology",
+    "mappings": ["ONT", "ONTOLOGY", "ONG", "ONTOLOGY GAS", "ONT GAS", "ONTOLOGY FUEL", "ONG TOKEN"],
+    "tokens": ["ONT2"]
+  },
+  {
+    "name": "Dash",
+    "mappings": ["DASH", "DASHCOIN"],
+    "tokens": []
+  },
+  {
+    "name": "Mango",
+    "mappings": ["MANGO", "MGO", "MANGONET"],
+    "tokens": []
+  },
+  {
+    "name": "Story",
+    "mappings": ["STORY", "STORYNET"],
+    "tokens": []
+  },
+  {
+    "name": "Cyber",
+    "mappings": ["CYBER", "CYBERCONNECT", "CYBER NETWORK", "CYBER PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Eclipse",
+    "mappings": ["ES", "ECLIPSE", "ECLIPSELAYER"],
+    "tokens": []
+  },
+  {
+    "name": "Gravity",
+    "mappings": [
+      "G",
+      "GRAVITY",
+      "GRAVITY ALPHA",
+      "GRAVITY PROTOCOL",
+      "GRAVITYCHAIN",
+      "GRAVITY ALPHA MAINNET",
+      "GRAVITY NETWORK",
+      "GRAVITY CHAIN",
+      "GRAVITYALPHA"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "Viction",
+    "mappings": ["VIC", "VICTION", "TOMOTOMAINNET", "TOMOTOMAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Verge",
+    "mappings": ["XVG", "VERGE", "VERGECURRENCY"],
+    "tokens": []
+  },
+  {
+    "name": "Initia",
+    "mappings": ["INITIA", "INITIA NETWORK", "INITIA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Babylon",
+    "mappings": ["BABY", "BABYLON", "BABYLONCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "QuarkChain",
+    "mappings": ["QKC", "QUARKCHAIN", "QUARK"],
+    "tokens": []
+  },
+  {
+    "name": "BitLayer",
+    "mappings": ["BTRBTC", "BITLAYER", "BITLAYERCHAIN", "BITLAYERNETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "AssetHubKusama",
+    "mappings": ["ASSET HUB KUSAMA", "KUSAMA ASSET HUB", "KUSAMA HUB", "ASSETHUBKUSAMA", "KSMASSETHUB"],
+    "tokens": []
+  },
+  {
+    "name": "Terra",
+    "mappings": ["LUNA2", "TERRA2", "LUNA", "TERRA"],
+    "tokens": []
+  },
+  {
+    "name": "TerraClassic",
+    "mappings": ["LUNC", "TERRA CLASSIC", "LUNA CLASSIC", "TERRA", "LUNA", "TERRALUNA"],
+    "tokens": []
+  },
+  {
+    "name": "ZeroG",
+    "mappings": ["0G", "ZEROGRAVITY"],
+    "tokens": []
+  },
+  {
+    "name": "Bittensor",
+    "mappings": ["TAO", "BITTENSOR", "BITTENSOR NETWORK", "BITTENSOR PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Bera",
+    "mappings": ["BERA", "BERACHAIN", "BERACHAIN (USDT0)"],
+    "tokens": []
+  },
+  {
+    "name": "Celo",
+    "mappings": ["CELO", "CELO NETWORK", "CELO BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Endurance",
+    "mappings": ["ENDURANCE", "ENDURANCE CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Movement",
+    "mappings": ["MOVE", "MOVEMENT", "MOVEMENT NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Kusama",
+    "mappings": ["KSMSM", "KUSAMA", "KSM", "KUSAMANETWORK"],
+    "tokens": ["KAR", "KSM1"]
+  },
+  {
+    "name": "Plume",
+    "mappings": ["PLUME", "PLUMENETWORK", "PLUME BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Xrp",
+    "mappings": ["XRP", "XRPL", "RIPPLE"],
+    "tokens": ["XRPTOKEN"]
+  },
+  {
+    "name": "ZkSync",
+    "mappings": [
+      "ZKSYNC2",
+      "ZKS20",
+      "ZKV2",
+      "ZKSYNC ERA",
+      "ZKSYNC",
+      "ZK SYNC",
+      "ZKSYNC V2",
+      "ZK SYNC ERA",
+      "ZKSYNCERA",
+      "ZK",
+      "ZKSYNC L2",
+      "ZKSYNCERA_ETH"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "Metal",
+    "mappings": ["METALDAOL2", "METAL", "METALDAO", "METALL2", "METAL L2", "METAL DAO L2"],
+    "tokens": ["METALMTL"]
+  },
+  {
+    "name": "Cardano",
+    "mappings": ["ADA", "CARDANO", "CARDANONETWORK", "CARDANOBLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Dymension",
+    "mappings": ["DYMEVM", "DYM", "DYMENSION", "DYMENSIONHUB"],
+    "tokens": []
+  },
+  {
+    "name": "Axelar",
+    "mappings": ["WAXL", "AXL", "AXELAR", "AXELARNETWORK", "AXELAR MAINNET"],
+    "tokens": []
+  },
+  {
+    "name": "Moonriver",
+    "mappings": ["MOVR", "MOONRIVER", "MOONRIVERNETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Bob",
+    "mappings": ["BOB", "BOBNETWORK", "BUILDONBITCOIN", "BOBCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Lumia",
+    "mappings": ["LUMIA", "LUMIA NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Iota",
+    "mappings": ["IOTA", "IOTANETWORK", "IOTATANGLE"],
+    "tokens": ["IOTA2"]
+  },
+  {
+    "name": "Ronin",
+    "mappings": ["RON", "RONIN", "RONIN NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "BounceBit",
+    "mappings": ["BB", "BOUNCEBIT", "BOUNCEBIT MAINNET"],
+    "tokens": []
+  },
+  {
+    "name": "Immutable",
+    "mappings": ["IMMUTABLE", "IMMUTABLEX", "IMX", "IMMUTABLEZK"],
+    "tokens": []
+  },
+  {
+    "name": "Fantom",
+    "mappings": ["FTM", "FANTOM", "FANTOMOPERA"],
+    "tokens": []
+  },
+  {
+    "name": "Enjin",
+    "mappings": ["ENJ", "ENJIN", "ENJIN NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Band",
+    "mappings": ["BAND", "BAND PROTOCOL", "BANDCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Sei",
+    "mappings": ["SEI", "SEIEVM", "SEI NETWORK", "SEI CHAIN", "SEI PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Litecoin",
+    "mappings": ["LTC", "LITECOIN", "LITE COIN", "LITE"],
+    "tokens": []
+  },
+  {
+    "name": "Dogecoin",
+    "mappings": ["DOGE", "DOGECOIN", "DOGE COIN", "DOGE CHAIN", "DOGECHAIN", "DOGECOIN NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Mantle",
+    "mappings": ["MNT", "MANTLE", "MANTLE MAINNET", "MANTLE NETWORK", "MANTLE CHAIN", "MANTLE L2", "MANTLE PROTOCOL", "MANTLE TOKEN"],
+    "tokens": []
+  },
+  {
+    "name": "Starknet",
+    "mappings": ["STARKNET", "STARK NET", "STARKWARE", "STARK NETWORK", "STARK CHAIN", "STARK", "STRK", "STARKNET L2"],
+    "tokens": []
+  },
+  {
+    "name": "Morph",
+    "mappings": ["MORPH", "MORPH NETWORK", "MORPH CHAIN", "MORPH L2", "MORPH PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "ArbitrumNova",
+    "mappings": ["ARBINOVA", "ARBITRUM NOVA", "ARBITRUM NOVA L2", "NOVA", "ARBITRUM NOVA NETWORK", "ARBITRUMNOVA"],
+    "tokens": []
+  },
+  {
+    "name": "Manta",
+    "mappings": ["MANTA", "MANTA NETWORK", "MANTA CHAIN", "MANTA L2", "MANTA PACIFIC", "MANTA MAINNET", "MANTANETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Near",
+    "mappings": ["NEAR", "NEARPROTOCOL", "NEAR CHAIN", "NEAR NETWORK", "NEAR BLOCKCHAIN", "NEAR TOKEN", "NEARProtocol", "NEAR PROTOCOL"],
+    "tokens": ["NEARSWEAT"]
+  },
+  {
+    "name": "Lightning",
+    "mappings": ["BTCLN", "LIGHTNING", "LIGHTNING NETWORK", "BITCOIN LIGHTNING", "LN NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Kcc",
+    "mappings": ["KCC", "KCS", "KUCOIN COMMUNITY CHAIN", "KUCOIN CHAIN", "KCC NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Fogo",
+    "mappings": ["FOGO", "FOGO NETWORK", "FOGO CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Frax",
+    "mappings": ["FRAX", "FRAX NETWORK", "FRAX PROTOCOL", "FRAX FINANCE", "FRAXTOKEN"],
+    "tokens": []
+  },
+  {
+    "name": "Siacoin",
+    "mappings": ["SC", "SIACOIN", "SIA", "SIA NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "VeChain",
+    "mappings": ["VECHAIN", "VET", "VE CHAIN", "VE CHAIN THOR"],
+    "tokens": []
+  },
+  {
+    "name": "Theta",
+    "mappings": ["THETA", "THETA TOKEN", "THETA NETWORK", "THETA BLOCKCHAIN", "THETA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "FetchAi",
+    "mappings": ["FET", "FETCH.AI", "FETCH AI", "FETCH", "FETCH NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Arweave",
+    "mappings": ["AR", "ARWEAVE", "AR WEAVE", "AR PERMAWEB"],
+    "tokens": ["AO"]
+  },
+  {
+    "name": "Oasis",
+    "mappings": ["ROSE", "OASIS", "OASIS NETWORK", "OASIS PROTOCOL", "OASIS ROSE"],
+    "tokens": []
+  },
+  {
+    "name": "Cosmos",
+    "mappings": ["ATOM", "COSMOS", "COSMOS NETWORK", "COSMOS HUB", "COSMOS PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Fraxtal",
+    "mappings": ["FRAXTAL", "FRAX L2", "FRAX CHAIN", "FRAXTAL L2"],
+    "tokens": []
+  },
+  {
+    "name": "Ravencoin",
+    "mappings": ["RVN", "RAVENCOIN", "RAVEN COIN", "RAVEN"],
+    "tokens": []
+  },
+  {
+    "name": "AssetHubPolkadot",
+    "mappings": [
+      "STATEMINT",
+      "ASSET HUB",
+      "ASSET HUB POLKADOT",
+      "POLKADOT ASSET HUB",
+      "POLKADOTASSETHUB",
+      "STATEMINT ASSET HUB",
+      "ASSET HUB DOT",
+      "DOTAH",
+      "POLKADOT ASSETHUB",
+      "DOTASSETHUB",
+      "ASSETHUB-DOT"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "Hedera",
+    "mappings": ["HBAR", "HEDERA", "HEDERA HASHGRAPH", "HEDERA NETWORK", "HEDERA TOKEN"],
+    "tokens": []
+  },
+  {
+    "name": "Algorand",
+    "mappings": ["ALGO", "ALGORAND", "ALGO NETWORK", "ALGORAND BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Conflux",
+    "mappings": [
+      "CFX_EVM",
+      "CFX1",
+      "CFX",
+      "CONFLUX",
+      "CONFLUX NETWORK",
+      "CONFLUX CHAIN",
+      "CFX ESPACE",
+      "CONFLUX EVM",
+      "CFXCORE",
+      "CFX CORE"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "Init",
+    "mappings": ["INIT", "INITIAL", "INIT NETWORK", "INITIAL NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Stellar",
+    "mappings": ["XLM", "STELLAR", "STELLAR LUMENS", "STELLAR NETWORK", "S"],
+    "tokens": ["XLMVELO1"]
+  },
+  {
+    "name": "DigiByte",
+    "mappings": ["DGB", "DIGIBYTE", "DIGI BYTE", "DIGIBYTE NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Nano",
+    "mappings": ["NANO", "NANO COIN", "NANO NETWORK", "NANO CRYPTOCURRENCY"],
+    "tokens": ["NANO1"]
+  },
+  {
+    "name": "ECash",
+    "mappings": ["XEC", "ECASH", "E CASH", "BITCOIN CASH ABC", "BCHA"],
+    "tokens": []
+  },
+  {
+    "name": "Syscoin",
+    "mappings": ["SYS", "SYSCOIN", "SYS COIN", "SYS NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Kava",
+    "mappings": ["KAVA", "KAVAEVM", "KAVA EVM", "KAVA NETWORK", "KAVA CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "IoTeX",
+    "mappings": ["IOTX", "IOTEX", "IOT EX", "INTERNET OF THINGS EX"],
+    "tokens": []
+  },
+  {
+    "name": "InternetComputer",
+    "mappings": ["ICP", "INTERNET COMPUTER", "ICP NETWORK", "INTERNET COMPUTER PROTOCOL", "DFINITY", "DFINITY ICP"],
+    "tokens": []
+  },
+  {
+    "name": "Acala",
+    "mappings": ["ACA", "ACALA", "ACALA NETWORK", "ACALA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "FitFi",
+    "mappings": ["FITFI", "STEP APP", "FITFI NETWORK", "STEP NETWORK"],
+    "tokens": ["FITFI1"]
+  },
+  {
+    "name": "Stable",
+    "mappings": ["STABLE", "STABLE NETWORK", "STABLE CHAIN", "STABLE PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Wemix",
+    "mappings": ["WEMIX", "WEMIX NETWORK", "WEMIX CHAIN", "WEMIX BLOCKCHAIN"],
+    "tokens": ["WEMIXMAINNET"]
+  },
+  {
+    "name": "Filecoin",
+    "mappings": ["FIL", "FILEVM", "FILE COIN", "FILECOIN", "FIL NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Waves",
+    "mappings": ["WAVES", "WAVES NETWORK", "WAVES PROTOCOL", "WAVES BLOCKCHAIN"],
+    "tokens": ["WAVES1"]
+  },
+  {
+    "name": "Neutron",
+    "mappings": ["NTRN", "NEUTRON", "NEUTRON NETWORK", "NEUTRON PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Merlin",
+    "mappings": ["MERLIN", "MERLIN NETWORK", "MERLIN CHAIN", "MERLIN LAYER", "MERLIN PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Aurora",
+    "mappings": ["AURORAEVM", "AURORA", "AURORA CHAIN", "AURORA EVM", "AURORA NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Nem",
+    "mappings": ["XEM", "NEM", "NEM NETWORK", "NEM BLOCKCHAIN", "NEW ECONOMY MOVEMENT"],
+    "tokens": []
+  },
+  {
+    "name": "Skale",
+    "mappings": ["SKALE", "SKALE NETWORK", "SKALE CHAIN", "SKALE PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Solar",
+    "mappings": ["SXP", "SOLAR", "SOLAR NETWORK", "SXP NETWORK", "SOLAR BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Nillion",
+    "mappings": ["NILLION", "NILLION NETWORK", "NILLION PROTOCOL", "NILLION CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Elastos",
+    "mappings": ["ELASTOS", "ELA", "ELASTOS NETWORK", "ELASTOS CHAIN", "ELASTOS BLOCKCHAIN", "ELAEVM", "ESC", "ESC (ELASTOS SMART CHAIN)"],
+    "tokens": []
+  },
+  {
+    "name": "HyperEVM",
+    "mappings": ["HYPEREVM", "HYPER EVM", "HYPER NETWORK", "HYPER CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Klaytn",
+    "mappings": ["KLAY", "KLAYTN", "KLAY NETWORK", "KLAYTN NETWORK", "KLAYTN CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Plasma",
+    "mappings": ["PLASMA", "PLASMA NETWORK", "PLASMA CHAIN", "PLASMA PROTOCOL", "PLASMA FINANCE"],
+    "tokens": []
+  },
+  {
+    "name": "Zilliqa",
+    "mappings": ["ZIL", "ZILLIQA"],
+    "tokens": []
+  },
+  {
+    "name": "SyscoinRollux",
+    "mappings": ["SYSROLLUX", "SYS ROLLUX", "ROLLUX", "SYSCOIN ROLLUX", "SYSCOIN L2"],
+    "tokens": []
+  },
+  {
+    "name": "Injective",
+    "mappings": ["INJ", "INJECTIVE", "INJECTIVE PROTOCOL", "INJECTIVE CHAIN", "INJECTIVE NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Thorchain",
+    "mappings": ["RUNE", "THORCHAIN", "THOR CHAIN", "THOR CHAIN RUNE", "THOR PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Sapphire",
+    "mappings": ["SAPPHIRE", "SAPPHIRE NETWORK", "OASIS SAPPHIRE", "SAPPHIRE PARACHAIN", "SAPPHIRE CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Zcash",
+    "mappings": ["ZEC", "ZCASH", "Z CASH", "ZCASH NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Klever",
+    "mappings": ["KLV", "KLEVER", "KLEVER CHAIN", "KLEVER NETWORK", "KLEVER BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Wax",
+    "mappings": ["WAX", "WAXP", "WAX NETWORK", "WORLDWIDE ASSET EXCHANGE", "WAX BLOCKCHAIN", "WAX CHAIN", "WAX TOKEN"],
+    "tokens": ["TLM"]
+  },
+  {
+    "name": "Kaia",
+    "mappings": ["KAIA", "KLAYTN", "KLAY", "KAIA NETWORK", "KLAYTN NETWORK", "KAIA CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "MantaAtlantic",
+    "mappings": ["MANTADOT", "MANTA ATLANTIC", "MANTA DOT", "ATLANTIC", "MANTA POLKADOT"],
+    "tokens": []
+  },
+  {
+    "name": "ZigChain",
+    "mappings": ["ZIG", "ZIGCHAIN", "ZIG CHAIN", "ZIGNALY", "ZIGNALY CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Aptos",
+    "mappings": ["APTOS", "APTOS NETWORK", "APTOS CHAIN", "APTOS BLOCKCHAIN", "APT", "APTPROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Chromia",
+    "mappings": ["CHR", "CHROMIA", "CHROMIA NETWORK", "CHROMIA PLATFORM", "CHROMIA BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Tanssi",
+    "mappings": ["TANSSI", "TANSSI NETWORK", "TANSSI PROTOCOL", "TANSSI CHAIN", "TANSSI APPCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "MilkyWay",
+    "mappings": ["MILK", "MILKYWAY", "MILKY WAY", "MILKY WAY NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Flow",
+    "mappings": ["FLOW", "FLOW NETWORK", "FLOW BLOCKCHAIN", "FLOW PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Qtum",
+    "mappings": ["QTUM", "QTUM NETWORK", "QTUM BLOCKCHAIN", "QTUM CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "VSystems",
+    "mappings": ["VSYS", "V SYSTEMS", "VSYSTEMS", "V SYSTEMS BLOCKCHAIN", "VSYS NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Beldex",
+    "mappings": ["BDX", "BELDEX", "BELDEX NETWORK", "BELDEX CHAIN", "BELDEX BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Secret",
+    "mappings": ["SCRT", "SECRET", "SECRET NETWORK", "SECRET PROTOCOL", "SECRET CHAIN", "SCRT NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Astar",
+    "mappings": [
+      "ASTR",
+      "ASTAR",
+      "ASTAR NETWORK",
+      "ASTAR CHAIN",
+      "ASTAR BLOCKCHAIN",
+      "ASTAREVM",
+      "ASTAR EVM",
+      "ASTAR EVM CHAIN",
+      "ASTAR EVM NETWORK",
+      "ASTAR EVM LAYER",
+      "ASTAR EVM PROTOCOL"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "Supra",
+    "mappings": ["SUPRA", "SUPRA NETWORK", "SUPRA CHAIN", "SUPRA PROTOCOL", "SUPRA ORACLE"],
+    "tokens": []
+  },
+  {
+    "name": "Canton",
+    "mappings": ["CANTON", "CANTON NETWORK", "CANTON PROTOCOL", "CANTON CHAIN", "CANTON BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Oort",
+    "mappings": ["OORT", "OORT NETWORK", "OORT CHAIN", "OORT PROTOCOL", "OORT CLOUD"],
+    "tokens": []
+  },
+  {
+    "name": "Matrix",
+    "mappings": ["MAN", "MATRIX", "MATRIX AI NETWORK", "MATRIX NETWORK", "MATRIX CHAIN", "MATRIX AI"],
+    "tokens": []
+  },
+  {
+    "name": "Xion",
+    "mappings": ["XION", "XION NETWORK", "XION CHAIN", "XION PROTOCOL", "XION BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Xfi",
+    "mappings": ["XFI", "XFITE", "XFINITE", "XFINITE ENTERTAINMENT", "XFI NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "U2U",
+    "mappings": ["U2U", "U2U NETWORK", "U2U CHAIN", "U2U BLOCKCHAIN", "U2U PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Mintlayer",
+    "mappings": ["ML", "MINTLAYER", "MINT LAYER", "MINTLAYER NETWORK", "MINTLAYER CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Xai",
+    "mappings": ["XAI", "XAI CHAIN", "XAI NETWORK", "XAI BLOCKCHAIN", "XAI PROTOCOL", "XAI LAYER3", "XAI GAMING", "XAI BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "SmartChain",
+    "mappings": ["SMART", "SMART CHAIN", "SMART NETWORK", "SMART BLOCKCHAIN", "SMART PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Meter",
+    "mappings": ["MTR", "METER", "METER NETWORK", "METER CHAIN", "METER BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "MeterGovernance",
+    "mappings": ["MTRG", "METER GOVERNANCE", "METER GOVERNANCE TOKEN", "METER GOV", "MTRG NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "MapProtocol",
+    "mappings": ["MAPO", "MAP", "MAP PROTOCOL", "MAP NETWORK", "MAP CHAIN", "MAP BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Beam",
+    "mappings": ["BEAM", "BEAM NETWORK", "BEAM CHAIN", "BEAM BLOCKCHAIN", "BEAM PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Bitgert",
+    "mappings": ["BRISE", "BITGERT", "BITGERT CHAIN", "BITGERT NETWORK", "BRISE CHAIN", "BRISE NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Hype",
+    "mappings": ["HYPE", "HYPE NETWORK", "HYPE CHAIN", "HYPE BLOCKCHAIN", "HYPE PROTOCOL", "HYPEEVM"],
+    "tokens": []
+  },
+  {
+    "name": "Pivx",
+    "mappings": ["PIVX", "PRIVATE INSTANT VERIFIED TRANSACTION", "PIVX NETWORK", "PIVX CHAIN", "PIVX BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "EthereumPoW",
+    "mappings": ["ETHW", "ETHEREUM POW", "ETHEREUM PROOF OF WORK", "ETHW NETWORK", "ETHW CHAIN", "ETHEREUMW", "ETHEREUMPOW"],
+    "tokens": []
+  },
+  {
+    "name": "Oraichain",
+    "mappings": ["ORAI", "ORAICHAIN", "ORAI CHAIN", "ORAI NETWORK", "ORAI BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Namada",
+    "mappings": ["NAMADA", "NAMADA NETWORK", "NAMADA CHAIN", "NAMADA PROTOCOL", "NAMADA BLOCKCHAIN"],
+    "tokens": ["NAM"]
+  },
+  {
+    "name": "MantraChain",
+    "mappings": ["MANTRA", "MANTRA CHAIN", "MANTRA NETWORK", "MANTRA PROTOCOL", "MANTRA BLOCKCHAIN", "OM", "OMNETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Shibarium",
+    "mappings": ["BONE", "SHIBARIUM", "SHIBARIUM NETWORK", "SHIBARIUM CHAIN", "SHIBARIUM L2", "SHIBA INU L2"],
+    "tokens": []
+  },
+  {
+    "name": "Tezos",
+    "mappings": ["XTZ", "TEZOS", "TEZOS NETWORK", "TEZOS BLOCKCHAIN", "TEZOS PROTOCOL", "XTZ BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Etherlink",
+    "mappings": ["XTZEVM", "ETHERLINK", "TEZOS EVM", "ETHERLINK NETWORK", "TEZOS EVM CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Zircuit",
+    "mappings": ["ZRC", "ZIRCUIT", "ZIRCUIT NETWORK", "ZIRCUIT CHAIN", "ZIRCUIT PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Telos",
+    "mappings": ["TLOS", "TLOSEVM", "TELOS", "TELOS ZERO", "TELOS EVM", "TELOS NETWORK", "TELOS CHAIN"],
+    "tokens": ["TLOS2"]
+  },
+  {
+    "name": "UnicornUltraSolaris",
+    "mappings": ["UNICORNULTRASOLARIS", "UNICORN ULTRA SOLARIS", "U2U SOLARIS", "SOLARIS", "UNICORN SOLARIS", "U2U NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Analog",
+    "mappings": ["ANLOG", "ANALOG", "ANALOG NETWORK", "ANALOG CHAIN", "ANALOG PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Vana",
+    "mappings": ["VANA", "VANA NETWORK", "VANA CHAIN", "VANA BLOCKCHAIN", "VANA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Swell",
+    "mappings": ["SWELL", "SWELL NETWORK", "SWELL CHAIN", "SWELL PROTOCOL", "SWELL LIQUID STAKING"],
+    "tokens": []
+  },
+  {
+    "name": "Aleo",
+    "mappings": ["ALEO", "ALEO NETWORK", "ALEO CHAIN", "ALEO BLOCKCHAIN", "ALEO PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Flare",
+    "mappings": ["FLARE", "FLR", "FLARE NETWORK", "FLARE CHAIN", "FLARE BLOCKCHAIN", "FLARE PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Camp",
+    "mappings": ["CAMP", "CAMPCHAIN", "CAMP CHAIN", "CAMP NETWORK", "CAMP BLOCKCHAIN", "CAMP PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Venom",
+    "mappings": ["VENOM", "VENOM BLOCKCHAIN", "VENOM NETWORK", "VENOM CHAIN", "VENOM PROTOCOL", "VENOM FOUNDATION"],
+    "tokens": []
+  },
+  {
+    "name": "Bitshares",
+    "mappings": ["BTS", "BITSHARES", "BTS NETWORK", "BITSHARES NETWORK", "BTS CHAIN", "BITSHARES CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Hydragon",
+    "mappings": ["HYDRAGON", "HYDRAGON NETWORK", "HYDRAGON CHAIN", "HYDRAGON BLOCKCHAIN", "HYDRAGON PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Sonic",
+    "mappings": ["SONIC", "SONIC NETWORK", "SONIC CHAIN", "SONIC BLOCKCHAIN", "SONIC PROTOCOL", "SONIC L2"],
+    "tokens": []
+  },
+  {
+    "name": "NewChain",
+    "mappings": ["NEW", "NEW CHAIN", "NEW NETWORK", "NEW BLOCKCHAIN", "NEW PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Casper",
+    "mappings": ["CSPR", "CASPER", "CASPER NETWORK", "CASPER CHAIN", "CASPER BLOCKCHAIN", "CASPER PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Hive",
+    "mappings": ["HIVE", "HIVE NETWORK", "HIVE CHAIN", "HIVE BLOCKCHAIN", "HIVE PROTOCOL", "HIVE ENGINE"],
+    "tokens": []
+  },
+  {
+    "name": "Octa",
+    "mappings": ["OCTA", "OCTA NETWORK", "OCTA CHAIN", "OCTA BLOCKCHAIN", "OCTA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Shentu",
+    "mappings": ["CTK", "SHENTU", "SHENTU NETWORK", "SHENTU CHAIN", "SHENTU PROTOCOL", "CERTIK CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Lukso",
+    "mappings": ["LYX", "LUKSO", "LUKSO NETWORK", "LUKSO CHAIN", "LUKSO BLOCKCHAIN", "LUKSO PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Nibiru",
+    "mappings": ["NIBI", "NIBIRU", "NIBIRU NETWORK", "NIBIRU CHAIN", "NIBIRU PROTOCOL", "NIBIRU BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Osmosis",
+    "mappings": ["OSMO", "OSMOSIS", "OSMOSIS NETWORK", "OSMOSIS CHAIN", "OSMOSIS PROTOCOL", "OSMOSIS ZONE"],
+    "tokens": []
+  },
+  {
+    "name": "Tbc",
+    "mappings": ["TBC", "TBC NETWORK", "TBC CHAIN", "TBC BLOCKCHAIN", "TBC PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Electroneum",
+    "mappings": ["ETN", "ELECTRONEUM", "ELECTRONEUM NETWORK", "ELECTRONEUM CHAIN", "ELECTRONEUM BLOCKCHAIN", "ETN NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Iron",
+    "mappings": ["IRON", "IRON NETWORK", "IRON CHAIN", "IRON BLOCKCHAIN", "IRON PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Fio",
+    "mappings": ["FIO", "FIO PROTOCOL", "FIO NETWORK", "FIO CHAIN", "FIO BLOCKCHAIN", "FOUNDATION FOR INTERWALLET OPERABILITY"],
+    "tokens": []
+  },
+  {
+    "name": "Radix",
+    "mappings": ["XRD", "RADIX", "RADIX NETWORK", "RADIX CHAIN", "RADIX BLOCKCHAIN", "RADIX PROTOCOL", "RADIX LEDGER"],
+    "tokens": []
+  },
+  {
+    "name": "Cronos",
+    "mappings": ["CRO", "CRONOS", "CRONOS NETWORK", "CRONOS CHAIN", "CRONOS BLOCKCHAIN", "CRONOS PROTOCOL", "CRYPTO ORG CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Xna",
+    "mappings": ["XNA", "NEURAI", "NEURAI NETWORK", "NEURAI CHAIN", "NEURAI BLOCKCHAIN", "NEURAI PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Fractal",
+    "mappings": ["FB", "FRACTAL", "FRACTAL NETWORK", "FRACTAL CHAIN", "FRACTAL BLOCKCHAIN", "FRACTAL PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Ergo",
+    "mappings": ["ERGO", "ERG", "ERGO NETWORK", "ERGO CHAIN", "ERGO BLOCKCHAIN", "ERGO PLATFORM", "ERGO PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Fuse",
+    "mappings": ["FUSE", "FUSE NETWORK", "FUSE CHAIN", "FUSE BLOCKCHAIN", "FUSE PROTOCOL", "FUSE CASH"],
+    "tokens": []
+  },
+  {
+    "name": "Vaulta",
+    "mappings": ["EOS", "VAULTA", "VAULTA NETWORK", "VAULTA CHAIN", "VAULTA BLOCKCHAIN", "VAULTA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Shardeum",
+    "mappings": ["SHARDEUM", "SHARDEUM NETWORK", "SHARDEUM CHAIN", "SHARDEUM BLOCKCHAIN", "SHARDEUM PROTOCOL", "SHARDEUM L1", "SHM"],
+    "tokens": []
+  },
+  {
+    "name": "HashKey",
+    "mappings": ["HSK", "HASHKEY", "HASHKEY CHAIN", "HASHKEY NETWORK", "HASHKEY BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "StaFi",
+    "mappings": ["FIS", "STAFI", "STAFI PROTOCOL", "STAFI NETWORK", "STAFI CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Peaq",
+    "mappings": ["PEAQ", "PEAQEVM", "PEAQ EVM", "PEAQ NETWORK", "PEAQ CHAIN", "PEAQ PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Steem",
+    "mappings": ["STEEM", "STEEM NETWORK", "STEEM CHAIN", "STEEM BLOCKCHAIN", "STEEM PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Sophon",
+    "mappings": ["SOPH", "SOPHON", "SOPHON NETWORK", "SOPHON CHAIN", "SOPHON PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Polymesh",
+    "mappings": ["POLYX", "POLYMESH", "POLYMESH NETWORK", "POLYMESH CHAIN", "POLYMESH BLOCKCHAIN", "POLYMESH PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Numbers",
+    "mappings": ["NUM", "NUMBERS", "NUMBERS PROTOCOL", "NUMBERS NETWORK", "NUMBERS CHAIN", "NUMBERS BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Kaspa",
+    "mappings": ["KAS", "KASPA", "KASPA NETWORK", "KASPA CHAIN", "KASPA BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Constellation",
+    "mappings": [
+      "DAG",
+      "CONSTELLATION",
+      "CONSTELLATION NETWORK",
+      "CONSTELLATION CHAIN",
+      "CONSTELLATION BLOCKCHAIN",
+      "CONSTELLATION PROTOCOL"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "T3rn",
+    "mappings": ["T3RN", "T3RN NETWORK", "T3RN CHAIN", "T3RN PROTOCOL", "T3RN BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "BitcoinSV",
+    "mappings": ["BSV", "BITCOIN SV", "BITCOIN SATOSHI VISION", "BITCOINSV", "BSV NETWORK", "BSV CHAIN", "HBSV"],
+    "tokens": []
+  },
+  {
+    "name": "Maverick",
+    "mappings": ["MVRK", "MAVERICK", "MAVERICK PROTOCOL", "MAVERICK NETWORK", "MAVERICK CHAIN", "MAVERICK BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Monero",
+    "mappings": ["XMR", "MONERO", "MONERO NETWORK", "MONERO CHAIN", "MONERO BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Mon",
+    "mappings": ["MON", "MONARCH", "MON NETWORK", "MON CHAIN", "MON BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Ultima",
+    "mappings": ["ULTIMA", "ULTIMA NETWORK", "ULTIMA CHAIN", "ULTIMA BLOCKCHAIN", "ULTIMA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "GraphLinq",
+    "mappings": ["GLQ", "GRAPHLINQ", "GRAPHLINQ CHAIN", "GRAPHLINQ NETWORK", "GRAPHLINQ PROTOCOL", "GRAPHLINQ BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Irisnet",
+    "mappings": ["IRIS", "IRISNET", "IRIS NETWORK", "IRISNET CHAIN", "IRISNET PROTOCOL", "IRISNET BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Stratis",
+    "mappings": [
+      "STRAX",
+      "STRATIS",
+      "STRATIS EVM",
+      "STRATIS NETWORK",
+      "STRATIS CHAIN",
+      "STRATIS BLOCKCHAIN",
+      "STRATIS PROTOCOL",
+      "STRATISEVM"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "Pocket",
+    "mappings": ["POKT", "POCKET", "POCKET NETWORK", "POCKET CHAIN", "POCKET BLOCKCHAIN", "POCKET PROTOCOL", "POCKET NETWORK PROTOCOL"],
+    "tokens": ["POKTSHANNON"]
+  },
+  {
+    "name": "Aelf",
+    "mappings": ["ELF", "AELF", "AELF NETWORK", "AELF CHAIN", "AELF BLOCKCHAIN", "AELF PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Ark",
+    "mappings": ["ARK", "ARK NETWORK", "ARK CHAIN", "ARK BLOCKCHAIN", "ARK PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Akash",
+    "mappings": ["AKT", "AKASH", "AKASH NETWORK", "AKASH CHAIN", "AKASH BLOCKCHAIN", "AKASH PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Core",
+    "mappings": ["CORE", "CORE NETWORK", "CORE CHAIN", "CORE BLOCKCHAIN", "CORE DAO", "CORE PROTOCOL"],
+    "tokens": ["CORE-AB"]
+  },
+  {
+    "name": "XLayer",
+    "mappings": ["XLAYER", "X LAYER", "XLAYER NETWORK", "XLAYER CHAIN", "XLAYER BLOCKCHAIN", "XLAYER PROTOCOL", "X LAYER (USDT0)"],
+    "tokens": []
+  },
+  {
+    "name": "Allora",
+    "mappings": ["ALLORA", "ALLO", "ALLORA NETWORK", "ALLORA CHAIN", "ALLORA BLOCKCHAIN", "ALLORA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Emyria",
+    "mappings": ["EMYC", "EMYRIA", "EMYRIA NETWORK", "EMYRIA CHAIN", "EMYRIA BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "EthereumClassic",
+    "mappings": ["ETC", "ETHEREUM CLASSIC", "ETHEREUMCLASSIC", "ETC NETWORK", "ETC CHAIN", "ETC BLOCKCHAIN", "ETH CLASSIC"],
+    "tokens": []
+  },
+  {
+    "name": "Proton",
+    "mappings": ["XPR", "PROTON", "PROTON NETWORK", "PROTON CHAIN", "PROTON BLOCKCHAIN", "PROTON PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Avail",
+    "mappings": ["AVAIL", "AVL", "AVAIL NETWORK", "AVAIL CHAIN", "AVAIL BLOCKCHAIN", "AVAIL PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Kub",
+    "mappings": ["KUB", "KUB CHAIN", "KUB NETWORK", "KUB BLOCKCHAIN", "KUB PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "ABCore",
+    "mappings": ["AB", "ABCORE", "AB CORE", "AB NETWORK", "AB CHAIN", "AB BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Humanode",
+    "mappings": ["HMND", "HUMANODE", "HUMANODE NETWORK", "HUMANODE CHAIN", "HUMANODE BLOCKCHAIN", "HUMANODE PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Dynex",
+    "mappings": ["DNX", "DYNEX", "DYNEX NETWORK", "DYNEX CHAIN", "DYNEX BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Saga",
+    "mappings": ["SAGA", "SAGA NETWORK", "SAGA CHAIN", "SAGA BLOCKCHAIN", "SAGA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Oasys",
+    "mappings": ["OAS", "OASYS", "OASYS NETWORK", "OASYS CHAIN", "OASYS BLOCKCHAIN", "OASYS PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Wanchain",
+    "mappings": ["WAN", "WANCHAIN", "WAN CHAIN", "WAN NETWORK", "WAN BLOCKCHAIN", "WAN PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Zelcash",
+    "mappings": ["ZEL", "ZELCASH", "ZEL CASH", "ZEL NETWORK", "ZEL CHAIN", "ZEL BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Luckycoin",
+    "mappings": ["LUCKYCOIN", "LUCKY COIN", "LUCKY NETWORK", "LUCKY CHAIN", "LUCKY BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Lamina1",
+    "mappings": ["LAMINA1", "LAMINA 1", "LAMINA ONE", "LAMINA1 NETWORK", "LAMINA1 CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "ZkVerify",
+    "mappings": ["ZKVERIFY", "ZK VERIFY", "ZKVERIFY NETWORK", "ZKVERIFY CHAIN", "ZKVERIFY PROTOCOL", "ZKVERIFY BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Nervos",
+    "mappings": ["CKB", "NERVOS", "NERVOS NETWORK", "NERVOS CHAIN", "NERVOS BLOCKCHAIN", "NERVOS PROTOCOL", "COMMON KNOWLEDGE BASE"],
+    "tokens": []
+  },
+  {
+    "name": "Blast",
+    "mappings": [
+      "BLAST",
+      "BLAST NETWORK",
+      "BLAST CHAIN",
+      "BLAST BLOCKCHAIN",
+      "BLAST PROTOCOL",
+      "BLAST L2",
+      "BLAST NETWORK",
+      "BLAST LAYER2",
+      "BLAST L2"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "AlephZero",
+    "mappings": [
+      "AZERO",
+      "ALEPH ZERO",
+      "ALEPHZERO",
+      "ALEPH ZERO NETWORK",
+      "ALEPH ZERO CHAIN",
+      "ALEPH ZERO BLOCKCHAIN",
+      "ALEPH ZERO PROTOCOL"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "Somnia",
+    "mappings": ["SOMI", "SOMNIA", "SOMNIA NETWORK", "SOMNIA CHAIN", "SOMNIA BLOCKCHAIN", "SOMNIA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "ZetaChain",
+    "mappings": [
+      "ZETA",
+      "ZETACHAIN",
+      "ZETA CHAIN",
+      "ZETACHAIN NETWORK",
+      "ZETACHAIN PROTOCOL",
+      "ZETAEVM",
+      "ZETACHAIN EVM",
+      "ZETACHAIN BLOCKCHAIN"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "Stratos",
+    "mappings": ["STOS", "STRATOS", "STRATOS NETWORK", "STRATOS CHAIN", "STRATOS BLOCKCHAIN", "STRATOS PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "BitcoinCash",
+    "mappings": ["BCH", "BITCOIN CASH", "BITCOINCASH", "BCH NETWORK", "BCH CHAIN", "BCH BLOCKCHAIN", "BITCOIN CASH NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Taiko",
+    "mappings": ["TAIKO", "TAIKOETH", "TAIKO ETH", "TAIKO NETWORK", "TAIKO CHAIN", "TAIKO BLOCKCHAIN", "TAIKO L2"],
+    "tokens": []
+  },
+  {
+    "name": "Arch",
+    "mappings": ["ARCH", "ARCH NETWORK", "ARCH CHAIN", "ARCH BLOCKCHAIN", "ARCH PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Mat",
+    "mappings": ["MAT", "MY MASTER WAR", "MAT NETWORK", "MAT CHAIN", "MAT BLOCKCHAIN", "MAT PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "OpBNB",
+    "mappings": ["OPBNB", "OP BNB", "OPBNB NETWORK", "OPBNB CHAIN", "OPBNB L2", "BINANCE OP ROLLUP", "OP-BNB"],
+    "tokens": []
+  },
+  {
+    "name": "Mitosis",
+    "mappings": ["MITO", "MITOSIS", "MITOSIS NETWORK", "MITOSIS CHAIN", "MITOSIS BLOCKCHAIN", "MITOSIS PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Aergo",
+    "mappings": ["AERGO", "AERGO NETWORK", "AERGO CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Aevo",
+    "mappings": ["AEVO", "AEVO NETWORK", "AEVO LAYER2"],
+    "tokens": []
+  },
+  {
+    "name": "Aioz",
+    "mappings": ["AIOZ", "AIOZ NETWORK", "AIOZ CHAIN", "AIOZ WEB3"],
+    "tokens": []
+  },
+  {
+    "name": "Aura",
+    "mappings": ["AURA", "AURA NETWORK", "AURA CHAIN", "AURA XPLA"],
+    "tokens": []
+  },
+  {
+    "name": "Ardor",
+    "mappings": ["ARDOR", "ARDR", "ARDOR ARDR", "ARDOR CHAIN", "ARDOR BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Archway",
+    "mappings": ["ARCHWAY", "ARCHWAY NETWORK", "ARCH"],
+    "tokens": []
+  },
+  {
+    "name": "BeamX",
+    "mappings": ["BEAMX", "BEAM X", "BEAM-X", "BEAM EXTENDED"],
+    "tokens": []
+  },
+  {
+    "name": "Brise",
+    "mappings": ["BRISE", "BITGERT", "BITGERT CHAIN", "BITGERT NETWORK", "BRISE CHAIN", "BRISE NETWORK"],
+    "tokens": []
+  },
+
+  {
+    "name": "Dione",
+    "mappings": ["DIONE", "DIONE PROTOCOL", "DIONE NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Dora",
+    "mappings": ["DORA", "DORA NETWORK", "DORA CHAIN", "DORAFACTORY", "DORA VOTA MAINNET", "DORAVOTA"],
+    "tokens": []
+  },
+  {
+    "name": "Edgeware",
+    "mappings": ["EDGEWARE"],
+    "tokens": []
+  },
+  {
+    "name": "Eliza",
+    "mappings": ["ELIZA"],
+    "tokens": []
+  },
+  {
+    "name": "Espresso",
+    "mappings": ["ESPRESSO"],
+    "tokens": []
+  },
+  {
+    "name": "Fhenix",
+    "mappings": ["FHENIX"],
+    "tokens": []
+  },
+  {
+    "name": "Haqq",
+    "mappings": ["HAQQ", "HAQQ NETWORK", "HAQQ CHAIN", "ISLM", "ISLAMIC COIN"],
+    "tokens": []
+  },
+
+  {
+    "name": "Telcoin",
+    "mappings": ["TELCOIN", "TEL COIN", "TEL NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Tenet",
+    "mappings": ["TENET", "TENET NETWORK", "TENET CHAIN"],
+    "tokens": []
+  },
+
+  {
+    "name": "Unichain",
+    "mappings": ["UNICHAIN", "UNI CHAIN", "UNICHAIN NETWORK", "UNICHAIN (USDT0)"],
+    "tokens": []
+  },
+
+  {
+    "name": "W",
+    "mappings": ["W", "W CHAIN", "W NETWORK", "W BLOCKCHAIN"],
+    "tokens": []
+  },
+
+  {
+    "name": "Heco",
+    "mappings": [
+      "HECO",
+      "HECO_HT",
+      "HECO CHAIN",
+      "HUOBI ECO CHAIN",
+      "HUOBI CHAIN",
+      "HECO NETWORK",
+      "HT",
+      "HUOBI TOKEN",
+      "HECO MAINNET",
+      "HUOBI SMART CHAIN"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "OkxChain",
+    "mappings": [
+      "OKTC",
+      "OKT",
+      "OKX CHAIN",
+      "OKEX CHAIN",
+      "OKT CHAIN",
+      "OKX",
+      "OKEX",
+      "OKX NETWORK",
+      "OKEX NETWORK",
+      "OKC",
+      "OKX MAINNET",
+      "OKEX MAINNET"
+    ],
+    "tokens": []
+  },
+  {
+    "name": "Gatechain",
+    "mappings": [
+      "GT",
+      "GATELAYER",
+      "GTEVM",
+      "GATE CHAIN",
+      "GATECHAIN",
+      "GATE LAYER",
+      "GATE NETWORK",
+      "GATE IO CHAIN",
+      "GATE.IO CHAIN",
+      "GATE BLOCKCHAIN"
+    ],
+    "tokens": ["GT"]
+  },
+  {
+    "name": "Coreum",
+    "mappings": ["COREUM", "COREUM NETWORK", "COREUM CHAIN", "COREUM BLOCKCHAIN", "CORE", "CORE DAO"],
+    "tokens": []
+  },
+  {
+    "name": "Bttc",
+    "mappings": [
+      "BTT",
+      "BTTC_T",
+      "BTTCHTX",
+      "BTTC",
+      "BITTORRENT CHAIN",
+      "BTT CHAIN",
+      "BTT NETWORK",
+      "BTTC MAINNET",
+      "BITTORRENT",
+      "BTT2",
+      "BTT2ETH",
+      "BTTC T"
+    ],
+    "tokens": ["BTT"]
+  },
+  {
+    "name": "Boba",
+    "mappings": [
+      "BOBAEVM",
+      "BOBA",
+      "BOBA NETWORK",
+      "BOBA CHAIN",
+      "BOBA L2",
+      "BOBA LAYER2",
+      "BOBA PROTOCOL",
+      "BOBA MAINNET",
+      "BOBA ETHEREUM",
+      "BOBA LAYER 2"
+    ],
+    "tokens": []
+  }
+]

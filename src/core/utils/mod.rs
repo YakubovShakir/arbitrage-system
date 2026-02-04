@@ -15,7 +15,7 @@ use crate::{
     core::{
         traits::exchange_service::NetworkService,
         types::{
-            ExchangeName, Glass, Network, TradingPair,
+            ExchangeName, Glass, TradingPair,
             exchanges::Exchange,
             network::{DepositNetwork, WithdrawNetwork},
         },
@@ -33,9 +33,7 @@ pub fn find_intersection_from_networks(
     for w_network in withdraw_networks {
         // ← из withdraw_networks
         for d_network in deposit_networks {
-            if mem::discriminant(&w_network.base.network_type)
-                == mem::discriminant(&d_network.base.network_type)
-            {
+            if &w_network.base.network_type == &d_network.base.network_type {
                 intersection.push((w_network.clone(), d_network.clone())); // ← клонируем w_network
                 break;
             }

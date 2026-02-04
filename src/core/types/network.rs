@@ -1,7 +1,4 @@
-use crate::config::{
-    NetworkType, get_map,
-    parameters::{ERROR_CODE, RESET_CODE},
-};
+use crate::config::get_map;
 use log::error;
 
 #[derive(Debug, Clone)]
@@ -14,12 +11,11 @@ pub struct NetworkConfig {
 #[derive(Debug, Clone)]
 pub struct Network {
     pub config: NetworkConfig,
-    pub network_type: NetworkType,
+    pub network_type: String,
 }
 impl Network {
     pub fn parse(name: String, full_name: String) -> Option<Self> {
-        let network_type =
-            Self::get_network_type(&name).or_else(|| Self::get_network_type(&full_name));
+        let network_type = get_map().get(&name.to_uppercase()).map(|s| s.as_str());
 
         match network_type {
             Some(network_type) => {
@@ -31,21 +27,13 @@ impl Network {
 
                 Some(Self {
                     config,
-                    network_type: network_type,
+                    network_type: network_type.to_string(),
                 })
             }
             None => {
                 error!(target: "unknown_networks_module", "Не удалось распознать сеть name: {} full_name: {}",name, full_name);
                 None
             }
-        }
-    }
-
-    fn get_network_type(name: &str) -> Option<NetworkType> {
-        let mapped = get_map().get(&*name.to_uppercase());
-        match mapped {
-            Some(network_type) => Some(network_type.clone()),
-            None => None,
         }
     }
 
@@ -80,7 +68,7 @@ impl Network {
         };
         Network {
             config,
-            network_type: NetworkType::Bitcoin,
+            network_type: "Bitcoin".to_string(),
         }
     }
 }

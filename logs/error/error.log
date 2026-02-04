@@ -24,3 +24,15 @@
 2026-01-31T15:28:40.519486+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
 2026-01-31T15:28:51.542203+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
 2026-02-03T13:36:39.687736+03:00 ERROR Ошибка подключения: HTTP error: 404 Not Found. Повтор через 5 сек.
+2026-02-04T14:12:26.791447+03:00 WARN Failed GET https://api-cloud.bitmart.com/spot/quotation/v3/tickers. Retry after 300ms..
+2026-02-04T14:12:31.790638+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-02-04T14:12:32.094550+03:00 ERROR Не удалось получить тикеры от биржи Bitmart, ошибка - error decoding response body
+2026-02-04T14:12:51.788550+03:00 ERROR Не удалось получить тикеры от биржи Huobi, ошибка - error decoding response body
+2026-02-04T14:12:52.265299+03:00 ERROR FLOW/USDT verify returns empty networks. REASON: Can't get buy Mexc networks. ERROR: Error status code HTTP 429 Too Many Requests - {"code":429,"msg":"Too Many Requests"}
+2026-02-04T14:12:52.459162+03:00 ERROR WARD/USDT verify returns empty networks. REASON: Can't get buy Bitget networks. ERROR: Error status code HTTP 429 Too Many Requests - {"code":"429","msg":"Too Many Requests","requestTime":1770203572290,"data":null}
+2026-02-04T14:12:53.115598+03:00 ERROR RIVER/USDT verify returns empty networks. REASON: Can't get buy Mexc networks. ERROR: Error status code HTTP 429 Too Many Requests - {"code":429,"msg":"Too Many Requests"}
+2026-02-04T14:12:56.813891+03:00 ERROR MGO/USDT verify returns empty networks. REASON: Can't get buy Kucoin networks. ERROR: error decoding response body
+2026-02-04T14:12:57.817121+03:00 WARN Failed GET https://api-cloud.bitmart.com/spot/quotation/v3/tickers. Retry after 300ms..
+2026-02-04T14:13:02.817143+03:00 WARN Failed GET https://api.gateio.ws/api/v4/spot/tickers. Retry after 300ms..
+2026-02-04T14:13:03.119227+03:00 ERROR Не удалось получить тикеры от биржи Bitmart, ошибка - error decoding response body
+2026-02-04T14:13:22.815923+03:00 WARN Failed GET https://api.huobi.pro/market/tickers. Retry after 300ms..

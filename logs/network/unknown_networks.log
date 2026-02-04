@@ -16,4 +16,22 @@
 FF2026-02-03T14:44:18.243585+03:00 ERROR Не удалось распознать сеть name: X Layer (USDT0) full_name: X Layer (USDT0)
 2026-02-03T14:44:18.243872+03:00 ERROR Не удалось распознать сеть name: Optimism (USDT0) full_name: Optimism (USDT0)
 2026-02-03T14:44:18.243893+03:00 ERROR Не удалось распознать сеть name: Unichain (USDT0) full_name: Unichain (USDT0)
-FF
+FF2026-02-04T14:12:53.955847+03:00 ERROR Не удалось распознать сеть name: BSC full_name: BNB Smart Chain
+2026-02-04T14:12:53.957097+03:00 ERROR Не удалось распознать сеть name: MILK full_name: MilkyWay
+2026-02-04T14:12:54.109843+03:00 ERROR Не удалось распознать сеть name: AVAIL full_name: AVAIL
+2026-02-04T14:12:54.162176+03:00 ERROR Не удалось распознать сеть name: ERC20 full_name: ERC20
+2026-02-04T14:12:54.244262+03:00 ERROR Не удалось распознать сеть name: sol full_name: SOL
+2026-02-04T14:12:54.261184+03:00 ERROR Не удалось распознать сеть name: ETH full_name: Ethereum
+2026-02-04T14:12:54.261285+03:00 ERROR Не удалось распознать сеть name: NEAR full_name: NEAR
+2026-02-04T14:12:54.275174+03:00 ERROR Не удалось распознать сеть name: ETH full_name: Ethereum
+2026-02-04T14:12:54.275249+03:00 ERROR Не удалось распознать сеть name: SOL full_name: SOL
+2026-02-04T14:12:54.309264+03:00 ERROR Не удалось распознать сеть name: BASE full_name: BASE
+2026-02-04T14:12:55.316817+03:00 ERROR Не удалось распознать сеть name: SUI full_name: SUI
+2026-02-04T14:12:55.778527+03:00 ERROR Не удалось распознать сеть name: nem full_name: NEM
+2026-02-04T14:12:56.180158+03:00 ERROR Не удалось распознать сеть name: BEP20 full_name: BEP20
+2026-02-04T14:12:56.461628+03:00 ERROR Не удалось распознать сеть name: eth full_name: ERC20
+2026-02-04T14:12:56.461757+03:00 ERROR Не удалось распознать сеть name: kcc full_name: KCC
+2026-02-04T14:12:56.461795+03:00 ERROR Не удалось распознать сеть name: trx full_name: TRC20
+2026-02-04T14:12:56.741202+03:00 ERROR Не удалось распознать сеть name: ERC20 full_name: ERC20
+2026-02-04T14:12:59.543900+03:00 ERROR Не удалось распознать сеть name: TON full_name: TON
+2026-02-04T14:13:00.446301+03:00 ERROR Не удалось распознать сеть name: ERC20 full_name: ERC20
