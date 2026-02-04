@@ -315,7 +315,7 @@ pub enum NetworkType {
 }
 
 // МАППИНГ ТОКЕНОВ
-const TOKEN_TO_NETWORK: [(&str, NetworkType); 74] = [
+const TOKEN_TO_NETWORK: [(&str, NetworkType); 145] = [
     // Ethereum токены
     ("ACU", NetworkType::Ethereum),
     ("REACT", NetworkType::Ethereum),
@@ -395,6 +395,83 @@ const TOKEN_TO_NETWORK: [(&str, NetworkType); 74] = [
     ("CFX", NetworkType::Conflux),
     ("KAR", NetworkType::Kusama),
     ("TLM", NetworkType::Wax),
+    // Ethereum токены
+    ("VC", NetworkType::Ethereum),       // Value Chain Token
+    ("ME", NetworkType::Ethereum),       // ME Token
+    ("IP", NetworkType::Ethereum),       // IP Token
+    ("T", NetworkType::Ethereum),        // T Token
+    ("REEF", NetworkType::Ethereum),     // Reef Finance
+    ("REEF1", NetworkType::Ethereum),    // Reef Finance
+    ("BAKE", NetworkType::Ethereum),     // BakeryToken
+    ("LDO", NetworkType::Ethereum),      // Lido DAO
+    ("AMP", NetworkType::Ethereum),      // AMP Token
+    ("CVX", NetworkType::Ethereum),      // Convex Finance
+    ("SKY", NetworkType::Ethereum),      // SKY Token
+    ("LADYS", NetworkType::Ethereum),    // Milady Meme Coin
+    ("DUSK", NetworkType::Ethereum),     // Dusk Network Token
+    ("CHEQ", NetworkType::Ethereum),     // CHEQ Token
+    ("EUL", NetworkType::Ethereum),      // Euler Token
+    ("RATS", NetworkType::Ethereum),     // Rats Token
+    ("BARD", NetworkType::Ethereum),     // BARD Token
+    ("NIGHT", NetworkType::Ethereum),    // NIGHT Token
+    ("TORN", NetworkType::Ethereum),     // Tornado Cash Token
+    ("SWTCH", NetworkType::Ethereum),    // SWTCH Token
+    ("CLORE", NetworkType::Ethereum),    // CLORE Token
+    ("PAXI", NetworkType::Ethereum),     // PAX Token
+    ("RWA", NetworkType::Ethereum),      // RWA Token
+    ("EURR", NetworkType::Ethereum),     // EURR Token
+    ("EGP1", NetworkType::Ethereum),     // EGP Token
+    ("MAS", NetworkType::Ethereum),      // MAS Token
+    ("KYO", NetworkType::Ethereum),      // KYO Token
+    ("LQTY", NetworkType::Ethereum),     // Liquity Token
+    ("BANK", NetworkType::Ethereum),     // BANK Token
+    ("LVVA", NetworkType::Ethereum),     // LVVA Token
+    ("MOCA", NetworkType::Ethereum),     // MOCA Token
+    ("PALU", NetworkType::Ethereum),     // PALU Token
+    ("AI3", NetworkType::Ethereum),      // AI3 Token
+    ("ATH", NetworkType::Ethereum),      // ATH Token
+    ("MOLT", NetworkType::Ethereum),     // MOLT Token
+    ("RSS3", NetworkType::Ethereum),     // RSS3 Token
+    ("ARC", NetworkType::Ethereum),      // ARC Token
+    ("VSC", NetworkType::Ethereum),      // VSC Token
+    ("PLANCK", NetworkType::Ethereum),   // Planck Token
+    ("TOWNS", NetworkType::Ethereum),    // TOWNS Token
+    ("ROOT", NetworkType::Ethereum),     // ROOT Token
+    ("GRASS", NetworkType::Ethereum),    // Grass Token
+    ("L3", NetworkType::Ethereum),       // L3 Token
+    ("WSDM", NetworkType::Ethereum),     // WSDM Token
+    ("ICBX", NetworkType::Ethereum),     // ICBX Token
+    ("AIC", NetworkType::Ethereum),      // AIC Token
+    ("NEUTARO", NetworkType::Ethereum),  // NEUTARO Token
+    ("BLUE1", NetworkType::Ethereum),    // BLUE Token
+    ("SAROS", NetworkType::Ethereum),    // SAROS Token
+    ("BSCBLUAI", NetworkType::Ethereum), // BSC BLU AI Token
+    ("ZENT", NetworkType::Ethereum),     // ZENT Token
+    // Solana токены
+    ("BAN", NetworkType::Solana),        // Вероятно Bonk (BONK)
+    ("BANANA", NetworkType::Solana),     // Banana Token
+    ("BANANAS31", NetworkType::Solana),  // Bananas Token
+    ("ORCA", NetworkType::Solana),       // Orca Token
+    ("JTO", NetworkType::Solana),        // JTO Token
+    ("MONAD", NetworkType::Solana),      // Monad Token
+    ("SOCHILLGUY", NetworkType::Solana), // SoChillGuy Token
+    ("MATCHAIN", NetworkType::Solana),   // MATCHAIN Token
+    // BSC токены
+    ("GOMINING", NetworkType::BinanceSmartChain), // GoMining Token
+    // NEAR токены
+    ("NEARSWEAT", NetworkType::Near), // Sweat Token
+    // TON токены
+    ("EVER", NetworkType::Ton), // Everscale на TON
+    // Другие сети
+    ("HTR", NetworkType::Ethereum),       // HTR Token
+    ("VARA", NetworkType::Ethereum),      // VARA Token
+    ("WEMIXMAINNET", NetworkType::Wemix), // WEMIX Token
+    ("OPENETH", NetworkType::Ethereum),   // OpenEthereum Token
+    ("SHM-EVM", NetworkType::Ethereum),   // SHM Token
+    ("OBOL", NetworkType::Ethereum),      // Obol Token
+    ("CORE-AB", NetworkType::Core),       // CORE-AB Token
+    ("MODE", NetworkType::Ethereum),      // MODE Token
+    ("ERC20ZAMA", NetworkType::Ethereum), // ZAMA Token
 ];
 static NETWORK_MAP: OnceLock<HashMap<&'static str, NetworkType>> = OnceLock::new();
 
