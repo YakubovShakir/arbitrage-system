@@ -285,7 +285,6 @@ pub enum NetworkType {
     Karnot,
     Kujira,
     Milkomeda,
-    Mocaverse,
     Nautilus,
     Nexis,
     Nolus,
@@ -308,13 +307,182 @@ pub enum NetworkType {
     Zkspace,
     Heco,
     OkxChain,
+    Gatechain, // GateChain
+    Coreum,    // COREUM
+    Bttc,      // BitTorrent Chain (BTTC)
+    Boba,      // Boba Network
+    Hbsv,      // HBSV (Bitcoin SV?)
 }
 
+// МАППИНГ ТОКЕНОВ
+const TOKEN_TO_NETWORK: [(&str, NetworkType); 74] = [
+    // Ethereum токены
+    ("ACU", NetworkType::Ethereum),
+    ("REACT", NetworkType::Ethereum),
+    ("ENSO", NetworkType::Ethereum),
+    ("WMTX", NetworkType::Ethereum),
+    ("ARTY", NetworkType::Ethereum),
+    ("BEBE", NetworkType::Ethereum),
+    ("BEBE1", NetworkType::Ethereum),
+    ("SWAP", NetworkType::Ethereum),
+    ("RACA", NetworkType::Ethereum),
+    ("PIXELMON", NetworkType::Ethereum),
+    ("LWA", NetworkType::Ethereum),
+    ("FURY", NetworkType::Ethereum),
+    ("UXLINKNEW", NetworkType::Ethereum),
+    ("SOON", NetworkType::Ethereum),
+    ("SIS", NetworkType::Ethereum),
+    ("PSTAKE", NetworkType::Ethereum),
+    ("ZKPASS", NetworkType::Ethereum),
+    ("DAO", NetworkType::Ethereum),
+    ("BIO", NetworkType::Ethereum),
+    ("DARK", NetworkType::Ethereum),
+    ("PAAL", NetworkType::Ethereum),
+    ("AIDOGE", NetworkType::Ethereum),
+    ("WTMLL", NetworkType::Ethereum),
+    ("ELON", NetworkType::Ethereum),
+    ("MERL", NetworkType::Ethereum),
+    ("MEMEFI", NetworkType::Ethereum),
+    ("ELX", NetworkType::Ethereum),
+    ("AI", NetworkType::Ethereum),
+    ("HIPPO", NetworkType::Ethereum),
+    ("PCI2", NetworkType::Ethereum),
+    ("MANEKI", NetworkType::Ethereum),
+    ("SPK", NetworkType::Ethereum),
+    ("HOUSE", NetworkType::Ethereum),
+    ("CHECK", NetworkType::Ethereum),
+    ("MICHI", NetworkType::Ethereum),
+    ("LF", NetworkType::Ethereum),
+    ("MANYU", NetworkType::Ethereum),
+    ("CLAWNCH", NetworkType::Ethereum),
+    ("STETH", NetworkType::Ethereum),
+    ("XFI1", NetworkType::Ethereum),
+    ("CSIX", NetworkType::Ethereum),
+    ("DSYNC", NetworkType::Ethereum),
+    ("ORDER", NetworkType::Ethereum),
+    ("STO", NetworkType::Ethereum),
+    ("ACX", NetworkType::Ethereum),
+    ("SUPER", NetworkType::Ethereum),
+    ("SCA", NetworkType::Ethereum),
+    ("DBR", NetworkType::Ethereum),
+    ("UFD", NetworkType::Ethereum),
+    ("SYND", NetworkType::Ethereum),
+    ("A8", NetworkType::Ethereum),
+    ("GHST", NetworkType::Ethereum),
+    ("SKR", NetworkType::Ethereum),
+    ("JASMY", NetworkType::Ethereum),
+    ("PEOPLE", NetworkType::Ethereum),
+    ("B2", NetworkType::Ethereum),
+    ("PING", NetworkType::Ethereum),
+    ("MOODENGETH", NetworkType::Ethereum),
+    ("EIGEN", NetworkType::Ethereum),
+    ("MOG", NetworkType::Ethereum),
+    ("FLZ", NetworkType::Ethereum),
+    // BSC токены
+    ("BABYDOGE", NetworkType::BinanceSmartChain),
+    ("BSCSFUND", NetworkType::BinanceSmartChain),
+    ("LAIKA-DOGE", NetworkType::BinanceSmartChain),
+    ("BNCPOLKA", NetworkType::BinanceSmartChain),
+    // Solana токены
+    ("NEON", NetworkType::Solana),
+    ("PUMPFUN", NetworkType::Solana),
+    // Bitcoin токены
+    ("SATS", NetworkType::Bitcoin),
+    ("ORDI", NetworkType::Bitcoin),
+    // Другие сети
+    ("GT", NetworkType::Gatechain),
+    ("BTT", NetworkType::Bttc),
+    ("CFX", NetworkType::Conflux),
+    ("KAR", NetworkType::Kusama),
+    ("TLM", NetworkType::Wax),
+];
 static NETWORK_MAP: OnceLock<HashMap<&'static str, NetworkType>> = OnceLock::new();
 
 pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
     NETWORK_MAP.get_or_init(|| {
         let mut m = HashMap::new();
+
+        // BitTorrent Chain (BTTC)
+        const BTTC_MAPPING: [&str; 12] = [
+            "BTT",
+            "BTTC_T",
+            "BTTCHTX",
+            "BTTC",
+            "BITTORRENT CHAIN",
+            "BTT CHAIN",
+            "BTT NETWORK",
+            "BTTC MAINNET",
+            "BITTORRENT",
+            "BTT2",
+            "BTT2ETH",
+            "BTTC T",
+        ];
+        for mapped in BTTC_MAPPING {
+            m.insert(mapped, NetworkType::Bttc);
+        }
+
+        // Boba Network
+        const BOBA_MAPPING: [&str; 10] = [
+            "BOBAEVM",
+            "BOBA",
+            "BOBA NETWORK",
+            "BOBA CHAIN",
+            "BOBA L2",
+            "BOBA LAYER2",
+            "BOBA PROTOCOL",
+            "BOBA MAINNET",
+            "BOBA ETHEREUM",
+            "BOBA LAYER 2",
+        ];
+        for mapped in BOBA_MAPPING {
+            m.insert(mapped, NetworkType::Boba);
+        }
+
+        // Conflux Network
+        const CONFLUX_MAPPING: [&str; 10] = [
+            "CFX_EVM",
+            "CFX1",
+            "CFX",
+            "CONFLUX",
+            "CONFLUX NETWORK",
+            "CONFLUX CHAIN",
+            "CFX ESPACE",
+            "CONFLUX EVM",
+            "CFXCORE",
+            "CFX CORE",
+        ];
+        for mapped in CONFLUX_MAPPING {
+            m.insert(mapped, NetworkType::Conflux);
+        }
+
+        // COREUM
+        const COREUM_MAPPING: [&str; 6] = [
+            "COREUM",
+            "COREUM NETWORK",
+            "COREUM CHAIN",
+            "COREUM BLOCKCHAIN",
+            "CORE",
+            "CORE DAO",
+        ];
+        for mapped in COREUM_MAPPING {
+            m.insert(mapped, NetworkType::Coreum);
+        }
+        // GateChain (Gate.io)
+        const GATECHAIN_MAPPING: [&str; 10] = [
+            "GT",
+            "GATELAYER",
+            "GTEVM",
+            "GATE CHAIN",
+            "GATECHAIN",
+            "GATE LAYER",
+            "GATE NETWORK",
+            "GATE IO CHAIN",
+            "GATE.IO CHAIN",
+            "GATE BLOCKCHAIN",
+        ];
+        for mapped in GATECHAIN_MAPPING {
+            m.insert(mapped, NetworkType::Gatechain);
+        }
 
         // OKX Chain (OKTC)
         const OKX_CHAIN_MAPPING: [&str; 12] = [
@@ -529,12 +697,16 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             m.insert(mapped, NetworkType::Eclipse);
         }
         // Gravity
-        const GRAVITY_MAPPING: [&str; 5] = [
+        const GRAVITY_MAPPING: [&str; 9] = [
             "G",
             "GRAVITY",
             "GRAVITY ALPHA",
             "GRAVITY PROTOCOL",
             "GRAVITYCHAIN",
+            "GRAVITY ALPHA MAINNET",
+            "GRAVITY NETWORK",
+            "GRAVITY CHAIN",
+            "GRAVITYALPHA",
         ];
         for mapped in GRAVITY_MAPPING {
             m.insert(mapped, NetworkType::Gravity);
@@ -1068,18 +1240,6 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             m.insert(mapped, NetworkType::Algorand);
         }
 
-        // Conflux (CFX) (новый)
-        const CONFLUX_MAPPING: [&str; 6] = [
-            "CFX",
-            "CFXCORE",
-            "CFX ESPACE",
-            "CFX CORE",
-            "CONFLUX",
-            "CONFLUX NETWORK",
-        ];
-        for mapped in CONFLUX_MAPPING {
-            m.insert(mapped, NetworkType::Conflux);
-        }
         // Nano (новый)
         const NANO_MAPPING: [&str; 4] =
             ["NANO", "NANO COIN", "NANO NETWORK", "NANO CRYPTOCURRENCY"];
@@ -1576,7 +1736,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             m.insert(mapped, NetworkType::Metis);
         }
         // NEAR Protocol (уже есть)
-        const NEAR_MAPPING: [&str; 7] = [
+        const NEAR_MAPPING: [&str; 8] = [
             "NEAR",
             "NEARPROTOCOL",
             "NEAR CHAIN",
@@ -1584,6 +1744,7 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
             "NEAR BLOCKCHAIN", // Добавил новое название
             "NEAR TOKEN",      // Добавил новое название
             "NEARProtocol",
+            "NEAR PROTOCOL",
         ];
         for mapped in NEAR_MAPPING {
             m.insert(mapped, NetworkType::Near);
@@ -2688,13 +2849,14 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         }
 
         // Bitcoin SV (BSV) (новый) - ОТДЕЛЬНАЯ СЕТЬ ОТ BITCOIN!
-        const BITCOIN_SV_MAPPING: [&str; 6] = [
+        const BITCOIN_SV_MAPPING: [&str; 7] = [
             "BSV",
             "BITCOIN SV",
             "BITCOIN SATOSHI VISION",
             "BITCOINSV",
             "BSV NETWORK",
             "BSV CHAIN",
+            "HBSV",
         ];
         for mapped in BITCOIN_SV_MAPPING {
             m.insert(mapped, NetworkType::BitcoinSV);
@@ -3258,6 +3420,11 @@ pub fn get_map() -> &'static HashMap<&'static str, NetworkType> {
         for mapped in ZETACHAIN_EXTENDED_MAPPING {
             m.insert(mapped, NetworkType::ZetaChain);
         }
+
+        for (token, network) in TOKEN_TO_NETWORK.iter() {
+            m.insert(*token, network.clone());
+        }
+
         m
     })
 }
