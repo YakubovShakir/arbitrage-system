@@ -195,3 +195,59 @@
 │        └─ Total passed: 0
 └── Total elapsed: 8.674 s
 
+2026-02-04T14:36:58.919328+03:00 INFO - Running in DEVELOPMENT mode
+2026-02-04T14:36:58.928819+03:00 INFO - 📡 Подключаемся к wss://wbs-api.mexc.com/ws
+2026-02-04T14:36:58.929265+03:00 INFO - 📡 Подключаемся к https://api.kucoin.com
+2026-02-04T14:36:59.875821+03:00 INFO - 🔗 WebSocket соединение c wss://wbs-api.mexc.com/ws установлено
+2026-02-04T14:37:00.873943+03:00 INFO - 🔗 WebSocket соединение c wss://ws-api-spot.kucoin.com/ установлено
+2026-02-04T14:37:16.932183+03:00 INFO - ┌── СomputWorker:1 Statistics for 10 iteration
+├──── Updated tickers
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+├──── Prices stat
+│        └─ Total elapsed: 0 ns
+├──── Ticker spread stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+├──── Verify stat
+│        ├─ Total elapsed: 85.965 µs
+│        └─ Total passed: 0
+├──── Orderbook stat
+│        ├─ Total elapsed: 1.401 µs
+│        └─ Total passed: 0
+├──── Calculated Books stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+├──── Final spread stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+└── Total elapsed: 591.473 µs
+
+2026-02-04T14:38:07.368588+03:00 INFO - Running in DEVELOPMENT mode
+2026-02-04T14:38:07.377483+03:00 INFO - 📡 Подключаемся к wss://wbs-api.mexc.com/ws
+2026-02-04T14:38:07.377855+03:00 INFO - 📡 Подключаемся к https://api.kucoin.com
+2026-02-04T14:38:08.387438+03:00 INFO - 🔗 WebSocket соединение c wss://wbs-api.mexc.com/ws установлено
+2026-02-04T14:38:09.229398+03:00 INFO - 🔗 WebSocket соединение c wss://ws-api-spot.kucoin.com/ установлено
+2026-02-04T14:38:25.385357+03:00 INFO - ┌── СomputWorker:1 Statistics for 10 iteration
+├──── Updated tickers
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+├──── Prices stat
+│        └─ Total elapsed: 0 ns
+├──── Ticker spread stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+├──── Verify stat
+│        ├─ Total elapsed: 94.617 µs
+│        └─ Total passed: 0
+├──── Orderbook stat
+│        ├─ Total elapsed: 2.457 µs
+│        └─ Total passed: 0
+├──── Calculated Books stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+├──── Final spread stat
+│        ├─ Total elapsed: 0 ns
+│        └─ Total passed: 0
+└── Total elapsed: 764.774 µs
+

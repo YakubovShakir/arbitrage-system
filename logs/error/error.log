@@ -36,3 +36,15 @@
 2026-02-04T14:13:02.817143+03:00 WARN Failed GET https://api.gateio.ws/api/v4/spot/tickers. Retry after 300ms..
 2026-02-04T14:13:03.119227+03:00 ERROR Не удалось получить тикеры от биржи Bitmart, ошибка - error decoding response body
 2026-02-04T14:13:22.815923+03:00 WARN Failed GET https://api.huobi.pro/market/tickers. Retry after 300ms..
+2026-02-04T14:37:03.929540+03:00 ERROR Не удалось получить тикеры от биржи Bitmart, ошибка - error decoding response body
+2026-02-04T14:37:08.929273+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-02-04T14:37:28.930868+03:00 ERROR Не удалось получить тикеры от биржи Huobi, ошибка - error decoding response body
+2026-02-04T14:37:29.382393+03:00 ERROR Cannot read networks_mapping.json - No such file or directory (os error 2)
+2026-02-04T14:37:30.345388+03:00 ERROR PREMARKET3/USDT verify returns empty networks. REASON: Can't get buy Bitget networks. ERROR: Error status code HTTP 429 Too Many Requests - {"code":"429","msg":"Too Many Requests","requestTime":1770205049563,"data":null}
+2026-02-04T14:37:33.947479+03:00 ERROR LKI/USDT verify returns empty networks. REASON: Can't get buy Kucoin networks. ERROR: error decoding response body
+2026-02-04T14:37:33.948425+03:00 ERROR AVAIL/USDT verify returns empty networks. REASON: Can't get buy Bybit networks. ERROR: error decoding response body
+2026-02-04T14:37:34.321912+03:00 ERROR ZEREBRO/USDT verify returns empty networks. REASON: Can't get buy Mexc networks. ERROR: Error status code HTTP 400 Bad Request - {"code":700003,"msg":"Timestamp for this request is outside of the recvWindow."}
+2026-02-04T14:37:34.942332+03:00 ERROR Не удалось получить тикеры от биржи Bitmart, ошибка - error decoding response body
+2026-02-04T14:38:12.393633+03:00 ERROR Не удалось получить тикеры от биржи Bitmart, ошибка - error decoding response body
+2026-02-04T14:38:17.378982+03:00 ERROR Не удалось получить тикеры от биржи Gate.io, ошибка - error decoding response body
+2026-02-04T14:38:37.379230+03:00 ERROR Не удалось получить тикеры от биржи Huobi, ошибка - error decoding response body

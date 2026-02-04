@@ -12,7 +12,7 @@ struct Network {
 static NETWORK_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
 
 fn load_networks() -> HashMap<String, String> {
-    let content = match fs::read_to_string("networks_mapping.json") {
+    let content = match fs::read_to_string("./src/config/networks_mapping.json") {
         Ok(c) => c,
         Err(e) => {
             log::error!("Cannot read networks_mapping.json - {}", e);
@@ -34,7 +34,6 @@ fn load_networks() -> HashMap<String, String> {
             map.insert(token.to_uppercase(), network.name.clone());
         }
     }
-    println!("RESULT {:#?}", map);
     map
 }
 
