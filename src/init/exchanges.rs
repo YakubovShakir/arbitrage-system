@@ -39,7 +39,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    exchanges.insert(config::binance::NAME.to_owned(), binance);
+    // exchanges.insert(config::binance::NAME.to_owned(), binance);
 
     // Bybit
     let bybit = Exchange::Bybit(ExchangeConfig {
