@@ -12,7 +12,7 @@ struct Network {
 static NETWORK_MAP: OnceLock<HashMap<String, String>> = OnceLock::new();
 
 fn load_networks() -> HashMap<String, String> {
-    let content = match fs::read_to_string("networks_config.json") {
+    let content = match fs::read_to_string("networks_mapping.json") {
         Ok(c) => c,
         Err(_) => return HashMap::new(),
     };
