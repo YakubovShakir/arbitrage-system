@@ -58,6 +58,15 @@
       "ERC20ZRC"
     ],
     "tokens": [
+      "LMWR",
+      "REI",
+      "INX",
+      "IDEX",
+      "DEXE",
+      "FCT",
+      "LIT",
+      "SD",
+      "ZRO",
       "ACU",
       "REACT",
       "ENSO",
@@ -271,7 +280,7 @@
       "BSCGIGGLE",
       "BSCSTABLE"
     ],
-    "tokens": ["BABYDOGE", "BSCSFUND", "LAIKA-DOGE", "BNCPOLKA", "GOMINING", "BNLIFE", "BSCLISTA", "BSCMUBARAK", "BSBROCCOLI"]
+    "tokens": ["3ULL", "BABYDOGE", "BSCSFUND", "LAIKA-DOGE", "BNCPOLKA", "GOMINING", "BNLIFE", "BSCLISTA", "BSCMUBARAK", "BSBROCCOLI"]
   },
   {
     "name": "Solana",
@@ -288,12 +297,26 @@
       "SOLANA NETWORK",
       "SOLANA MAINNET"
     ],
-    "tokens": ["NEON", "PUMPFUN", "BAN", "BANANA", "BANANAS31", "ORCA", "JTO", "MONAD", "SOCHILLGUY", "MATCHAIN", "MNDE"]
+    "tokens": [
+      "SUNDOG",
+      "DONKEY",
+      "NEON",
+      "PUMPFUN",
+      "BAN",
+      "BANANA",
+      "BANANAS31",
+      "ORCA",
+      "JTO",
+      "MONAD",
+      "SOCHILLGUY",
+      "MATCHAIN",
+      "MNDE"
+    ]
   },
   {
     "name": "Sui",
     "mappings": ["SUI"],
-    "tokens": []
+    "tokens": ["CETUS"]
   },
   {
     "name": "Stacks",
@@ -328,7 +351,7 @@
   {
     "name": "Ton",
     "mappings": ["TON", "THE OPEN NETWORK", "TONCOIN", "OPENTON"],
-    "tokens": ["EVER", "FREETON"]
+    "tokens": ["BLUM", "EVER", "FREETON"]
   },
   {
     "name": "Icon",
@@ -353,7 +376,7 @@
   {
     "name": "Base",
     "mappings": ["BASE", "BASE MAINNET", "BASECARV", "BASEELSA", "BASEZEN", "BASE L2", "BASE NETWORK", "BASE-ETH"],
-    "tokens": []
+    "tokens": ["BRETT"]
   },
   {
     "name": "Hemi",
@@ -566,7 +589,7 @@
   },
   {
     "name": "AssetHubKusama",
-    "mappings": ["ASSET HUB KUSAMA", "KUSAMA ASSET HUB", "KUSAMA HUB", "ASSETHUBKUSAMA", "KSMASSETHUB"],
+    "mappings": ["AssetHub Kusama", "ASSET HUB KUSAMA", "KUSAMA ASSET HUB", "KUSAMA HUB", "ASSETHUBKUSAMA", "KSMASSETHUB"],
     "tokens": []
   },
   {
@@ -1344,7 +1367,7 @@
   },
   {
     "name": "Electroneum",
-    "mappings": ["ETN", "ELECTRONEUM", "ELECTRONEUM NETWORK", "ELECTRONEUM CHAIN", "ELECTRONEUM BLOCKCHAIN", "ETN NETWORK"],
+    "mappings": ["etn1", "ETN", "ELECTRONEUM", "ELECTRONEUM NETWORK", "ELECTRONEUM CHAIN", "ELECTRONEUM BLOCKCHAIN", "ETN NETWORK"],
     "tokens": []
   },
   {
@@ -1887,6 +1910,111 @@
       "BOBA ETHEREUM",
       "BOBA LAYER 2"
     ],
+    "tokens": []
+  },
+  {
+    "name": "Nimiq",
+    "mappings": ["NIM", "NIMIQ", "NIMI Q", "NIMIQ NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Zano",
+    "mappings": ["ZANO", "ZANO NETWORK", "ZANO BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Cheqd",
+    "mappings": ["CHEQD", "Cheqd", "CHEQD NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Quai",
+    "mappings": ["QUAI", "QUAI NETWORK", "Quai Network"],
+    "tokens": []
+  },
+  {
+    "name": "Minima",
+    "mappings": ["MINIMA", "MINIMA NETWORK", "MINIMA BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Concordium",
+    "mappings": ["CCD", "CONCORDIUM", "CONCORDIUM NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Nym",
+    "mappings": ["NYM", "NYM NETWORK", "NYM PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Fuel",
+    "mappings": ["FUEL", "FUEL NETWORK", "FUEL CHAIN", "FUEL L2"],
+    "tokens": []
+  },
+  {
+    "name": "ThunderCore",
+    "mappings": ["TT", "THUNDERCORE", "THUNDER CORE", "THUNDERCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Nexa",
+    "mappings": ["NEXA", "NEXA NETWORK", "NEXA BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Kima",
+    "mappings": ["KIMA", "KIMA NETWORK", "KIMA PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Qubic",
+    "mappings": ["QUBIC", "QUBIC NETWORK", "QUBIC CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Alephium",
+    "mappings": ["ALPH", "ALEPHIUM", "ALEPHIUM NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Tari",
+    "mappings": ["MINOTARI", "TARI", "TARI NETWORK", "TARI PROTOCOL"],
+    "tokens": []
+  },
+  {
+    "name": "Chia",
+    "mappings": ["XCH", "xch1", "CHIA", "CHIA NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Songbird",
+    "mappings": ["SGB", "SONGBIRD", "SONGBIRD NETWORK", "FLARE CANARY NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "RedBelly",
+    "mappings": ["REDBELLY", "RED BELLY", "REDBELLY NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Autonomys",
+    "mappings": ["AUTONOMYS", "Autonomys", "AUTONOMYS NETWORK", "SUBSPACE NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "REINetwork",
+    "mappings": ["REI", "REI NETWORK", "REI CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Factom",
+    "mappings": ["FCT", "FACTOM", "FACTOM NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Naka",
+    "mappings": ["NAKA", "NAKACHAIN", "NAKA NETWORK"],
     "tokens": []
   }
 ]
