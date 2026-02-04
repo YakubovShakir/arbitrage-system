@@ -58,6 +58,9 @@
       "ERC20ZRC"
     ],
     "tokens": [
+      "PUFFER",
+      "DIA",
+      "ARKM",
       "LMWR",
       "REI",
       "INX",
@@ -280,7 +283,20 @@
       "BSCGIGGLE",
       "BSCSTABLE"
     ],
-    "tokens": ["3ULL", "BABYDOGE", "BSCSFUND", "LAIKA-DOGE", "BNCPOLKA", "GOMINING", "BNLIFE", "BSCLISTA", "BSCMUBARAK", "BSBROCCOLI"]
+    "tokens": [
+      "MBOX",
+      "LAOZI",
+      "3ULL",
+      "BABYDOGE",
+      "BSCSFUND",
+      "LAIKA-DOGE",
+      "BNCPOLKA",
+      "GOMINING",
+      "BNLIFE",
+      "BSCLISTA",
+      "BSCMUBARAK",
+      "BSBROCCOLI"
+    ]
   },
   {
     "name": "Solana",
@@ -298,6 +314,8 @@
       "SOLANA MAINNET"
     ],
     "tokens": [
+      "DRIFT",
+      "PYTH",
       "SUNDOG",
       "DONKEY",
       "NEON",
@@ -376,7 +394,7 @@
   {
     "name": "Base",
     "mappings": ["BASE", "BASE MAINNET", "BASECARV", "BASEELSA", "BASEZEN", "BASE L2", "BASE NETWORK", "BASE-ETH"],
-    "tokens": ["BRETT"]
+    "tokens": ["CLAWD", "AWE", "BNKR", "CLANKER", "BRETT"]
   },
   {
     "name": "Hemi",
@@ -391,6 +409,7 @@
   {
     "name": "Avalanche",
     "mappings": [
+      "APERTUM",
       "CAVAX",
       "AVAXC",
       "AVAX",
@@ -510,7 +529,7 @@
   {
     "name": "Tron",
     "mappings": ["TRX", "TRON", "TRON NETWORK", "TRC20BTC", "TRC20ROCK1", "TRC20TRUMP", "TRC20WBT", "TRC20WBTC", "TRONBTC", "TRC20"],
-    "tokens": []
+    "tokens": ["WIN"]
   },
   {
     "name": "Ontology",
@@ -650,6 +669,7 @@
   {
     "name": "ZkSync",
     "mappings": [
+      "era",
       "ZKSYNC2",
       "ZKS20",
       "ZKV2",
@@ -677,7 +697,7 @@
   },
   {
     "name": "Dymension",
-    "mappings": ["DYMEVM", "DYM", "DYMENSION", "DYMENSIONHUB"],
+    "mappings": ["dym1", "DYMEVM", "DYM", "DYMENSION", "DYMENSIONHUB"],
     "tokens": []
   },
   {
@@ -727,7 +747,102 @@
   },
   {
     "name": "Enjin",
-    "mappings": ["ENJ", "ENJIN", "ENJIN NETWORK"],
+    "mappings": ["enj1", "ENJ", "ENJIN", "ENJIN NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Warden",
+    "mappings": ["WARDEN", "WARD", "Warden", "Warden Protocol"],
+    "tokens": []
+  },
+  {
+    "name": "Flare",
+    "mappings": ["F"],
+    "tokens": []
+  },
+  {
+    "name": "XDC",
+    "mappings": ["XDC", "XDC NETWORK", "XINFIN", "XDCNetworkXDC"],
+    "tokens": []
+  },
+  {
+    "name": "Apertum",
+    "mappings": ["APERTUM", "APTM", "Apertum"],
+    "tokens": []
+  },
+  {
+    "name": "Zeus",
+    "mappings": ["ZEUS", "ZEUS NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Lisk",
+    "mappings": ["LISK", "LSK", "Lisk"],
+    "tokens": []
+  },
+  {
+    "name": "QIE",
+    "mappings": ["QIE", "QIE BLOCKCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "PolyZKP",
+    "mappings": ["POLYZKP", "ZKP"],
+    "tokens": []
+  },
+  {
+    "name": "AssetChain",
+    "mappings": ["ASSETCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Symbol",
+    "mappings": ["XYM", "SYMBOL"],
+    "tokens": []
+  },
+  {
+    "name": "Tomo",
+    "mappings": ["TOMO", "TOMOCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "ElizaOS",
+    "mappings": ["ELIZAOS", "elizaos"],
+    "tokens": []
+  },
+  {
+    "name": "Mira",
+    "mappings": ["MIRA", "MIRA NETWORK"],
+    "tokens": []
+  },
+  {
+    "name": "Sahara",
+    "mappings": ["SAHARA", "SAHARA AI"],
+    "tokens": []
+  },
+  {
+    "name": "Epic",
+    "mappings": ["EPIC", "EPIC CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "JOC",
+    "mappings": ["JOC", "JAPAN OPEN CHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Nexus",
+    "mappings": ["NEX", "NEXUS"],
+    "tokens": []
+  },
+  {
+    "name": "Dingocoin",
+    "mappings": ["DINGO", "DINGOCOIN"],
+    "tokens": []
+  },
+  {
+    "name": "BlackFort",
+    "mappings": ["BXN", "BLACKFORT"],
     "tokens": []
   },
   {
@@ -1045,7 +1160,7 @@
   },
   {
     "name": "Zcash",
-    "mappings": ["ZEC", "ZCASH", "Z CASH", "ZCASH NETWORK"],
+    "mappings": ["zec1", "ZEC", "ZCASH", "Z CASH", "ZCASH NETWORK"],
     "tokens": []
   },
   {
@@ -1548,7 +1663,7 @@
   },
   {
     "name": "Core",
-    "mappings": ["CORE", "CORE NETWORK", "CORE CHAIN", "CORE BLOCKCHAIN", "CORE DAO", "CORE PROTOCOL"],
+    "mappings": ["CoreDAO", "CORE", "CORE NETWORK", "CORE CHAIN", "CORE BLOCKCHAIN", "CORE DAO", "CORE PROTOCOL"],
     "tokens": ["CORE-AB"]
   },
   {
