@@ -336,8 +336,8 @@ impl Workable for ComputWorker {
                 };
                 let calc_books_time = Instant::now();
                 let (calculated_asks, calculated_bids) = (
-                    calculate_price_by_glass(&quote_volume, &buy_orderbook.0),
-                    calculate_price_by_glass(&quote_volume, &sell_orderbook.1),
+                    calculate_price_by_glass(&(quote_volume * QUOTE_RATE), &buy_orderbook.0),
+                    calculate_price_by_glass(&(quote_volume * QUOTE_RATE), &sell_orderbook.1),
                 );
 
                 calc_books_total_elapsed += calc_books_time.elapsed().as_nanos();
@@ -357,7 +357,7 @@ impl Workable for ComputWorker {
                     continue;
                 }
                 orderbook_spread_passed += 1;
-                let base_profit = (quote_volume / QUOTE_RATE) * (orderbook_spread / 100.0);
+                let base_profit = quote_volume * (orderbook_spread / 100.0);
 
                 let mut spread_message = format!(
                     "✅ {}/{}\nBuy exchange: {}\nSell exchange: {}\nQuote volume: {} {}\nСalculated buy price: {:.5} {}\nCalculated sell price: {:.5} {}\nNetworks:\n",
@@ -365,7 +365,7 @@ impl Workable for ComputWorker {
                     pair.quote,
                     buy_exchange.config().name,
                     sell_exchange.config().name,
-                    quote_volume / QUOTE_RATE,
+                    quote_volume,
                     pair.quote,
                     calculated_buy_price,
                     pair.quote,
@@ -377,8 +377,7 @@ impl Workable for ComputWorker {
                     let fee_quote_volume =
                         withdraw_network.withdraw_fee.unwrap_or(0.0) * calculated_sell_price;
                     let profit_with_fee = base_profit - fee_quote_volume;
-                    let final_spread_percent =
-                        profit_with_fee / (quote_volume / QUOTE_RATE) * 100.0;
+                    let final_spread_percent = profit_with_fee / quote_volume * 100.0;
 
                     let fee_message = match withdraw_network.withdraw_fee {
                         Some(fee) => format!(

@@ -2,14 +2,14 @@ pub const PAIRS_PER_THREAD: usize = 15;
 pub const EXCHANGES_PER_TICKER_THREAD: usize = 4;
 
 pub const QUOTE_LIST: &[(&str, f64)] = &[
-    ("USDT", 1800.0),
-    ("USDC", 1800.0),
-    ("DAI", 1800.0),
-    ("TUSD", 1800.0),
-    ("BTC", 0.02),
-    ("ETH", 0.6),
+    ("USDT", 900.0),
+    ("USDC", 900.0),
+    ("DAI", 900.0),
+    ("TUSD", 900.0),
+    ("BTC", 0.01),
+    ("ETH", 0.3),
 ];
-pub const QUOTE_RATE: f64 = 2.0;
+pub const QUOTE_RATE: f64 = 1.5;
 pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.33;
 pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.3;
 pub const NETWORKS_CACHE_TTL_SECS: u64 = 1200;

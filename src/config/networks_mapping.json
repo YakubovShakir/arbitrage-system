@@ -58,6 +58,30 @@
       "ERC20ZRC"
     ],
     "tokens": [
+      "hfil",
+      "HFIL",
+      "wbtc",
+      "WBTC",
+      "hft",
+      "resolv",
+      "AIX",
+      "l",
+      "al",
+      "sqd",
+      "mcrt",
+      "spell",
+      "rez",
+      "kernel",
+      "gtai",
+      "polydai",
+      "erc20usdd2",
+      "newt",
+      "neiroeth",
+      "ionet",
+      "mavia",
+      "zcx1",
+      "may",
+      "usdq",
       "ENA",
       "SOLV",
       "PROVE",
@@ -310,6 +334,9 @@
       "BSCSTABLE"
     ],
     "tokens": [
+      "KCALP",
+      "parti",
+      "UCN",
       "BSCTUT",
       "CGPT",
       "CAKE",
@@ -347,6 +374,15 @@
       "SOLANA MAINNET"
     ],
     "tokens": [
+      "gork",
+      "bome",
+      "jup",
+      "goat",
+      "kite",
+      "wen",
+      "wif",
+      "actsol",
+      "prcl",
       "MOODENG",
       "FARTCOIN",
       "MEW",
@@ -448,6 +484,7 @@
     "mappings": ["GUN", "GUNZ", "GUNZ NETWORK"],
     "tokens": []
   },
+  { "name": "ApeChain", "mappings": ["APE"], "tokens": [] },
   {
     "name": "Avalanche",
     "mappings": [
@@ -501,7 +538,18 @@
   },
   {
     "name": "Optimism",
-    "mappings": ["OPETH", "OPTIMISM", "OP", "OPTIMISTIC ETHEREUM", "OPTETH", "OPTOP", "OPTVELO1", "OPTIMISM L2", "OPTIMISM (USDT0)"],
+    "mappings": [
+      "Optimism (V2)",
+      "OPETH",
+      "OPTIMISM",
+      "OP",
+      "OPTIMISTIC ETHEREUM",
+      "OPTETH",
+      "OPTOP",
+      "OPTVELO1",
+      "OPTIMISM L2",
+      "OPTIMISM (USDT0)"
+    ],
     "tokens": []
   },
   {
@@ -521,7 +569,7 @@
   },
   {
     "name": "Linea",
-    "mappings": ["LINEA", "LINEA NETWORK", "CONSENSYS LINEA"],
+    "mappings": ["LINEA-ETH", "LINEA", "LINEA NETWORK", "CONSENSYS LINEA"],
     "tokens": []
   },
   {
@@ -546,7 +594,7 @@
   },
   {
     "name": "Chiliz",
-    "mappings": ["CAP20", "CHZ2", "CHZ", "CHILIZ", "CHILIZ CHAIN", "CHILIZ 2.0 CHAIN"],
+    "mappings": ["CHILIZ_CHZ", "CAP20", "CHZ2", "CHZ", "CHILIZ", "CHILIZ CHAIN", "CHILIZ 2.0 CHAIN"],
     "tokens": []
   },
   {
@@ -604,6 +652,7 @@
     "mappings": ["ES", "ECLIPSE", "ECLIPSELAYER"],
     "tokens": []
   },
+  { "name": "Vite", "mappings": ["VITE"], "tokens": [] },
   {
     "name": "Gravity",
     "mappings": [
@@ -750,8 +799,53 @@
     "tokens": []
   },
   {
+    "name": "Joystream",
+    "mappings": ["JOYSTREAM"],
+    "tokens": []
+  },
+  {
+    "name": "QuantumResistantLedger",
+    "mappings": ["QRL"],
+    "tokens": []
+  },
+  {
+    "name": "OzoneChain",
+    "mappings": ["OZONE-EVM", "OZONE"],
+    "tokens": []
+  },
+  {
+    "name": "Phantasma",
+    "mappings": ["PHANTASMA", "phantasma"],
+    "tokens": []
+  },
+  {
+    "name": "ABEYChain",
+    "mappings": ["ABEY"],
+    "tokens": []
+  },
+  {
+    "name": "CarFi",
+    "mappings": ["CARFI-ETH"],
+    "tokens": []
+  },
+  {
+    "name": "UChain",
+    "mappings": ["UCHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "ONINO",
+    "mappings": ["ONINO"],
+    "tokens": []
+  },
+  {
+    "name": "Matchain",
+    "mappings": ["MATCHAIN-BNB"],
+    "tokens": []
+  },
+  {
     "name": "DigitalBits",
-    "mappings": ["XDB"],
+    "mappings": ["XDB", "xdbchain"],
     "tokens": []
   },
   {
@@ -915,7 +1009,7 @@
   },
   {
     "name": "Iota",
-    "mappings": ["IOTA Stardust", "IOTA", "IOTANETWORK", "IOTATANGLE"],
+    "mappings": ["IOTA-L1", "IOTA Stardust", "IOTA", "IOTANETWORK", "IOTATANGLE"],
     "tokens": ["IOTA2"]
   },
   {
@@ -1235,9 +1329,10 @@
   },
   {
     "name": "Syscoin",
-    "mappings": ["SYS", "SYSCOIN", "SYS COIN", "SYS NETWORK"],
+    "mappings": ["sysevm", "SYS", "SYSCOIN", "SYS COIN", "SYS NETWORK"],
     "tokens": []
   },
+  { "name": "Persistence", "mappings": [], "tokens": ["xprt", "XPRT"] },
   {
     "name": "Kava",
     "mappings": ["KAVA", "KAVAEVM", "KAVA EVM", "KAVA NETWORK", "KAVA CHAIN"],
@@ -1374,8 +1469,13 @@
     "tokens": []
   },
   {
+    "name": "Komodo",
+    "mappings": ["KOMODO", "kmd"],
+    "tokens": []
+  },
+  {
     "name": "Wax",
-    "mappings": ["WAX", "WAXP", "WAX NETWORK", "WORLDWIDE ASSET EXCHANGE", "WAX BLOCKCHAIN", "WAX CHAIN", "WAX TOKEN"],
+    "mappings": ["wax1", "WAX", "WAXP", "WAX NETWORK", "WORLDWIDE ASSET EXCHANGE", "WAX BLOCKCHAIN", "WAX CHAIN", "WAX TOKEN"],
     "tokens": ["TLM"]
   },
   {
@@ -1573,7 +1673,7 @@
   },
   {
     "name": "Etherlink",
-    "mappings": ["XTZEVM", "ETHERLINK", "TEZOS EVM", "ETHERLINK NETWORK", "TEZOS EVM CHAIN"],
+    "mappings": ["ETHERLINK-XTZ", "XTZEVM", "ETHERLINK", "TEZOS EVM", "ETHERLINK NETWORK", "TEZOS EVM CHAIN"],
     "tokens": []
   },
   {
@@ -1656,6 +1756,7 @@
     "mappings": ["HIVE", "HIVE NETWORK", "HIVE CHAIN", "HIVE BLOCKCHAIN", "HIVE PROTOCOL", "HIVE ENGINE"],
     "tokens": []
   },
+  { "name": "EnergyWeb", "mappings": ["EWT"], "tokens": [] },
   {
     "name": "Octa",
     "mappings": ["OCTA", "OCTA NETWORK", "OCTA CHAIN", "OCTA BLOCKCHAIN", "OCTA PROTOCOL"],
@@ -1717,7 +1818,16 @@
   },
   {
     "name": "Cronos",
-    "mappings": ["CRO", "CRONOS", "CRONOS NETWORK", "CRONOS CHAIN", "CRONOS BLOCKCHAIN", "CRONOS PROTOCOL", "CRYPTO ORG CHAIN"],
+    "mappings": [
+      "CronosChain",
+      "CRO",
+      "CRONOS",
+      "CRONOS NETWORK",
+      "CRONOS CHAIN",
+      "CRONOS BLOCKCHAIN",
+      "CRONOS PROTOCOL",
+      "CRYPTO ORG CHAIN"
+    ],
     "tokens": []
   },
   {
@@ -2030,7 +2140,7 @@
   },
   {
     "name": "Taiko",
-    "mappings": ["TAIKO", "TAIKOETH", "TAIKO ETH", "TAIKO NETWORK", "TAIKO CHAIN", "TAIKO BLOCKCHAIN", "TAIKO L2"],
+    "mappings": ["TAIKO-ETH", "TAIKO", "TAIKOETH", "TAIKO ETH", "TAIKO NETWORK", "TAIKO CHAIN", "TAIKO BLOCKCHAIN", "TAIKO L2"],
     "tokens": []
   },
   {
@@ -2279,7 +2389,7 @@
   },
   {
     "name": "Fuel",
-    "mappings": ["FUEL", "FUEL NETWORK", "FUEL CHAIN", "FUEL L2"],
+    "mappings": ["FUEL-ETH", "FUEL", "FUEL NETWORK", "FUEL CHAIN", "FUEL L2"],
     "tokens": []
   },
   {
