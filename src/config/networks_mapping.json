@@ -58,6 +58,11 @@
       "ERC20ZRC"
     ],
     "tokens": [
+      "boson",
+      "HP",
+      "pyusd",
+      "myro",
+      "ethfi",
       "hfil",
       "HFIL",
       "wbtc",
@@ -185,8 +190,6 @@
       "ME",
       "IP",
       "T",
-      "REEF",
-      "REEF1",
       "BAKE",
       "LDO",
       "AMP",
@@ -334,6 +337,7 @@
       "BSCSTABLE"
     ],
     "tokens": [
+      "kgst",
       "KCALP",
       "parti",
       "UCN",
@@ -374,6 +378,9 @@
       "SOLANA MAINNET"
     ],
     "tokens": [
+      "pixel",
+      "apepe",
+      "vr",
       "gork",
       "bome",
       "jup",
@@ -413,6 +420,11 @@
     "name": "Sui",
     "mappings": ["SUI"],
     "tokens": ["CETUS"]
+  },
+  {
+    "name": "Reef",
+    "mappings": ["reef", "reef1", "reef-new"],
+    "tokens": []
   },
   {
     "name": "Stacks",
@@ -457,11 +469,11 @@
   {
     "name": "Polygon",
     "mappings": ["MATIC", "POLYGON", "POLYGON MATIC", "MATIC NETWORK"],
-    "tokens": []
+    "tokens": ["polykct"]
   },
   {
     "name": "Harmony",
-    "mappings": ["ONE", "HARMONY"],
+    "mappings": ["one1", "ONE", "HARMONY"],
     "tokens": []
   },
   {
@@ -564,7 +576,7 @@
   },
   {
     "name": "Metis",
-    "mappings": ["METIS TOKEN", "METIS", "METIS NETWORK", "METISTOKEN"],
+    "mappings": ["met", "METIS TOKEN", "METIS", "METIS NETWORK", "METISTOKEN"],
     "tokens": []
   },
   {
@@ -629,7 +641,7 @@
   },
   {
     "name": "Dash",
-    "mappings": ["dash1", "DASH", "DASHCOIN"],
+    "mappings": ["dash1", "DASH", "DASHCOIN", "Digital Cash"],
     "tokens": []
   },
   {
@@ -779,6 +791,11 @@
     "tokens": []
   },
   {
+    "name": "Xanau",
+    "mappings": ["Xanau"],
+    "tokens": []
+  },
+  {
     "name": "Esx",
     "mappings": ["esx"],
     "tokens": []
@@ -790,7 +807,7 @@
   },
   {
     "name": "Partisia",
-    "mappings": ["PARTISIA"],
+    "mappings": ["PARTISIA", "MPC"],
     "tokens": []
   },
   {
@@ -803,6 +820,7 @@
     "mappings": ["JOYSTREAM"],
     "tokens": []
   },
+  { "name": "StrikeX", "mappings": [], "tokens": ["strx"] },
   {
     "name": "QuantumResistantLedger",
     "mappings": ["QRL"],
@@ -1332,7 +1350,7 @@
     "mappings": ["sysevm", "SYS", "SYSCOIN", "SYS COIN", "SYS NETWORK"],
     "tokens": []
   },
-  { "name": "Persistence", "mappings": [], "tokens": ["xprt", "XPRT"] },
+  { "name": "Persistence", "mappings": [], "tokens": ["navx", "xprt", "XPRT"] },
   {
     "name": "Kava",
     "mappings": ["KAVA", "KAVAEVM", "KAVA EVM", "KAVA NETWORK", "KAVA CHAIN"],
@@ -1345,7 +1363,22 @@
   },
   {
     "name": "InternetComputer",
-    "mappings": ["ICP-OGY", "ICP", "INTERNET COMPUTER", "ICP NETWORK", "INTERNET COMPUTER PROTOCOL", "DFINITY", "DFINITY ICP"],
+    "mappings": ["ICP-CHAT", "ICP-OGY", "ICP", "INTERNET COMPUTER", "ICP NETWORK", "INTERNET COMPUTER PROTOCOL", "DFINITY", "DFINITY ICP"],
+    "tokens": []
+  },
+  {
+    "name": "Mova",
+    "mappings": ["mova", "MOVA", "Mova Mainnet"],
+    "tokens": []
+  },
+  {
+    "name": "USAT",
+    "mappings": ["usat"],
+    "tokens": []
+  },
+  {
+    "name": "Wallet",
+    "mappings": ["wallet"],
     "tokens": []
   },
   {
@@ -1563,7 +1596,7 @@
   },
   {
     "name": "Canton",
-    "mappings": ["CANTON", "CANTON NETWORK", "CANTON PROTOCOL", "CANTON CHAIN", "CANTON BLOCKCHAIN"],
+    "mappings": ["CC", "CANTON", "CANTON NETWORK", "CANTON PROTOCOL", "CANTON CHAIN", "CANTON BLOCKCHAIN"],
     "tokens": []
   },
   {
