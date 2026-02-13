@@ -10,8 +10,8 @@ pub const QUOTE_LIST: &[(&str, f64)] = &[
     ("ETH", 0.3),
 ];
 pub const QUOTE_RATE: f64 = 1.5;
-pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.33;
-pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.3;
+pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.25;
+pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.25;
 pub const NETWORKS_CACHE_TTL_SECS: u64 = 1200;
 pub const MARGIN_INFO_CACHE_TTL_SECS: u64 = 1200;
 
@@ -48,7 +48,7 @@ pub const BITMART_REQUESTS_PER_SECOND: usize = 1;
 pub const GATE_REQUESTS_PER_SECOND: usize = 450;
 pub const HUOBI_REQUESTS_PER_SECOND: usize = 100;
 pub const MEXC_REQUESTS_PER_SECOND: usize = 50;
-pub const OKX_REQUESTS_PER_SECOND: usize = 50;
+pub const OKX_REQUESTS_PER_SECOND: usize = 20;
 pub const KUCOIN_REQUESTS_PER_SECOND: usize = 50;
 
 // pub const BINANCE_REQUESTS_PER_SECOND: usize = 0;
