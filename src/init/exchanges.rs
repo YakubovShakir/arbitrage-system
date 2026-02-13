@@ -263,7 +263,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::bitmart::NAME.to_owned(),
         api_key: env::var("BITMART_API_KEY")?.to_owned(),
         secret_key: env::var("BITMART_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::bitmart::BASE_URL, 20)?,
+        http_client: HttpClient::new(config::bitmart::BASE_URL, 10)?,
         websocket_client: None,
         cached_data: CachedConfig {
             networks: CacheData::new(
