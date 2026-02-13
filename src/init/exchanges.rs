@@ -130,7 +130,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     exchanges.insert(config::bitget::NAME.to_owned(), bitget);
 
     // Kucoin
-    let kucoin_http_client = HttpClient::new(config::kucoin::BASE_URL, 130)?;
+    let kucoin_http_client = HttpClient::new(config::kucoin::BASE_URL, 60)?;
     let kucoin_name = config::kucoin::NAME;
     let kucoin_connection_handler: ConnectionHandler = Arc::new({
         let http_client = kucoin_http_client.clone();
