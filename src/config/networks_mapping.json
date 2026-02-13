@@ -337,6 +337,7 @@
       "BSCSTABLE"
     ],
     "tokens": [
+      "BNB",
       "kgst",
       "KCALP",
       "parti",
@@ -722,7 +723,7 @@
   },
   {
     "name": "TerraClassic",
-    "mappings": ["LUNC", "TERRA CLASSIC", "LUNA CLASSIC", "TERRA", "LUNA", "TERRALUNA"],
+    "mappings": ["TerraUSD Classic", "LUNC", "TERRA CLASSIC", "LUNA CLASSIC", "TERRA", "LUNA", "TERRALUNA"],
     "tokens": []
   },
   {
@@ -791,8 +792,8 @@
     "tokens": []
   },
   {
-    "name": "Xanau",
-    "mappings": ["Xanau"],
+    "name": "XAHAU",
+    "mappings": ["XAHAU"],
     "tokens": []
   },
   {
@@ -1202,7 +1203,7 @@
   },
   {
     "name": "Manta",
-    "mappings": ["MANTA", "MANTA NETWORK", "MANTA CHAIN", "MANTA L2", "MANTA PACIFIC", "MANTA MAINNET", "MANTANETWORK"],
+    "mappings": [" MANTA-ETH", "MANTA", "MANTA NETWORK", "MANTA CHAIN", "MANTA L2", "MANTA PACIFIC", "MANTA MAINNET", "MANTANETWORK"],
     "tokens": []
   },
   {
@@ -1930,7 +1931,7 @@
   },
   {
     "name": "Kaspa",
-    "mappings": ["KAS", "KASPA", "KASPA NETWORK", "KASPA CHAIN", "KASPA BLOCKCHAIN"],
+    "mappings": ["KRC20", "KAS", "KASPA", "KASPA NETWORK", "KASPA CHAIN", "KASPA BLOCKCHAIN"],
     "tokens": []
   },
   {
