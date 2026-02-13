@@ -60,7 +60,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    // exchanges.insert(config::bybit::NAME.to_owned(), bybit);
+    exchanges.insert(config::bybit::NAME.to_owned(), bybit);
 
     // Mexc
     // Обработчик для protobuf сообщений MEXC
@@ -108,7 +108,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    // exchanges.insert(config::mexc::NAME.to_owned(), mexc);
+    exchanges.insert(config::mexc::NAME.to_owned(), mexc);
 
     // Bitget
     let bitget = Exchange::Bitget(ExchangeConfig {
@@ -128,7 +128,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    // exchanges.insert(config::bitget::NAME.to_owned(), bitget);
+    exchanges.insert(config::bitget::NAME.to_owned(), bitget);
 
     // Kucoin
     let kucoin_http_client = HttpClient::new(config::kucoin::BASE_URL, 130)?;
@@ -215,7 +215,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    // exchanges.insert(config::kucoin::NAME.to_owned(), kucoin);
+    exchanges.insert(config::kucoin::NAME.to_owned(), kucoin);
 
     // Gate.io
     let gate = Exchange::Gate(ExchangeConfig {
@@ -235,7 +235,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    // exchanges.insert(config::gate::NAME.to_owned(), gate);
+    exchanges.insert(config::gate::NAME.to_owned(), gate);
 
     let huobi = Exchange::Huobi(ExchangeConfig {
         name: config::huobi::NAME.to_owned(),
@@ -258,7 +258,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    // exchanges.insert(config::huobi::NAME.to_owned(), huobi);
+    exchanges.insert(config::huobi::NAME.to_owned(), huobi);
 
     let bitmart = Exchange::Bitmart(ExchangeConfig {
         name: config::bitmart::NAME.to_owned(),
@@ -277,7 +277,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    // exchanges.insert(config::bitmart::NAME.to_owned(), bitmart);
+    exchanges.insert(config::bitmart::NAME.to_owned(), bitmart);
 
     let okx = Exchange::Okx(ExchangeConfig {
         name: config::okx::NAME.to_owned(),
