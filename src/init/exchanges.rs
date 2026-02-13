@@ -9,7 +9,10 @@ use tokio_tungstenite::connect_async;
 
 use crate::config;
 use crate::config::parameters::{
-    MARGIN_INFO_CACHE_TTL_SECS, NETWORKS_CACHE_TTL_SECS, RESET_CODE, SUCCESS_CODE,
+    BINANCE_REQUESTS_PER_SECOND, BITGET_REQUESTS_PER_SECOND, BITMART_REQUESTS_PER_SECOND,
+    BYBIT_REQUESTS_PER_SECOND, GATE_REQUESTS_PER_SECOND, HUOBI_REQUESTS_PER_SECOND,
+    KUCOIN_REQUESTS_PER_SECOND, MARGIN_INFO_CACHE_TTL_SECS, MEXC_REQUESTS_PER_SECOND,
+    NETWORKS_CACHE_TTL_SECS, OKX_REQUESTS_PER_SECOND, RESET_CODE, SUCCESS_CODE,
 };
 use crate::core::net::http::HttpClient;
 use crate::core::net::websocket::{BinaryMessageHandler, ConnectionHandler, WebSocketClient};
@@ -26,7 +29,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::binance::NAME.to_owned(),
         api_key: env::var("BINANCE_API_KEY")?.to_owned(),
         secret_key: env::var("BINANCE_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::binance::BASE_URL, 25)?,
+        http_client: HttpClient::new(config::binance::BASE_URL, BINANCE_REQUESTS_PER_SECOND)?,
         websocket_client: Some(WebSocketClient::new(config::binance::WEBSOCKET_URL)),
         cached_data: CachedConfig {
             networks: CacheData::new(
@@ -46,7 +49,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::bybit::NAME.to_owned(),
         api_key: env::var("BYBIT_API_KEY")?.to_owned(),
         secret_key: env::var("BYBIT_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::bybit::BASE_URL, 80)?,
+        http_client: HttpClient::new(config::bybit::BASE_URL, BYBIT_REQUESTS_PER_SECOND)?,
         websocket_client: None,
         cached_data: CachedConfig {
             networks: CacheData::new(
@@ -90,7 +93,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::mexc::NAME.to_owned(),
         api_key: env::var("MEXC_API_KEY")?.to_owned(),
         secret_key: env::var("MEXC_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::mexc::BASE_URL, 50)?,
+        http_client: HttpClient::new(config::mexc::BASE_URL, MEXC_REQUESTS_PER_SECOND)?,
         websocket_client: Some(
             WebSocketClient::new(config::mexc::WEBSOCKET_URL)
                 .with_ping_interval(Duration::from_secs(20), r#"{"method": "PING"}"#.to_string())
@@ -114,7 +117,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::bitget::NAME.to_owned(),
         api_key: env::var("BITGET_API_KEY")?.to_owned(),
         secret_key: env::var("BITGET_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::bitget::BASE_URL, 15)?,
+        http_client: HttpClient::new(config::bitget::BASE_URL, BITGET_REQUESTS_PER_SECOND)?,
         websocket_client: None,
         cached_data: CachedConfig {
             networks: CacheData::new(
@@ -130,7 +133,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     exchanges.insert(config::bitget::NAME.to_owned(), bitget);
 
     // Kucoin
-    let kucoin_http_client = HttpClient::new(config::kucoin::BASE_URL, 60)?;
+    let kucoin_http_client = HttpClient::new(config::kucoin::BASE_URL, KUCOIN_REQUESTS_PER_SECOND)?;
     let kucoin_name = config::kucoin::NAME;
     let kucoin_connection_handler: ConnectionHandler = Arc::new({
         let http_client = kucoin_http_client.clone();
@@ -221,7 +224,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::gate::NAME.to_owned(),
         api_key: env::var("GATE_API_KEY")?.to_owned(),
         secret_key: env::var("GATE_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::gate::BASE_URL, 900)?,
+        http_client: HttpClient::new(config::gate::BASE_URL, GATE_REQUESTS_PER_SECOND)?,
         websocket_client: None,
         cached_data: CachedConfig {
             networks: CacheData::new(
@@ -240,7 +243,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::huobi::NAME.to_owned(),
         api_key: env::var("HUOBI_API_KEY")?.to_owned(),
         secret_key: env::var("HUOBI_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::huobi::BASE_URL, 200)?,
+        http_client: HttpClient::new(config::huobi::BASE_URL, HUOBI_REQUESTS_PER_SECOND)?,
         // websocket_client: Some(
         //     WebSocketClient::new(config::huobi::WEBSOCKET_URL)
         //         .with_binary_handler(huobi_binary_handler),
@@ -263,7 +266,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::bitmart::NAME.to_owned(),
         api_key: env::var("BITMART_API_KEY")?.to_owned(),
         secret_key: env::var("BITMART_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::bitmart::BASE_URL, 5)?,
+        http_client: HttpClient::new(config::bitmart::BASE_URL, BITMART_REQUESTS_PER_SECOND)?,
         websocket_client: None,
         cached_data: CachedConfig {
             networks: CacheData::new(
@@ -282,7 +285,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::okx::NAME.to_owned(),
         api_key: env::var("OKX_API_KEY")?.to_owned(),
         secret_key: env::var("OKX_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::okx::BASE_URL, 60)?,
+        http_client: HttpClient::new(config::okx::BASE_URL, OKX_REQUESTS_PER_SECOND)?,
         websocket_client: None,
         cached_data: CachedConfig {
             networks: CacheData::new(
