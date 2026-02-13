@@ -1,5 +1,5 @@
 use json::JsonValue;
-use log::{error, warn};
+use log::{debug, error, warn};
 use reqwest::{
     Client, RequestBuilder, StatusCode,
     header::{HeaderMap, HeaderName, HeaderValue},
@@ -11,7 +11,7 @@ use crate::{
     config::parameters::{
         GLOBAL_HTTP_TIMEOUT_SECS, HTTP_MAX_POOL_IDLE_PER_HOST, HTTP_RETRY_AFTER_MILLIS,
     },
-    core::types::KeyValue,
+    core::types::{KeyValue, rate_limiter::RateLimiter},
 };
 
 static GLOBAL_CLIENT: OnceCell<Arc<Client>> = OnceCell::const_new();
@@ -31,13 +31,15 @@ pub async fn get_global_client() -> &'static Arc<Client> {
 }
 #[derive(Debug, Clone)]
 pub struct HttpClient {
-    _base_url: String,
+    base_url: String,
+    rate_limiter: RateLimiter,
 }
 
 impl HttpClient {
-    pub fn new(base_url: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn new(base_url: &str, requests_per_second: usize) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            _base_url: base_url.to_string(),
+            base_url: base_url.to_string(),
+            rate_limiter: RateLimiter::new(requests_per_second),
         })
     }
     async fn build_get(
@@ -50,13 +52,13 @@ impl HttpClient {
         match timeout {
             Some(timeout) => get_global_client()
                 .await
-                .get(format!("{}{}", self._base_url, endpoint))
+                .get(format!("{}{}", self.base_url, endpoint))
                 .timeout(timeout)
                 .headers(headers)
                 .query(query),
             None => get_global_client()
                 .await
-                .get(format!("{}{}", self._base_url, endpoint))
+                .get(format!("{}{}", self.base_url, endpoint))
                 .headers(headers)
                 .query(query),
         }
@@ -70,6 +72,10 @@ impl HttpClient {
         }
         Ok(true)
     }
+    // Вспомогательный метод для логирования
+    fn log_request(&self, method: &str, endpoint: &str) {
+        debug!(target: "debug_module","[{}] {} {}", self.base_url, method, endpoint);
+    }
 
     pub async fn get(
         &self,
@@ -78,6 +84,8 @@ impl HttpClient {
         headers: Option<&[(&str, &str)]>,
         timeout: Option<Duration>,
     ) -> Result<JsonValue, Box<dyn std::error::Error>> {
+        self.rate_limiter.acquire().await;
+        self.log_request("GET", endpoint);
         let query = query.unwrap_or(&[]);
         let mut formated_headers = HeaderMap::new();
 
@@ -103,7 +111,7 @@ impl HttpClient {
             Err(_) => {
                 warn!(
                     "Failed GET {}{}. Retry after {}ms..",
-                    self._base_url, endpoint, HTTP_RETRY_AFTER_MILLIS
+                    self.base_url, endpoint, HTTP_RETRY_AFTER_MILLIS
                 );
 
                 tokio::time::sleep(std::time::Duration::from_millis(HTTP_RETRY_AFTER_MILLIS)).await;
@@ -114,9 +122,9 @@ impl HttpClient {
                 match req_builder.send().await {
                     Ok(res) => res,
                     Err(e) => {
-                        error!("Failed GET after retry {}{}", self._base_url, endpoint);
+                        error!("Failed GET after retry {}{}", self.base_url, endpoint);
                         if e.is_timeout() {
-                            error!("Timeout error {}{} - {}", self._base_url, endpoint, e);
+                            error!("Timeout error {}{} - {}", self.base_url, endpoint, e);
                         }
                         return Err(Box::new(e));
                     }
@@ -126,7 +134,7 @@ impl HttpClient {
         let response_status = response.status();
 
         // Читаем ответ
-        let text = if self._base_url.contains("huobi.pro") {
+        let text = if self.base_url.contains("huobi.pro") {
             // Для HTX читаем ответ побайтово
             self.read_chunked_response(response).await?
         } else {
@@ -194,7 +202,7 @@ impl HttpClient {
 
         let mut req_builder = get_global_client()
             .await
-            .post(format!("{}{}", self._base_url, endpoint))
+            .post(format!("{}{}", self.base_url, endpoint))
             .headers(formated_headers)
             .query(query);
 
