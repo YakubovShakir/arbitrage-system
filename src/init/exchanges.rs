@@ -26,7 +26,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::binance::NAME.to_owned(),
         api_key: env::var("BINANCE_API_KEY")?.to_owned(),
         secret_key: env::var("BINANCE_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::binance::BASE_URL, 50)?,
+        http_client: HttpClient::new(config::binance::BASE_URL, 25)?,
         websocket_client: Some(WebSocketClient::new(config::binance::WEBSOCKET_URL)),
         cached_data: CachedConfig {
             networks: CacheData::new(
