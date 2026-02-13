@@ -115,7 +115,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::bitget::NAME.to_owned(),
         api_key: env::var("BITGET_API_KEY")?.to_owned(),
         secret_key: env::var("BITGET_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::bitget::BASE_URL, 3000)?,
+        http_client: HttpClient::new(config::bitget::BASE_URL, 20)?,
         websocket_client: None,
         cached_data: CachedConfig {
             networks: CacheData::new(
