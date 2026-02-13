@@ -16,7 +16,6 @@ use crate::core::net::websocket::{BinaryMessageHandler, ConnectionHandler, WebSo
 use crate::core::types::Exchanges;
 use crate::core::types::api::CacheData;
 use crate::core::types::exchanges::{CachedConfig, Exchange, ExchangeConfig};
-use crate::core::types::rate_limiter::RateLimiter;
 use crate::core::utils::json_utils::find_value_from_json_key;
 
 pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
