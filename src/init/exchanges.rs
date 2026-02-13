@@ -42,7 +42,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    exchanges.insert(config::binance::NAME.to_owned(), binance);
+    // exchanges.insert(config::binance::NAME.to_owned(), binance);
 
     // Bybit
     let bybit = Exchange::Bybit(ExchangeConfig {
@@ -110,7 +110,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             ),
         },
     });
-    // exchanges.insert(config::mexc::NAME.to_owned(), mexc);
+    exchanges.insert(config::mexc::NAME.to_owned(), mexc);
 
     // Bitget
     let bitget = Exchange::Bitget(ExchangeConfig {
