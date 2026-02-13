@@ -91,7 +91,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::mexc::NAME.to_owned(),
         api_key: env::var("MEXC_API_KEY")?.to_owned(),
         secret_key: env::var("MEXC_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::mexc::BASE_URL, 120)?,
+        http_client: HttpClient::new(config::mexc::BASE_URL, 50)?,
         websocket_client: Some(
             WebSocketClient::new(config::mexc::WEBSOCKET_URL)
                 .with_ping_interval(Duration::from_secs(20), r#"{"method": "PING"}"#.to_string())
