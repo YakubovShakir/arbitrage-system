@@ -41,16 +41,25 @@ pub const HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS: u64 = 30;
 pub const HUOBI_MARGIN_INFO_HTTP_TIMEOUT_SECONDS: u64 = 10;
 
 // Rate Limits
-pub const BINANCE_REQUESTS_PER_SECOND: usize = 10;
-pub const BYBIT_REQUESTS_PER_SECOND: usize = 30;
-pub const BITGET_REQUESTS_PER_SECOND: usize = 10;
-pub const BITMART_REQUESTS_PER_SECOND: usize = 2;
-pub const GATE_REQUESTS_PER_SECOND: usize = 450;
-pub const HUOBI_REQUESTS_PER_SECOND: usize = 100;
-pub const MEXC_REQUESTS_PER_SECOND: usize = 50;
-pub const OKX_REQUESTS_PER_SECOND: usize = 50;
-pub const KUCOIN_REQUESTS_PER_SECOND: usize = 50;
+// pub const BINANCE_REQUESTS_PER_SECOND: usize = 10;
+// pub const BYBIT_REQUESTS_PER_SECOND: usize = 30;
+// pub const BITGET_REQUESTS_PER_SECOND: usize = 10;
+// pub const BITMART_REQUESTS_PER_SECOND: usize = 2;
+// pub const GATE_REQUESTS_PER_SECOND: usize = 450;
+// pub const HUOBI_REQUESTS_PER_SECOND: usize = 100;
+// pub const MEXC_REQUESTS_PER_SECOND: usize = 50;
+// pub const OKX_REQUESTS_PER_SECOND: usize = 50;
+// pub const KUCOIN_REQUESTS_PER_SECOND: usize = 50;
 
+pub const BINANCE_REQUESTS_PER_SECOND: usize = 0;
+pub const BYBIT_REQUESTS_PER_SECOND: usize = 0;
+pub const BITGET_REQUESTS_PER_SECOND: usize = 0;
+pub const BITMART_REQUESTS_PER_SECOND: usize = 0;
+pub const GATE_REQUESTS_PER_SECOND: usize = 0;
+pub const HUOBI_REQUESTS_PER_SECOND: usize = 0;
+pub const MEXC_REQUESTS_PER_SECOND: usize = 0;
+pub const OKX_REQUESTS_PER_SECOND: usize = 0;
+pub const KUCOIN_REQUESTS_PER_SECOND: usize = 0;
 pub const SUCCESS_CODE: &str = "\x1b[38;5;48m"; // #00ff87 - яркий мятный ✅
 pub const ERROR_CODE: &str = "\x1b[38;5;203m"; // #ff5f5f - яркий алый ❌  
 pub const WARNING_CODE: &str = "\x1b[38;5;221m"; // #ffd75f - тёплый жёлтый ⚠️
