@@ -47,9 +47,9 @@ pub const BITGET_REQUESTS_PER_SECOND: usize = 5;
 pub const BITMART_REQUESTS_PER_SECOND: usize = 5;
 pub const GATE_REQUESTS_PER_SECOND: usize = 450;
 pub const HUOBI_REQUESTS_PER_SECOND: usize = 100;
-pub const MEXC_REQUESTS_PER_SECOND: usize = 25;
+pub const MEXC_REQUESTS_PER_SECOND: usize = 15;
 pub const OKX_REQUESTS_PER_SECOND: usize = 20;
-pub const KUCOIN_REQUESTS_PER_SECOND: usize = 25;
+pub const KUCOIN_REQUESTS_PER_SECOND: usize = 15;
 
 // pub const BINANCE_REQUESTS_PER_SECOND: usize = 0;
 // pub const BYBIT_REQUESTS_PER_SECOND: usize = 0;
