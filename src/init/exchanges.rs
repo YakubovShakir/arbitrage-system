@@ -47,7 +47,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::bybit::NAME.to_owned(),
         api_key: env::var("BYBIT_API_KEY")?.to_owned(),
         secret_key: env::var("BYBIT_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::bybit::BASE_URL, 120)?,
+        http_client: HttpClient::new(config::bybit::BASE_URL, 80)?,
         websocket_client: None,
         cached_data: CachedConfig {
             networks: CacheData::new(
@@ -115,7 +115,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::bitget::NAME.to_owned(),
         api_key: env::var("BITGET_API_KEY")?.to_owned(),
         secret_key: env::var("BITGET_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::bitget::BASE_URL, 20)?,
+        http_client: HttpClient::new(config::bitget::BASE_URL, 15)?,
         websocket_client: None,
         cached_data: CachedConfig {
             networks: CacheData::new(
@@ -264,7 +264,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
         name: config::bitmart::NAME.to_owned(),
         api_key: env::var("BITMART_API_KEY")?.to_owned(),
         secret_key: env::var("BITMART_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::bitmart::BASE_URL, 25)?,
+        http_client: HttpClient::new(config::bitmart::BASE_URL, 20)?,
         websocket_client: None,
         cached_data: CachedConfig {
             networks: CacheData::new(
