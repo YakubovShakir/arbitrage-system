@@ -85,7 +85,7 @@ impl HttpClient {
         timeout: Option<Duration>,
     ) -> Result<JsonValue, Box<dyn std::error::Error>> {
         self.rate_limiter.acquire().await;
-        self.log_request("GET", endpoint);
+        // self.log_request("GET", endpoint);
         let query = query.unwrap_or(&[]);
         let mut formated_headers = HeaderMap::new();
 
