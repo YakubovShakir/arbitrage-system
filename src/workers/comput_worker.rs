@@ -408,11 +408,11 @@ impl Workable for ComputWorker {
                     "Quote Volume - ",
                     spread_pair.0.quote,
                     "Buy Price - ",
-                    spread_pair.0.quote,
+                    spread_pair.0.quote.trim(),
                     "Sell Price - ",
-                    spread_pair.0.quote,
+                    spread_pair.0.quote.trim(),
                     "Base Profit - ",
-                    spread_pair.0.quote,
+                    spread_pair.0.quote.trim(),
                     "Networks"
                 );
                 for bundle in spread_pair.1 {
@@ -459,7 +459,7 @@ impl Workable for ComputWorker {
                     }
 
                     let bundle_line = format!(
-                        "│{:<8}│{:<8}│{:<8}│{:<8}│{:<8.5}│{:<8.5}│{:<8}│",
+                        "│{:<8}│{:<8}│{:<8}│{:<8.2}│{:<8.5}│{:<8.5}│{:<8}│",
                         bundle.buy_ex.config().name,
                         bundle.sell_ex.config().name,
                         bundle.quote_volume,
