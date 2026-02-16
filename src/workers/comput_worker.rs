@@ -398,11 +398,11 @@ impl Workable for ComputWorker {
 
             for spread_pair in spread_pairs {
                 let mut message = format!("✅ {}/{} ✅", spread_pair.0.base, spread_pair.0.quote);
-                let horizontal_line = format!("{}", "─".repeat(125));
+                let horizontal_line = format!("{}", "─".repeat(175));
 
                 message += &("\n┌".to_owned() + &horizontal_line + "┐\n");
                 message += &format!(
-                    "│ {:<14} │ {:<14} │ {:<14} │ {:<14} │ {:<14} │ {:<14} │ {:<14} │",
+                    "│ {:<14} │ {:<14} │ {:<14} │ {:<14} │ {:<14} │ {:<14} │ {:<60} │",
                     "Buy Ex",
                     "Sell Ex",
                     "Quote Volume",
@@ -442,7 +442,7 @@ impl Workable for ComputWorker {
                         };
 
                         let message = format!(
-                            "[-] {:?} Tx fee: {}. Contract: {}. Confirms: {}. Net Income {:.2} {} ~ {:.2}%\n",
+                            "[-] {} Tx fee: {}. Contract: {}. Confirms: {}. Net Income {:.2} {} ~ {:.2}% ",
                             withdraw_network.base.network_type,
                             fee_message,
                             contract_message,
@@ -459,9 +459,9 @@ impl Workable for ComputWorker {
                         bundle.buy_ex.config().name,
                         bundle.sell_ex.config().name,
                         bundle.quote_volume,
-                        bundle.base_profit,
                         bundle.buy_price,
                         bundle.sell_price,
+                        bundle.base_profit,
                         network_message
                     );
 
