@@ -2,13 +2,10 @@ use std::{collections::HashMap, sync::Arc, time::Instant};
 
 use futures_util::future::join_all;
 
-use crate::{
-    config::parameters::{ERROR_CODE, INFO_CODE, RESET_CODE},
-    core::{
-        traits::{Workable, exchange_service::TickerService},
-        types::{Exchanges, PriceData, TickerPrice, Tickers, TradingPairs, blacklist::Blacklist},
-        utils::format_duration,
-    },
+use crate::core::{
+    traits::{Workable, exchange_service::TickerService},
+    types::{Exchanges, PriceData, TickerPrice, Tickers, TradingPairs, blacklist::Blacklist},
+    utils::format_duration,
 };
 use log::{error, info};
 pub struct TickerWorker {
@@ -111,16 +108,14 @@ impl TickerWorker {
                 &price.buy_price.1,
             );
 
-            if self.trading_pairs.contains_key(&pair) {
-                if let Some(existing_price) = self.trading_pairs.get(&pair) {
-                    existing_price
-                        .update_buy_price(buy_ex_name, price.buy_price.1)
-                        .await;
+            if let Some(mut existing_price) = self.trading_pairs.get_mut(&pair) {
+                existing_price
+                    .update_buy_list(&buy_ex_name, price.buy_price.1)
+                    .await;
 
-                    existing_price
-                        .update_sell_price(sell_ex_name.clone(), price.sell_price.1)
-                        .await;
-                }
+                existing_price
+                    .update_sell_list(&sell_ex_name, price.sell_price.1)
+                    .await;
             } else {
                 self.trading_pairs.insert(pair, price_data);
             }

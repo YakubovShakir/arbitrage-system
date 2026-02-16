@@ -1,15 +1,14 @@
-use futures_util::{future::join_all, sink::With};
+use futures_util::future::join_all;
 
 use crate::{
     config::parameters::{
-        DEBUG_CODE, ERROR_CODE, INFO_CODE, QUOTE_RATE, REQUESTS_CHUNK_SIZE,
-        REQUIRED_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE,
-        SUCCESS_CODE,
+        QUOTE_RATE, REQUESTS_CHUNK_SIZE, REQUIRED_ORDERBOOK_SPREAD_PERCENT,
+        REQUIRED_TICKER_SPREAD_PERCENT, RESET_CODE,
     },
     core::{
         traits::{Workable, exchange_service::OrderBookService},
         types::{
-            ExchangeName, Exchanges, Network, OrderBook, TradingPair, TradingPairs,
+            ExchangeName, Exchanges, OrderBook, TradingPair, TradingPairs,
             blacklist::Blacklist,
             exchanges::Exchange,
             network::{DepositNetwork, WithdrawNetwork},
@@ -22,6 +21,13 @@ use crate::{
 };
 use log::{error, info};
 use std::{sync::Arc, time::Instant};
+
+struct TickerSpread<'a> {
+    pair: TradingPair,
+    buy_ex: &'a Exchange,
+    sell_ex: &'a Exchange,
+}
+
 pub struct ComputWorker {
     id: usize,
     trading_pairs: Arc<TradingPairs>,
@@ -48,79 +54,163 @@ impl ComputWorker {
     }
 }
 impl ComputWorker {
-    async fn collect_pairs_to_check(&self) -> (Vec<TradingPair>, u128) {
-        let mut collection: Vec<TradingPair> = vec![];
-        let mut elapsed: u128 = 0;
+    async fn find_ticker_spreads(&self) -> (Vec<TickerSpread>, u128) {
+        let mut ticker_spreads: Vec<TickerSpread> = Vec::new();
+        let mut comput_elapsed: u128 = 0;
+        let comput_time = Instant::now();
+
         for entry in self.trading_pairs.iter() {
-            let pair = entry.key();
-            let price_data = entry.value();
+            let buy_list = &entry.buy_price_list;
+            let sell_list = &entry.sell_price_list;
 
-            if self.spread_pairs.contains_key(pair) {
-                continue;
-            }
-            let checked_time = Instant::now();
-            let checked = price_data.check_if_not_checked().await;
-            elapsed += checked_time.elapsed().as_nanos();
-            if checked {
-                continue;
-            }
-            collection.push(pair.clone());
-        }
-        (collection, elapsed)
-    }
-    async fn filter_pairs_by_spread(
-        &self,
-        pairs: Vec<TradingPair>,
-    ) -> (Vec<(TradingPair, &Exchange, &Exchange)>, u128, u128) {
-        let mut collect: Vec<(TradingPair, ExchangeName, ExchangeName)> = vec![];
-        let mut prices_elapsed: u128 = 0;
-        let mut spread_elapsed: u128 = 0;
+            for buy_item in buy_list {
+                let buy_checked = buy_item.check().await;
 
-        for pair in pairs {
-            let Some(entry) = self.trading_pairs.get(&pair) else {
-                continue;
-            };
-            let price_data = entry.value();
+                if buy_checked {
+                    for sell_item in sell_list {
+                        if buy_item.exchange == sell_item.exchange {
+                            continue;
+                        }
 
-            let prices_time = Instant::now();
-            let (buy_price, sell_price) = {
-                let buy_guard = price_data.min_buy_price.read().await;
-                let sell_guard = price_data.max_sell_price.read().await;
-                (buy_guard, sell_guard)
-            };
-            prices_elapsed += prices_time.elapsed().as_nanos();
+                        let spread = comput_spread_percent(
+                            &buy_item.get_price().await,
+                            &sell_item.get_price().await,
+                        );
 
-            // Вычисление тикер-спреда
-            let ticker_spread_time = Instant::now();
-            let spread = comput_spread_percent(&buy_price.1, &sell_price.1);
-            spread_elapsed += ticker_spread_time.elapsed().as_nanos();
-            if spread < REQUIRED_TICKER_SPREAD_PERCENT {
-                continue;
-            }
+                        if spread < REQUIRED_TICKER_SPREAD_PERCENT {
+                            continue;
+                        }
 
-            collect.push((pair, buy_price.0.to_string(), sell_price.0.to_string()));
-        }
+                        let (buy_exchange, sell_exchange) = {
+                            match (
+                                self.exchanges.get(&buy_item.exchange),
+                                self.exchanges.get(&sell_item.exchange),
+                            ) {
+                                (Some(buy), Some(sell)) => (buy, sell),
+                                _ => continue,
+                            }
+                        };
 
-        // Сбор параметров для параллельного запроса на верификацию
-        let collect: Vec<_> = collect
-            .into_iter()
-            .filter_map(|(pair, buy_exchange_name, sell_exchange_name)| {
-                let (buy_exchange, sell_exchange) = {
-                    match (
-                        self.exchanges.get(&buy_exchange_name),
-                        self.exchanges.get(&sell_exchange_name),
-                    ) {
-                        (Some(buy), Some(sell)) => (buy, sell),
-                        _ => return None,
+                        ticker_spreads.push(TickerSpread {
+                            pair: entry.key().clone(),
+                            buy_ex: &buy_exchange,
+                            sell_ex: &sell_exchange,
+                        });
                     }
-                };
+                } else {
+                    for sell_item in sell_list {
+                        let sell_checked = sell_item.check().await;
 
-                // Создаем задачу
-                Some((pair, buy_exchange, sell_exchange))
-            })
-            .collect();
-        (collect, prices_elapsed, spread_elapsed)
+                        if buy_item.exchange == sell_item.exchange || !sell_checked {
+                            continue;
+                        }
+
+                        let spread = comput_spread_percent(
+                            &buy_item.get_price().await,
+                            &sell_item.get_price().await,
+                        );
+
+                        if spread < REQUIRED_TICKER_SPREAD_PERCENT {
+                            continue;
+                        }
+
+                        let (buy_exchange, sell_exchange) = {
+                            match (
+                                self.exchanges.get(&buy_item.exchange),
+                                self.exchanges.get(&sell_item.exchange),
+                            ) {
+                                (Some(buy), Some(sell)) => (buy, sell),
+                                _ => continue,
+                            }
+                        };
+
+                        ticker_spreads.push(TickerSpread {
+                            pair: entry.key().clone(),
+                            buy_ex: &buy_exchange,
+                            sell_ex: &sell_exchange,
+                        });
+                    }
+                }
+            }
+        }
+        comput_elapsed += comput_time.elapsed().as_nanos();
+
+        (ticker_spreads, comput_elapsed)
     }
+
+    // async fn collect_pairs_to_check(&self) -> (Vec<TradingPair>, u128) {
+    //     let mut collection: Vec<TradingPair> = vec![];
+    //     let mut elapsed: u128 = 0;
+    //     for entry in self.trading_pairs.iter() {
+    //         let pair = entry.key();
+    //         let price_data = entry.value();
+
+    //         if self.spread_pairs.contains_key(pair) {
+    //             continue;
+    //         }
+    //         let checked_time = Instant::now();
+    //         let checked = price_data.check_if_not_checked().await;
+    //         elapsed += checked_time.elapsed().as_nanos();
+    //         if checked {
+    //             continue;
+    //         }
+    //         collection.push(pair.clone());
+    //     }
+    //     (collection, elapsed)
+    // }
+    // async fn filter_pairs_by_spread(
+    //     &self,
+    //     pairs: Vec<TradingPair>,
+    // ) -> (Vec<(TradingPair, &Exchange, &Exchange)>, u128, u128) {
+    //     let mut collect: Vec<(TradingPair, ExchangeName, ExchangeName)> = vec![];
+    //     let mut prices_elapsed: u128 = 0;
+    //     let mut spread_elapsed: u128 = 0;
+
+    //     for pair in pairs {
+    //         let Some(entry) = self.trading_pairs.get(&pair) else {
+    //             continue;
+    //         };
+    //         let price_data = entry.value();
+
+    //         let prices_time = Instant::now();
+    //         let (buy_price, sell_price) = {
+    //             let buy_guard = price_data.min_buy_price.read().await;
+    //             let sell_guard = price_data.max_sell_price.read().await;
+    //             (buy_guard, sell_guard)
+    //         };
+    //         prices_elapsed += prices_time.elapsed().as_nanos();
+
+    //         // Вычисление тикер-спреда
+    //         let ticker_spread_time = Instant::now();
+    //         let spread = comput_spread_percent(&buy_price.1, &sell_price.1);
+    //         spread_elapsed += ticker_spread_time.elapsed().as_nanos();
+    //         if spread < REQUIRED_TICKER_SPREAD_PERCENT {
+    //             continue;
+    //         }
+
+    //         collect.push((pair, buy_price.0.to_string(), sell_price.0.to_string()));
+    //     }
+
+    //     // Сбор параметров для параллельного запроса на верификацию
+    //     let collect: Vec<_> = collect
+    //         .into_iter()
+    //         .filter_map(|(pair, buy_exchange_name, sell_exchange_name)| {
+    //             let (buy_exchange, sell_exchange) = {
+    //                 match (
+    //                     self.exchanges.get(&buy_exchange_name),
+    //                     self.exchanges.get(&sell_exchange_name),
+    //                 ) {
+    //                     (Some(buy), Some(sell)) => (buy, sell),
+    //                     _ => return None,
+    //                 }
+    //             };
+
+    //             // Создаем задачу
+    //             Some((pair, buy_exchange, sell_exchange))
+    //         })
+    //         .collect();
+    //     (collect, prices_elapsed, spread_elapsed)
+    // }
 }
 impl Workable for ComputWorker {
     fn id(&self) -> usize {
@@ -129,9 +219,6 @@ impl Workable for ComputWorker {
 
     // "┌ │ ├─ └─"
     async fn run(&self) -> ! {
-        let mut check_passed = 0;
-        let mut check_total_elapsed: u128 = 0;
-
         let mut prices_quard_total_elapsed: u128 = 0;
 
         let mut ticker_spread_passed = 0;
@@ -161,49 +248,48 @@ impl Workable for ComputWorker {
             let start_time = Instant::now();
             // stat_info += &format!("├──── Trading Pairs: {}\n", self.trading_pairs.len());
 
-            // println!("{DEBUG_CODE}[DEBUG] ComputWorker - Call collect_pairs_to_check(){RESET_CODE}");
-            // Сбор непроверенные тикеры
-            let (pairs, elapsed) = self.collect_pairs_to_check().await;
-            check_total_elapsed += elapsed;
-            check_passed += pairs.len();
-
-            // println!("{DEBUG_CODE}[DEBUG] ComputWorker - Call filter_pairs_by_spread(){RESET_CODE}");
-            // Фильтрация по тикер спреду
-            let (pairs, prices_elapsed, spread_elapsed) = self.filter_pairs_by_spread(pairs).await;
-            prices_quard_total_elapsed += prices_elapsed;
-            ticker_spread_total_elapsed += spread_elapsed;
+            // Сбор тикер спредов по биржевым пересечениям
+            let (pairs, elapsed) = self.find_ticker_spreads().await;
+            ticker_spread_total_elapsed += elapsed;
             ticker_spread_passed += pairs.len();
 
-            // println!("{DEBUG_CODE}[DEBUG] ComputWorker - Call verify_arbitrage_conditions_and_get_networks(){RESET_CODE}");
+            // // Фильтрация по тикер спреду
+            // let (pairs, prices_elapsed, spread_elapsed) = self.filter_pairs_by_spread(pairs).await;
+            // prices_quard_total_elapsed += prices_elapsed;
+            // ticker_spread_total_elapsed += spread_elapsed;
+            // ticker_spread_passed += pairs.len();
+
             // Параллельное выполнение верификации
             let verify_futures: Vec<_> = pairs
                 .into_iter()
-                .map(|(pair, buy_exchange, sell_exchange)| async move {
-                    match verify_arbitrage_conditions_and_get_networks(
-                        &buy_exchange,
-                        &sell_exchange,
-                        &pair,
-                    )
-                    .await
-                    {
-                        Ok(networks) => {
-                            if networks.len() != 0 {
-                                Some((pair, buy_exchange, sell_exchange, networks))
-                            } else {
+                .map(
+                    |TickerSpread {
+                         pair,
+                         buy_ex,
+                         sell_ex,
+                     }| async move {
+                        match verify_arbitrage_conditions_and_get_networks(&buy_ex, &sell_ex, &pair)
+                            .await
+                        {
+                            Ok(networks) => {
+                                if networks.len() != 0 {
+                                    Some((pair, buy_ex, sell_ex, networks))
+                                } else {
+                                    None
+                                }
+                            }
+                            Err(failed_exchange) => {
+                                self.trading_pairs.remove(&pair);
+                                if failed_exchange == buy_ex.config().name {
+                                    self.blacklist.blacklist_buy(&pair, failed_exchange);
+                                } else {
+                                    self.blacklist.blacklist_sell(&pair, failed_exchange);
+                                }
                                 None
                             }
                         }
-                        Err(failed_exchange) => {
-                            self.trading_pairs.remove(&pair);
-                            if failed_exchange == buy_exchange.config().name {
-                                self.blacklist.blacklist_buy(&pair, failed_exchange);
-                            } else {
-                                self.blacklist.blacklist_sell(&pair, failed_exchange);
-                            }
-                            None
-                        }
-                    }
-                })
+                    },
+                )
                 .collect();
 
             let verify_time = Instant::now();
@@ -228,7 +314,6 @@ impl Workable for ComputWorker {
                 .collect();
             verify_passed += verify_passed_pairs.len();
 
-            // println!("{DEBUG_CODE}[DEBUG] ComputWorker - Call orderbook() {RESET_CODE}");
             let mut orderbook_futures: Vec<_> = verify_passed_pairs
                 .into_iter()
                 .map(|(pair, buy_exchange, sell_exchange, networks)| async move {
@@ -419,8 +504,7 @@ impl Workable for ComputWorker {
 
             loop_count += 1;
             if loop_count == loop_to_update_stat {
-                let formated_total_check = format_duration(check_total_elapsed);
-                let formated_total_prices = format_duration(prices_quard_total_elapsed);
+                // let formated_total_prices = format_duration(prices_quard_total_elapsed);
                 let formated_total_ticker = format_duration(ticker_spread_total_elapsed);
                 let formated_total_verify = format_duration(verify_total_elapsed);
                 let formated_total_orderbook = format_duration(orderbook_total_elapsed);
@@ -429,11 +513,6 @@ impl Workable for ComputWorker {
                 let formated_total_loop = format_duration(loop_elapsed);
 
                 // "│ ├─ └─"
-                stat_info += &format!("├──── Updated tickers\n");
-                stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_check);
-                stat_info += &format!("│        └─ Total passed: {}\n", check_passed);
-                stat_info += &format!("├──── Prices stat\n");
-                stat_info += &format!("│        └─ Total elapsed: {}\n", formated_total_prices);
                 stat_info += &format!("├──── Ticker spread stat\n");
                 stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_ticker);
                 stat_info += &format!("│        └─ Total passed: {}\n", ticker_spread_passed);
@@ -455,9 +534,6 @@ impl Workable for ComputWorker {
 
                 (
                     loop_count,
-                    check_passed,
-                    check_total_elapsed,
-                    prices_quard_total_elapsed,
                     ticker_spread_passed,
                     ticker_spread_total_elapsed,
                     verify_passed,
@@ -469,7 +545,7 @@ impl Workable for ComputWorker {
                     orderbook_spread_passed,
                     orderbook_spread_total_elapsed,
                     loop_elapsed,
-                ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
                 stat_info = format!(
                     "┌── СomputWorker:{} Statistics for {} iteration\n",
