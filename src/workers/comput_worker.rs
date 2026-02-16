@@ -462,7 +462,7 @@ impl Workable for ComputWorker {
                     }
 
                     let bundle_line = format!(
-                        "│ {:<9} │ {:<9} │ {:<10} │ {:<12.5} │ {:<12.5} │ {:<13.2} │ {:<60} │",
+                        "│ {:<9} │ {:<9} │ {:<10} │ {:<12.5} │ {:<12.5} │ {:<13.2} │ {:<65} │",
                         bundle.buy_ex.config().name,
                         bundle.sell_ex.config().name,
                         bundle.quote_volume,
