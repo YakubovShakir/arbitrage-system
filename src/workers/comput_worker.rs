@@ -402,7 +402,7 @@ impl Workable for ComputWorker {
 
                 message += &("\n┌".to_owned() + &horizontal_line + "┐\n");
                 message += &format!(
-                    "│ {:<9} │ {:<9} │ {:<10} │ {:<12} │ {:<12} │ {:<13} │ {:<45} │",
+                    "│ {:<9} │ {:<9} │ {:<10} │ {:<12} │ {:<12} │ {:<13} │ {:<65} │",
                     "Buy Ex",
                     "Sell Ex",
                     "Quote Vol.",
@@ -472,7 +472,7 @@ impl Workable for ComputWorker {
                         network_message
                     );
 
-                    message += &("\n├".to_owned() + &horizontal_line + "\n");
+                    message += &("\n├".to_owned() + &horizontal_line + "┤\n");
                     message += &bundle_line;
                 }
 
