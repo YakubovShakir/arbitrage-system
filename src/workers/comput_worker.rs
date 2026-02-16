@@ -422,7 +422,7 @@ impl Workable for ComputWorker {
 
                         let fee_message = match withdraw_network.withdraw_fee {
                             Some(fee) => format!(
-                                "{} {} ~ {:.3} {}",
+                                "{:.2} {} ~ {:.2} {}",
                                 fee, bundle.pair.base, fee_quote_volume, bundle.pair.quote
                             ),
                             None => String::from("∅"),
@@ -438,9 +438,9 @@ impl Workable for ComputWorker {
                             .or_else(|| deposit_network.base.config.contract_address)
                         {
                             Some(contract_address) => {
-                                if contract_address.len() > 6 {
-                                    let start = &contract_address[0..3];
-                                    let end = &contract_address[contract_address.len() - 3..];
+                                if contract_address.len() > 8 {
+                                    let start = &contract_address[0..4];
+                                    let end = &contract_address[contract_address.len() - 4..];
                                     format!("{}..{}", start, end)
                                 } else {
                                     contract_address
@@ -450,13 +450,12 @@ impl Workable for ComputWorker {
                         };
 
                         let message = format!(
-                            "[ {} | Fee: {} | Cont.: {} | Confs.: {} | Income: {:.2} {} ~ {:.2}% ]",
+                            "[{} Fee:{} C-ct.:{} Conf-s.:{} Income:{:.2}~{:.2}%]",
                             withdraw_network.base.network_type,
                             fee_message,
                             contract_message,
                             num_of_conf_message,
                             profit_with_fee,
-                            bundle.pair.quote,
                             final_spread_percent
                         );
                         network_message += &message;
