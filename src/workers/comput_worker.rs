@@ -450,7 +450,7 @@ impl Workable for ComputWorker {
                         };
 
                         let message = format!(
-                            "[{} Fee:{} C-ct.:{} Conf-s.:{} Income:{:.2}~{:.2}%]",
+                            "[{}|Fee:{}|C-ct.:{}|Conf-s.:{}|Income:{:.2}~{:.2}%]",
                             withdraw_network.base.network_type,
                             fee_message,
                             contract_message,
@@ -462,7 +462,7 @@ impl Workable for ComputWorker {
                     }
 
                     let bundle_line = format!(
-                        "│ {:<14} │ {:<14} │ {:<14} │ {:<14.2} │ {:<14.5} │ {:<14.5} │ {:<14} │",
+                        "│ {:<9} │ {:<9} │ {:<8} │ {:<8.5} │ {:<8.5} │ {:<8.2} │ {:<24} │",
                         bundle.buy_ex.config().name,
                         bundle.sell_ex.config().name,
                         bundle.quote_volume,
