@@ -425,11 +425,11 @@ impl Workable for ComputWorker {
                                 "{} {} ~ {:.3} {}",
                                 fee, bundle.pair.base, fee_quote_volume, bundle.pair.quote
                             ),
-                            None => String::from("Not provided"),
+                            None => String::from("∅"),
                         };
                         let num_of_conf_message = match deposit_network.number_of_confirmation {
                             Some(number) => number.to_string(),
-                            None => String::from("Not provided"),
+                            None => String::from("∅"),
                         };
                         let contract_message = match withdraw_network
                             .base
@@ -437,12 +437,20 @@ impl Workable for ComputWorker {
                             .contract_address
                             .or_else(|| deposit_network.base.config.contract_address)
                         {
-                            Some(contract_address) => contract_address,
-                            None => String::from("Not provided"),
+                            Some(contract_address) => {
+                                if contract_address.len() > 6 {
+                                    let start = &contract_address[0..3];
+                                    let end = &contract_address[contract_address.len() - 3..];
+                                    format!("{}..{}", start, end)
+                                } else {
+                                    contract_address
+                                }
+                            }
+                            None => String::from("∅"),
                         };
 
                         let message = format!(
-                            "[-] {} Tx fee: {}. Contract: {}. Confirms: {}. Net Income {:.2} {} ~ {:.2}% ",
+                            "[ {} | Fee: {} | Cont.: {} | Confs.: {} | Income: {:.2} {} ~ {:.2}% ]",
                             withdraw_network.base.network_type,
                             fee_message,
                             contract_message,
