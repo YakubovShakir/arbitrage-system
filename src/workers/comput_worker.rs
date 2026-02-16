@@ -385,8 +385,8 @@ impl Workable for ComputWorker {
                     networks,
                     buy_price: calculated_buy_price,
                     sell_price: calculated_sell_price,
-                    base_profit,
-                    quote_volume,
+                    base_profit: base_profit,
+                    quote_volume: quote_volume,
                 };
 
                 if let Some(spread_list) = spread_pairs.get_mut(&pair) {
@@ -397,12 +397,12 @@ impl Workable for ComputWorker {
             }
 
             for spread_pair in spread_pairs {
-                let mut message = format!("✅ {}/{} ✅\n", spread_pair.0.base, spread_pair.0.quote);
-                let horizontal_line = format!("\n{}\n", "─".repeat(20));
+                let mut message = format!("✅ {}/{} ✅", spread_pair.0.base, spread_pair.0.quote);
+                let horizontal_line = format!("\n{}\n", "─".repeat(100));
 
                 message += &horizontal_line;
                 message += &format!(
-                    "│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│\n",
+                    "│ {:<8} │ {:<8} │ {:<8} {:<8} │ {:<8} {:<8} │ {:<8} {:<8} │ {:<8} {:<8} │ {:<8} │\n",
                     "Buy Ex",
                     "Sell Ex",
                     "Quote Volume - ",
@@ -459,9 +459,11 @@ impl Workable for ComputWorker {
                     }
 
                     let bundle_line = format!(
-                        "│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│",
+                        "│{:<8}│{:<8}│{:<8}│{:<8}│{:<8.5}│{:<8.5}│{:<8}│",
                         bundle.buy_ex.config().name,
                         bundle.sell_ex.config().name,
+                        bundle.quote_volume,
+                        bundle.base_profit,
                         bundle.buy_price,
                         bundle.sell_price,
                         network_message
