@@ -58,6 +58,8 @@
       "ERC20ZRC"
     ],
     "tokens": [
+      "usde",
+      "vra",
       "boson",
       "HP",
       "pyusd",
@@ -379,6 +381,7 @@
       "SOLANA MAINNET"
     ],
     "tokens": [
+      "up",
       "pixel",
       "apepe",
       "vr",
@@ -475,6 +478,26 @@
   {
     "name": "Harmony",
     "mappings": ["one1", "ONE", "HARMONY"],
+    "tokens": []
+  },
+  {
+    "name": "ValueChain",
+    "mappings": ["VALUECHAIN"],
+    "tokens": []
+  },
+  {
+    "name": "Ultra",
+    "mappings": ["UOS"],
+    "tokens": []
+  },
+  {
+    "name": "Cortex",
+    "mappings": ["cxt"],
+    "tokens": []
+  },
+  {
+    "name": "OortCloud",
+    "mappings": ["OGPU"],
     "tokens": []
   },
   {
@@ -1464,7 +1487,7 @@
   },
   {
     "name": "Plasma",
-    "mappings": ["PLASMA", "PLASMA NETWORK", "PLASMA CHAIN", "PLASMA PROTOCOL", "PLASMA FINANCE"],
+    "mappings": ["PLASMA", "PLASMA NETWORK", "PLASMA CHAIN", "PLASMA PROTOCOL", "PLASMA FINANCE", "XPL"],
     "tokens": []
   },
   {
@@ -2126,7 +2149,8 @@
       "BLAST L2",
       "BLAST NETWORK",
       "BLAST LAYER2",
-      "BLAST L2"
+      "BLAST L2",
+      "BLAST-ETH"
     ],
     "tokens": []
   },
