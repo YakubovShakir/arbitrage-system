@@ -8,10 +8,11 @@ use crate::{
     core::{
         traits::{Workable, exchange_service::OrderBookService},
         types::{
-            ExchangeName, Exchanges, OrderBook, TradingPair, TradingPairs,
+            Exchanges, OrderBook, TradingPair, TradingPairs,
             blacklist::Blacklist,
             exchanges::Exchange,
             network::{DepositNetwork, WithdrawNetwork},
+            trading_pair,
         },
         utils::{
             calculate_price_by_glass, comput_spread_percent, format_duration,
@@ -20,12 +21,23 @@ use crate::{
     },
 };
 use log::{error, info};
-use std::{sync::Arc, time::Instant};
+use std::{collections::HashMap, sync::Arc, time::Instant};
 
 struct TickerSpread<'a> {
     pair: TradingPair,
     buy_ex: &'a Exchange,
     sell_ex: &'a Exchange,
+}
+
+struct SpreadBundle<'a> {
+    pair: TradingPair,
+    buy_ex: &'a Exchange,
+    sell_ex: &'a Exchange,
+    networks: Vec<(WithdrawNetwork, DepositNetwork)>,
+    buy_price: f64,
+    sell_price: f64,
+    base_profit: f64,
+    quote_volume: f64,
 }
 
 pub struct ComputWorker {
@@ -137,80 +149,6 @@ impl ComputWorker {
 
         (ticker_spreads, comput_elapsed)
     }
-
-    // async fn collect_pairs_to_check(&self) -> (Vec<TradingPair>, u128) {
-    //     let mut collection: Vec<TradingPair> = vec![];
-    //     let mut elapsed: u128 = 0;
-    //     for entry in self.trading_pairs.iter() {
-    //         let pair = entry.key();
-    //         let price_data = entry.value();
-
-    //         if self.spread_pairs.contains_key(pair) {
-    //             continue;
-    //         }
-    //         let checked_time = Instant::now();
-    //         let checked = price_data.check_if_not_checked().await;
-    //         elapsed += checked_time.elapsed().as_nanos();
-    //         if checked {
-    //             continue;
-    //         }
-    //         collection.push(pair.clone());
-    //     }
-    //     (collection, elapsed)
-    // }
-    // async fn filter_pairs_by_spread(
-    //     &self,
-    //     pairs: Vec<TradingPair>,
-    // ) -> (Vec<(TradingPair, &Exchange, &Exchange)>, u128, u128) {
-    //     let mut collect: Vec<(TradingPair, ExchangeName, ExchangeName)> = vec![];
-    //     let mut prices_elapsed: u128 = 0;
-    //     let mut spread_elapsed: u128 = 0;
-
-    //     for pair in pairs {
-    //         let Some(entry) = self.trading_pairs.get(&pair) else {
-    //             continue;
-    //         };
-    //         let price_data = entry.value();
-
-    //         let prices_time = Instant::now();
-    //         let (buy_price, sell_price) = {
-    //             let buy_guard = price_data.min_buy_price.read().await;
-    //             let sell_guard = price_data.max_sell_price.read().await;
-    //             (buy_guard, sell_guard)
-    //         };
-    //         prices_elapsed += prices_time.elapsed().as_nanos();
-
-    //         // Вычисление тикер-спреда
-    //         let ticker_spread_time = Instant::now();
-    //         let spread = comput_spread_percent(&buy_price.1, &sell_price.1);
-    //         spread_elapsed += ticker_spread_time.elapsed().as_nanos();
-    //         if spread < REQUIRED_TICKER_SPREAD_PERCENT {
-    //             continue;
-    //         }
-
-    //         collect.push((pair, buy_price.0.to_string(), sell_price.0.to_string()));
-    //     }
-
-    //     // Сбор параметров для параллельного запроса на верификацию
-    //     let collect: Vec<_> = collect
-    //         .into_iter()
-    //         .filter_map(|(pair, buy_exchange_name, sell_exchange_name)| {
-    //             let (buy_exchange, sell_exchange) = {
-    //                 match (
-    //                     self.exchanges.get(&buy_exchange_name),
-    //                     self.exchanges.get(&sell_exchange_name),
-    //                 ) {
-    //                     (Some(buy), Some(sell)) => (buy, sell),
-    //                     _ => return None,
-    //                 }
-    //             };
-
-    //             // Создаем задачу
-    //             Some((pair, buy_exchange, sell_exchange))
-    //         })
-    //         .collect();
-    //     (collect, prices_elapsed, spread_elapsed)
-    // }
 }
 impl Workable for ComputWorker {
     fn id(&self) -> usize {
@@ -219,8 +157,6 @@ impl Workable for ComputWorker {
 
     // "┌ │ ├─ └─"
     async fn run(&self) -> ! {
-        let mut prices_quard_total_elapsed: u128 = 0;
-
         let mut ticker_spread_passed = 0;
         let mut ticker_spread_total_elapsed: u128 = 0;
 
@@ -252,12 +188,6 @@ impl Workable for ComputWorker {
             let (pairs, elapsed) = self.find_ticker_spreads().await;
             ticker_spread_total_elapsed += elapsed;
             ticker_spread_passed += pairs.len();
-
-            // // Фильтрация по тикер спреду
-            // let (pairs, prices_elapsed, spread_elapsed) = self.filter_pairs_by_spread(pairs).await;
-            // prices_quard_total_elapsed += prices_elapsed;
-            // ticker_spread_total_elapsed += spread_elapsed;
-            // ticker_spread_passed += pairs.len();
 
             // Параллельное выполнение верификации
             let verify_futures: Vec<_> = pairs
@@ -411,14 +341,17 @@ impl Workable for ComputWorker {
                 .collect();
             orderbook_passed += orderbook_passed_pairs.len();
 
-            // println!("{DEBUG_CODE}[DEBUG] ComputWorker - Start comput orderbook spread {RESET_CODE}");
+            let mut spread_pairs: HashMap<TradingPair, Vec<SpreadBundle>> = HashMap::new();
+
             for (pair, buy_exchange, sell_exchange, networks, buy_orderbook, sell_orderbook) in
                 orderbook_passed_pairs
             {
+                // Получение объема квота
                 let Some(quote_volume) = pair.get_volume_by_quote() else {
                     error!("Не удалось получить объем квота {:?}", pair);
                     continue;
                 };
+                // Просчет ордербук цен
                 let calc_books_time = Instant::now();
                 let (calculated_asks, calculated_bids) = (
                     calculate_price_by_glass(&(quote_volume * QUOTE_RATE), &buy_orderbook.0),
@@ -433,6 +366,7 @@ impl Workable for ComputWorker {
                 };
                 calc_books_passed += 1;
 
+                // Вычисление спреда
                 let orderbook_spread_time = Instant::now();
                 let orderbook_spread =
                     comput_spread_percent(&calculated_buy_price, &calculated_sell_price);
@@ -442,64 +376,104 @@ impl Workable for ComputWorker {
                     continue;
                 }
                 orderbook_spread_passed += 1;
+
                 let base_profit = quote_volume * (orderbook_spread / 100.0);
-
-                let mut spread_message = format!(
-                    "✅ {}/{}\nBuy exchange: {}\nSell exchange: {}\nQuote volume: {} {}\nСalculated buy price: {:.5} {}\nCalculated sell price: {:.5} {}\nNetworks:\n",
-                    pair.base,
-                    pair.quote,
-                    buy_exchange.config().name,
-                    sell_exchange.config().name,
+                let spread_pair = SpreadBundle {
+                    pair: pair.clone(),
+                    buy_ex: buy_exchange,
+                    sell_ex: sell_exchange,
+                    networks,
+                    buy_price: calculated_buy_price,
+                    sell_price: calculated_sell_price,
+                    base_profit,
                     quote_volume,
-                    pair.quote,
-                    calculated_buy_price,
-                    pair.quote,
-                    calculated_sell_price,
-                    pair.quote
-                );
+                };
 
-                for (withdraw_network, deposit_network) in networks {
-                    let fee_quote_volume =
-                        withdraw_network.withdraw_fee.unwrap_or(0.0) * calculated_sell_price;
-                    let profit_with_fee = base_profit - fee_quote_volume;
-                    let final_spread_percent = profit_with_fee / quote_volume * 100.0;
-
-                    let fee_message = match withdraw_network.withdraw_fee {
-                        Some(fee) => format!(
-                            "{} {} ~ {:.3} {}",
-                            fee, pair.base, fee_quote_volume, pair.quote
-                        ),
-                        None => String::from("Not provided"),
-                    };
-                    let num_of_conf_message = match deposit_network.number_of_confirmation {
-                        Some(number) => number.to_string(),
-                        None => String::from("Not provided"),
-                    };
-                    let contract_message = match withdraw_network
-                        .base
-                        .config
-                        .contract_address
-                        .or_else(|| deposit_network.base.config.contract_address)
-                    {
-                        Some(contract_address) => contract_address,
-                        None => String::from("Not provided"),
-                    };
-
-                    let message = format!(
-                        "[-] {:?}\nTransfer fee: {}\nContract address: {}\nNumber of confirmations: {}\nProfit {:.2} {} ~ {:.2}%",
-                        withdraw_network.base.network_type,
-                        fee_message,
-                        contract_message,
-                        num_of_conf_message,
-                        profit_with_fee,
-                        pair.quote,
-                        final_spread_percent
-                    );
-                    spread_message += &message;
-                }
-                spread_message += RESET_CODE;
-                info!(target: "info_module", "\n{}\n", spread_message);
+                if let Some(spread_list) = spread_pairs.get_mut(&pair) {
+                    spread_list.push(spread_pair);
+                } else {
+                    spread_pairs.insert(pair, vec![spread_pair]);
+                };
             }
+
+            for spread_pair in spread_pairs {
+                let mut message = format!("✅ {}/{} ✅\n", spread_pair.0.base, spread_pair.0.quote);
+                let horizontal_line = format!("\n{}\n", "─".repeat(20));
+
+                message += &horizontal_line;
+                message += &format!(
+                    "│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│\n",
+                    "Buy Ex",
+                    "Sell Ex",
+                    "Quote Volume - ",
+                    spread_pair.0.quote,
+                    "Buy Price - ",
+                    spread_pair.0.quote,
+                    "Sell Price - ",
+                    spread_pair.0.quote,
+                    "Base Profit - ",
+                    spread_pair.0.quote,
+                    "Networks"
+                );
+                for bundle in spread_pair.1 {
+                    let mut network_message = format!("");
+
+                    for (withdraw_network, deposit_network) in bundle.networks {
+                        let fee_quote_volume =
+                            withdraw_network.withdraw_fee.unwrap_or(0.0) * bundle.sell_price;
+                        let profit_with_fee = bundle.base_profit - fee_quote_volume;
+                        let final_spread_percent = profit_with_fee / bundle.quote_volume * 100.0;
+
+                        let fee_message = match withdraw_network.withdraw_fee {
+                            Some(fee) => format!(
+                                "{} {} ~ {:.3} {}",
+                                fee, bundle.pair.base, fee_quote_volume, bundle.pair.quote
+                            ),
+                            None => String::from("Not provided"),
+                        };
+                        let num_of_conf_message = match deposit_network.number_of_confirmation {
+                            Some(number) => number.to_string(),
+                            None => String::from("Not provided"),
+                        };
+                        let contract_message = match withdraw_network
+                            .base
+                            .config
+                            .contract_address
+                            .or_else(|| deposit_network.base.config.contract_address)
+                        {
+                            Some(contract_address) => contract_address,
+                            None => String::from("Not provided"),
+                        };
+
+                        let message = format!(
+                            "[-] {:?} Tx fee: {}. Contract: {}. Confirms: {}. Net Income {:.2} {} ~ {:.2}%\n",
+                            withdraw_network.base.network_type,
+                            fee_message,
+                            contract_message,
+                            num_of_conf_message,
+                            profit_with_fee,
+                            bundle.pair.quote,
+                            final_spread_percent
+                        );
+                        network_message += &message;
+                    }
+
+                    let bundle_line = format!(
+                        "│{:<8}│{:<8}│{:<8}│{:<8}│{:<8}│",
+                        bundle.buy_ex.config().name,
+                        bundle.sell_ex.config().name,
+                        bundle.buy_price,
+                        bundle.sell_price,
+                        network_message
+                    );
+
+                    message += &horizontal_line;
+                    message += &bundle_line;
+                }
+
+                info!(target: "info_module", "\n{}\n", message);
+            }
+
             loop_elapsed += start_time.elapsed().as_nanos();
 
             loop_count += 1;
