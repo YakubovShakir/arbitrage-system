@@ -402,10 +402,10 @@ impl Workable for ComputWorker {
 
                 message += &("\n┌".to_owned() + &horizontal_line + "┐\n");
                 message += &format!(
-                    "│ {:<9} │ {:<9} │ {:<8} │ {:<8} │ {:<8} │ {:<8} │ {:<60} │",
+                    "│ {:<9} │ {:<9} │ {:<8} │ {:<12} │ {:<12} │ {:<8} │ {:<60} │",
                     "Buy Ex",
                     "Sell Ex",
-                    "Quote Volume",
+                    "Quote Vol.",
                     "Buy Price",
                     "Sell Price",
                     "Base Profit",
@@ -462,7 +462,7 @@ impl Workable for ComputWorker {
                     }
 
                     let bundle_line = format!(
-                        "│ {:<9} │ {:<9} │ {:<8} │ {:<8.5} │ {:<8.5} │ {:<8.2} │ {:<60} │",
+                        "│ {:<9} │ {:<9} │ {:<8} │ {:<12.5} │ {:<12.5} │ {:<8.2} │ {:<60} │",
                         bundle.buy_ex.config().name,
                         bundle.sell_ex.config().name,
                         bundle.quote_volume,
