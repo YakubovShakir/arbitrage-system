@@ -465,7 +465,7 @@ impl Workable for ComputWorker {
                         network_message
                     );
 
-                    message += &("\n├".to_owned() + &horizontal_line);
+                    message += &("\n├".to_owned() + &horizontal_line + "\n");
                     message += &bundle_line;
                 }
 
