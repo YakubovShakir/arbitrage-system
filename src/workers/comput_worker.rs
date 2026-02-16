@@ -400,7 +400,7 @@ impl Workable for ComputWorker {
                 let mut message = format!("✅ {}/{} ✅", spread_pair.0.base, spread_pair.0.quote);
                 let horizontal_line = format!("{}", "─".repeat(125));
 
-                message += &("\n┌".to_owned() + &horizontal_line + "┐");
+                message += &("\n┌".to_owned() + &horizontal_line + "┐\n");
                 message += &format!(
                     "│ {:<14} │ {:<14} │ {:<14} │ {:<14} │ {:<14} │ {:<14} │ {:<14} │",
                     "Buy Ex",
