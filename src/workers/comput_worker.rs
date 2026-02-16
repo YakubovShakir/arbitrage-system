@@ -398,9 +398,9 @@ impl Workable for ComputWorker {
 
             for spread_pair in spread_pairs {
                 let mut message = format!("✅ {}/{} ✅", spread_pair.0.base, spread_pair.0.quote);
-                let horizontal_line = format!("\n{}\n", "─".repeat(100));
+                let horizontal_line = format!("{}\n", "─".repeat(100));
 
-                message += &("┌".to_owned() + &horizontal_line);
+                message += &("\n┌".to_owned() + &horizontal_line);
                 message += &format!(
                     " {:<8} │ {:<8} │ {:<8} │ {:<8} │ {:<8} │ {:<8} │ {:<8} │",
                     "Buy Ex",
@@ -465,7 +465,7 @@ impl Workable for ComputWorker {
                         network_message
                     );
 
-                    message += &("├".to_owned() + &horizontal_line);
+                    message += &("\n├".to_owned() + &horizontal_line);
                     message += &bundle_line;
                 }
 
