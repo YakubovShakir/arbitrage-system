@@ -34,9 +34,6 @@ impl ExchangePrice {
 pub struct PriceData {
     pub sell_price_list: Vec<ExchangePrice>,
     pub buy_price_list: Vec<ExchangePrice>,
-    // pub min_buy_price: RwLock<(ExchangeName, f64)>,
-    // pub max_sell_price: RwLock<(ExchangeName, f64)>,
-    // checked: RwLock<bool>,
 }
 
 impl PriceData {
@@ -44,9 +41,6 @@ impl PriceData {
         Self {
             sell_price_list: vec![ExchangePrice::new(sell_ex_name, sell_price)],
             buy_price_list: vec![ExchangePrice::new(buy_ex_name, buy_price)],
-            // min_buy_price: RwLock::new((buy_ex_name.to_owned(), buy_price.to_owned())),
-            // max_sell_price: RwLock::new((sell_ex_name.to_owned(), sell_price.to_owned())),
-            // checked: RwLock::new(false),
         }
     }
     pub async fn update_buy_list(&mut self, exchange: &str, price: f64) {
@@ -84,41 +78,4 @@ impl PriceData {
                 .push(ExchangePrice::new(exchange, &price));
         }
     }
-
-    // pub async fn update_buy_price(&self, exchange_name: String, price: f64) {
-    //     let mut data_quard = self.min_buy_price.write().await;
-
-    //     let price_is_better = price < data_quard.1;
-    //     let current_exchange_price_changed = data_quard.0 == exchange_name && data_quard.1 != price;
-
-    //     if price_is_better || current_exchange_price_changed {
-    //         *data_quard = (exchange_name, price);
-
-    //         let mut checked_quard = self.checked.write().await;
-    //         *checked_quard = false;
-    //     }
-    // }
-    // pub async fn update_sell_price(&self, exchange_name: String, price: f64) {
-    //     let mut data_guard = self.max_sell_price.write().await;
-
-    //     let price_is_better = price > data_guard.1;
-    //     let current_exchange_price_changed = data_guard.0 == exchange_name && data_guard.1 != price;
-
-    //     if price_is_better || current_exchange_price_changed {
-    //         *data_guard = (exchange_name, price);
-
-    //         let mut checked_quard = self.checked.write().await;
-    //         *checked_quard = false;
-    //     }
-    // }
-
-    // pub async fn check_if_not_checked(&self) -> bool {
-    //     let mut checked_guard = self.checked.write().await;
-    //     if *checked_guard {
-    //         *checked_guard
-    //     } else {
-    //         *checked_guard = true;
-    //         false
-    //     }
-    // }
 }
