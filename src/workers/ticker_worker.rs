@@ -2,10 +2,13 @@ use std::{collections::HashMap, sync::Arc, time::Instant};
 
 use futures_util::future::join_all;
 
-use crate::core::{
-    traits::{Workable, exchange_service::TickerService},
-    types::{Exchanges, PriceData, TickerPrice, Tickers, TradingPairs, blacklist::Blacklist},
-    utils::format_duration,
+use crate::{
+    config::parameters::BASE_BLACKLIST,
+    core::{
+        traits::{Workable, exchange_service::TickerService},
+        types::{Exchanges, PriceData, TickerPrice, Tickers, TradingPairs, blacklist::Blacklist},
+        utils::format_duration,
+    },
 };
 use log::{error, info};
 pub struct TickerWorker {
@@ -46,6 +49,7 @@ impl TickerWorker {
                 }
             })
             .collect();
+
         let tickers_results: Vec<_> = join_all(tickers_futures)
             .await
             .into_iter()
@@ -59,6 +63,9 @@ impl TickerWorker {
 
         raw_tickers.iter().for_each(|tickers| {
             for (pair, price) in tickers {
+                if BASE_BLACKLIST.contains(&pair.base.as_str()) {
+                    continue;
+                }
                 let ex_name = &price.buy_price.0;
                 let in_buy_blacklist = self.blacklist.is_buy_blacklisted(pair, &ex_name);
                 let in_sell_blacklist = self.blacklist.is_sell_blacklisted(pair, &ex_name);

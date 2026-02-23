@@ -8,6 +8,7 @@ pub const QUOTE_LIST: &[(&str, f64)] = &[
     ("DAI", 900.0),
     ("TUSD", 900.0),
 ];
+
 pub const QUOTE_RATE: f64 = 1.5;
 pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.33;
 pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.33;
@@ -52,6 +53,7 @@ pub const MEXC_REQUESTS_PER_SECOND: usize = 7;
 pub const OKX_REQUESTS_PER_SECOND: usize = 20;
 pub const KUCOIN_REQUESTS_PER_SECOND: usize = 15;
 
+pub const BASE_BLACKLIST: &[&str] = &["USTC", "LUNC"];
 // unused
 pub const SUCCESS_CODE: &str = "\x1b[38;5;48m"; // #00ff87 - яркий мятный ✅
 pub const ERROR_CODE: &str = "\x1b[38;5;203m"; // #ff5f5f - яркий алый ❌  
