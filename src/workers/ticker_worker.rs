@@ -177,7 +177,7 @@ impl Workable for TickerWorker {
                 );
             }
 
-            tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
+            tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
         }
     }
 }
