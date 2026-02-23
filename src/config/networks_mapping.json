@@ -2050,7 +2050,16 @@
   },
   {
     "name": "XLayer",
-    "mappings": ["XLAYER", "X LAYER", "XLAYER NETWORK", "XLAYER CHAIN", "XLAYER BLOCKCHAIN", "XLAYER PROTOCOL", "X LAYER (USDT0)"],
+    "mappings": [
+      "XLAYER",
+      "X LAYER",
+      "XLAYER NETWORK",
+      "XLAYER CHAIN",
+      "XLAYER BLOCKCHAIN",
+      "XLAYER PROTOCOL",
+      "X LAYER (USDT0)",
+      "X LAYER (WETH)"
+    ],
     "tokens": []
   },
   {

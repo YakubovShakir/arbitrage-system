@@ -57,20 +57,22 @@ impl ComputWorker {
     }
 }
 impl ComputWorker {
-    async fn find_ticker_spreads(&self) -> (Vec<(TradingPair, Vec<TickerSpread>)>, u128) {
+    async fn find_ticker_spreads(&self) -> (Vec<(TradingPair, Vec<TickerSpread>)>, u128, usize) {
         let mut ticker_spreads: Vec<(TradingPair, Vec<TickerSpread>)> = Vec::new();
+        let mut total_bundles: usize = 0;
         let mut comput_elapsed: u128 = 0;
 
         let comput_time = Instant::now();
 
         for entry in self.trading_pairs.iter() {
             if let Some(spreads) = entry.detect_spread_pairs().await {
+                total_bundles += spreads.len();
                 ticker_spreads.push((entry.key().clone(), spreads));
             }
         }
         comput_elapsed += comput_time.elapsed().as_nanos();
 
-        (ticker_spreads, comput_elapsed)
+        (ticker_spreads, comput_elapsed, total_bundles)
     }
 }
 impl Workable for ComputWorker {
@@ -108,9 +110,9 @@ impl Workable for ComputWorker {
             // stat_info += &format!("├──── Trading Pairs: {}\n", self.trading_pairs.len());
 
             // Сбор тикер спредов по биржевым пересечениям
-            let (pairs, elapsed) = self.find_ticker_spreads().await;
+            let (pairs, elapsed, total_bundles) = self.find_ticker_spreads().await;
             ticker_spread_total_elapsed += elapsed;
-            ticker_spread_passed += pairs.len();
+            ticker_spread_passed += total_bundles;
 
             // Параллельное выполнение верификации
             let verify_futures: Vec<_> = pairs
