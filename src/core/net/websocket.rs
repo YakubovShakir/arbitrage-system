@@ -9,6 +9,7 @@ use tokio_tungstenite::tungstenite::http::Response;
 use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 use tokio_tungstenite::{connect_async, tungstenite::Message};
 
+// use crate::core::utils::decompress_gzip;
 use log::{error, info};
 pub type BinaryMessageHandler = Arc<dyn Fn(prost::bytes::Bytes) -> Option<String> + Send + Sync>;
 pub type PingPongHandler = Arc<dyn Fn(&str) -> Option<String> + Send + Sync>;
@@ -130,14 +131,12 @@ impl WebSocketClient {
     }
 
     // Вспомогательный метод для ожидания завершения задачи
-    async fn wait_for_task_completion(
-        listen_handle: Arc<Mutex<Option<JoinHandle<()>>>>,
-    ) -> Result<(), tokio::task::JoinError> {
+    async fn wait_for_task_completion(listen_handle: Arc<Mutex<Option<JoinHandle<()>>>>) {
         let mut handle_guard = listen_handle.lock().await;
         if let Some(handle) = handle_guard.take() {
-            handle.await?; // Возвращаем ошибку если задача завершилась с ошибкой
+            // Теперь у нас владение handle, можем его awaitить
+            let _ = handle.await;
         }
-        Ok(())
     }
 
     async fn connect_and_listen(
@@ -203,19 +202,7 @@ impl WebSocketClient {
                         }
                     }))
                 } else {
-                    let write_for_ping = Arc::clone(&write);
-
-                    Some(tokio::spawn(async move {
-                        let mut interval_timer = tokio::time::interval(Duration::from_secs(20));
-                        loop {
-                            interval_timer.tick().await;
-                            let mut write_guard = write_for_ping.lock().await;
-                            if let Err(e) = write_guard.send(Message::Ping(vec![].into())).await {
-                                error!("Failed to send ping: {}", e);
-                                break;
-                            }
-                        }
-                    }))
+                    None
                 };
 
             // Основной цикл обработки сообщений
@@ -239,7 +226,7 @@ impl WebSocketClient {
                             }
                         }
 
-                        // Если это было не ping/pong сообщение, сохраняем его в state
+                        // Если это было ping/pong сообщение, не сохраняем его в state
                         if !is_ping_pong && text.to_string().to_lowercase() != "pong" {
                             if state_is_streamed {
                                 let mut state_guard = streamed_state.write().await;
