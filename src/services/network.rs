@@ -42,22 +42,23 @@ impl NetworkService for Exchange {
 
         match self {
             Exchange::Binance(cfg) => {
-                let timestamp = get_current_timestamp()?;
-                let query_string = format!("coin={}&timestamp={}", coin, timestamp);
-                let signature = self.generate_signature(SignatureParams::Binance {
-                    query: &query_string,
-                })?;
-
-                let query = &[
-                    ("coin", coin),
-                    ("timestamp", &timestamp),
-                    ("signature", &signature),
-                ];
-
-                let headers = &[("X-MBX-APIKEY", cfg.api_key.as_str())];
                 let data = match cache_data {
                     Some(cached) => cached,
                     None => {
+                        let timestamp = get_current_timestamp()?;
+                        let query_string = format!("coin={}&timestamp={}", coin, timestamp);
+                        let signature = self.generate_signature(SignatureParams::Binance {
+                            query: &query_string,
+                        })?;
+
+                        let query = &[
+                            ("coin", coin),
+                            ("timestamp", &timestamp),
+                            ("signature", &signature),
+                        ];
+
+                        let headers = &[("X-MBX-APIKEY", cfg.api_key.as_str())];
+
                         let response = cfg
                             .http_client
                             .get(
@@ -413,28 +414,28 @@ impl NetworkService for Exchange {
                 }
             }
             Exchange::Mexc(cfg) => {
-                let recv_window = "5000";
-                let timestamp = get_current_timestamp()?;
-                let query_string = format!("recvWindow={}&timestamp={}", recv_window, timestamp);
-                let sign = self.generate_signature(SignatureParams::Mexc {
-                    query: &query_string,
-                    string_body: "",
-                })?;
-
-                let query = &[
-                    ("recvWindow", recv_window),
-                    ("timestamp", &timestamp),
-                    ("signature", &sign),
-                ];
-
-                let headers = &[
-                    ("X-MEXC-APIKEY", cfg.api_key.as_str()),
-                    ("Content-Type", "application/json"),
-                ];
-
                 let data = match cache_data {
                     Some(cached) => cached,
                     None => {
+                        let recv_window = "5000";
+                        let timestamp = get_current_timestamp()?;
+                        let query_string =
+                            format!("recvWindow={}&timestamp={}", recv_window, timestamp);
+                        let sign = self.generate_signature(SignatureParams::Mexc {
+                            query: &query_string,
+                            string_body: "",
+                        })?;
+
+                        let query = &[
+                            ("recvWindow", recv_window),
+                            ("timestamp", &timestamp),
+                            ("signature", &sign),
+                        ];
+
+                        let headers = &[
+                            ("X-MEXC-APIKEY", cfg.api_key.as_str()),
+                            ("Content-Type", "application/json"),
+                        ];
                         let response = cfg
                             .http_client
                             .get(
@@ -501,11 +502,10 @@ impl NetworkService for Exchange {
                 }
             }
             Exchange::Huobi(cfg) => {
-                let headers = &[("Content-Type", "application/json")];
-
                 let data = match cache_data {
                     Some(cached) => cached,
                     None => {
+                        let headers = &[("Content-Type", "application/json")];
                         let response = cfg
                             .http_client
                             .get(endpoint, None, Some(headers), None)
