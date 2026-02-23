@@ -1,7 +1,7 @@
 pub const PAIRS_PER_THREAD: usize = 15;
 pub const EXCHANGES_PER_TICKER_THREAD: usize = 4;
 
-// Filter parameters
+// filter parameters
 pub const QUOTE_LIST: &[(&str, f64)] = &[
     ("USDT", 900.0),
     ("USDC", 900.0),
@@ -12,35 +12,36 @@ pub const QUOTE_RATE: f64 = 2.0;
 pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.33;
 pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.33;
 
-// Cache
+// cache
 pub const NETWORKS_CACHE_TTL_SECS: u64 = 12000;
 pub const MARGIN_INFO_CACHE_TTL_SECS: u64 = 12000;
 
-// API-client configuration
+// api-client config
 pub const REQUESTS_CHUNK_SIZE: usize = 20;
 pub const HTTP_MAX_POOL_IDLE_PER_HOST: usize = 20;
 pub const HTTP_RETRY_AFTER_MILLIS: u64 = 300;
 pub const GLOBAL_HTTP_TIMEOUT_SECS: u64 = 5;
 
-// BINANCE REQUEST TIMEOUTS
+// binance request timeouts
 pub const BINANCE_NETWORKS_HTTP_TIMEOUT_SECONDS: u64 = 10;
 
-// BITGET REQUEST TIMEOUTS
+// bitget request timeouts
 pub const BITGET_MARGIN_INFO_HTTP_TIMEOUT_SECONDS: u64 = 10;
 pub const BITGET_NETWORKS_HTTP_TIMEOUT_SECONDS: u64 = 10;
 
-// GATE.IO REQUEST TIMEOUTS
+// gate.io request timeouts
 pub const GATE_MARGIN_INFO_HTTP_TIMEOUT_SECONDS: u64 = 10;
 pub const GATE_TICKERS_HTTP_TIMEOUT_SECONDS: u64 = 10;
 pub const GATE_NETWORKS_HTTP_TIMEOUT_SECONDS: u64 = 5;
-// MEXC REQUEST TIMEOUTS
+
+// mexc request timeouts
 pub const MEXC_NETWORKS_HTTP_TIMEOUT_SECONDS: u64 = 10;
 
-// HUOBI REQUEST TIMEOUTS
+// huobi request timeouts
 pub const HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS: u64 = 30;
 pub const HUOBI_MARGIN_INFO_HTTP_TIMEOUT_SECONDS: u64 = 10;
 
-// Rate Limits
+// rate limits
 pub const BINANCE_REQUESTS_PER_SECOND: usize = 5;
 pub const BYBIT_REQUESTS_PER_SECOND: usize = 10;
 pub const BITGET_REQUESTS_PER_SECOND: usize = 10;
@@ -51,15 +52,7 @@ pub const MEXC_REQUESTS_PER_SECOND: usize = 7;
 pub const OKX_REQUESTS_PER_SECOND: usize = 20;
 pub const KUCOIN_REQUESTS_PER_SECOND: usize = 15;
 
-// pub const BINANCE_REQUESTS_PER_SECOND: usize = 0;
-// pub const BYBIT_REQUESTS_PER_SECOND: usize = 0;
-// pub const BITGET_REQUESTS_PER_SECOND: usize = 0;
-// pub const BITMART_REQUESTS_PER_SECOND: usize = 0;
-// pub const GATE_REQUESTS_PER_SECOND: usize = 0;
-// pub const HUOBI_REQUESTS_PER_SECOND: usize = 0;
-// pub const MEXC_REQUESTS_PER_SECOND: usize = 0;
-// pub const OKX_REQUESTS_PER_SECOND: usize = 0;
-// pub const KUCOIN_REQUESTS_PER_SECOND: usize = 0;
+// unused
 pub const SUCCESS_CODE: &str = "\x1b[38;5;48m"; // #00ff87 - яркий мятный ✅
 pub const ERROR_CODE: &str = "\x1b[38;5;203m"; // #ff5f5f - яркий алый ❌  
 pub const WARNING_CODE: &str = "\x1b[38;5;221m"; // #ffd75f - тёплый жёлтый ⚠️

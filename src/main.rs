@@ -7,7 +7,7 @@ use arbitrage_system::{
     init::{exchanges::get_exchanges, load_env::load_env},
     workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
 };
-use dashmap::DashMap;
+
 use std::sync::Arc;
 #[tokio::main]
 async fn main() {
@@ -22,10 +22,7 @@ async fn main() {
     let spread_pairs = Arc::new(TradingPairs::new());
 
     // blacklist
-    let tickers_blacklist = Arc::new(Blacklist {
-        buy_blacklist: DashMap::new(),
-        sell_blacklist: DashMap::new(),
-    });
+    let tickers_blacklist = Arc::new(Blacklist::new());
 
     // let tickers_produced: Vec<Arc<TradingPairs>> = Vec::from(Arc::new(TradingPairs::new()));
     let mut tasks = Vec::new();

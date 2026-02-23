@@ -50,4 +50,41 @@ impl TradingPair {
             None
         })
     }
+
+    #[cfg(test)]
+    pub fn mock() -> Self {
+        Self::new("BTC", "USDT")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::types::TradingPair;
+
+    #[test]
+    fn test_from_str() {
+        let valid = TradingPair::from_str("btcusdt");
+        let invalid = TradingPair::from_str("btcusdt-ff");
+
+        assert!(valid.is_some());
+        assert!(invalid.is_none());
+    }
+
+    #[test]
+    fn test_from_str_with_separator() {
+        let valid = TradingPair::from_str_with_separator("btc-usdt", '-');
+        let invalid = TradingPair::from_str_with_separator("btcusdt", '-');
+
+        assert!(valid.is_some());
+        assert!(invalid.is_none());
+    }
+
+    #[test]
+    fn test_get_volume_by_quote() {
+        let valid = TradingPair::mock();
+        let invalid = TradingPair::new("BTC", "ZEBRA");
+
+        assert!(valid.get_volume_by_quote().is_some());
+        assert!(invalid.get_volume_by_quote().is_none());
+    }
 }

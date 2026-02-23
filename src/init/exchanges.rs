@@ -12,7 +12,7 @@ use crate::config::parameters::{
     BINANCE_REQUESTS_PER_SECOND, BITGET_REQUESTS_PER_SECOND, BITMART_REQUESTS_PER_SECOND,
     BYBIT_REQUESTS_PER_SECOND, GATE_REQUESTS_PER_SECOND, HUOBI_REQUESTS_PER_SECOND,
     KUCOIN_REQUESTS_PER_SECOND, MARGIN_INFO_CACHE_TTL_SECS, MEXC_REQUESTS_PER_SECOND,
-    NETWORKS_CACHE_TTL_SECS, OKX_REQUESTS_PER_SECOND, RESET_CODE, SUCCESS_CODE,
+    NETWORKS_CACHE_TTL_SECS, OKX_REQUESTS_PER_SECOND,
 };
 use crate::core::net::http::HttpClient;
 use crate::core::net::websocket::{BinaryMessageHandler, ConnectionHandler, WebSocketClient};
@@ -21,11 +21,8 @@ use crate::core::types::api::CacheData;
 use crate::core::types::exchanges::{CachedConfig, Exchange, ExchangeConfig};
 use crate::core::utils::json_utils::find_value_from_json_key;
 
-pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
-    let mut exchanges: Exchanges = HashMap::new();
-
-    // Binance
-    let binance = Exchange::Binance(ExchangeConfig {
+pub fn init_binance() -> Result<Exchange, Box<dyn Error>> {
+    Ok(Exchange::Binance(ExchangeConfig {
         name: config::binance::NAME.to_owned(),
         api_key: env::var("BINANCE_API_KEY")?.to_owned(),
         secret_key: env::var("BINANCE_SECRET_KEY")?.to_owned(),
@@ -41,11 +38,10 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
             ),
         },
-    });
-    exchanges.insert(config::binance::NAME.to_owned(), binance);
-
-    // Bybit
-    let bybit = Exchange::Bybit(ExchangeConfig {
+    }))
+}
+pub fn init_bybit() -> Result<Exchange, Box<dyn Error>> {
+    Ok(Exchange::Bybit(ExchangeConfig {
         name: config::bybit::NAME.to_owned(),
         api_key: env::var("BYBIT_API_KEY")?.to_owned(),
         secret_key: env::var("BYBIT_SECRET_KEY")?.to_owned(),
@@ -61,10 +57,9 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
             ),
         },
-    });
-    exchanges.insert(config::bybit::NAME.to_owned(), bybit);
-
-    // Mexc
+    }))
+}
+pub fn init_mexc() -> Result<Exchange, Box<dyn Error>> {
     // Обработчик для protobuf сообщений MEXC
     let mexc_binary_handler: BinaryMessageHandler = Arc::new(|data: prost::bytes::Bytes| {
         match crate::config::mexc_protocol_buffers::decode_message(&data) {
@@ -89,7 +84,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             }
         }
     });
-    let mexc = Exchange::Mexc(ExchangeConfig {
+    Ok(Exchange::Mexc(ExchangeConfig {
         name: config::mexc::NAME.to_owned(),
         api_key: env::var("MEXC_API_KEY")?.to_owned(),
         secret_key: env::var("MEXC_SECRET_KEY")?.to_owned(),
@@ -109,11 +104,10 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
             ),
         },
-    });
-    exchanges.insert(config::mexc::NAME.to_owned(), mexc);
-
-    // Bitget
-    let bitget = Exchange::Bitget(ExchangeConfig {
+    }))
+}
+pub fn init_bitget() -> Result<Exchange, Box<dyn Error>> {
+    Ok(Exchange::Bitget(ExchangeConfig {
         name: config::bitget::NAME.to_owned(),
         api_key: env::var("BITGET_API_KEY")?.to_owned(),
         secret_key: env::var("BITGET_SECRET_KEY")?.to_owned(),
@@ -129,10 +123,9 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
             ),
         },
-    });
-    exchanges.insert(config::bitget::NAME.to_owned(), bitget);
-
-    // Kucoin
+    }))
+}
+pub fn init_kucoin() -> Result<Exchange, Box<dyn Error>> {
     let kucoin_http_client = HttpClient::new(config::kucoin::BASE_URL, KUCOIN_REQUESTS_PER_SECOND)?;
     let kucoin_name = config::kucoin::NAME;
     let kucoin_connection_handler: ConnectionHandler = Arc::new({
@@ -192,7 +185,7 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
             })
         }
     });
-    let kucoin = Exchange::Kucoin(ExchangeConfig {
+    Ok(Exchange::Kucoin(ExchangeConfig {
         name: kucoin_name.to_owned(),
         api_key: env::var("KUCOIN_API_KEY")?.to_owned(),
         secret_key: env::var("KUCOIN_SECRET_KEY")?.to_owned(),
@@ -216,30 +209,10 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
             ),
         },
-    });
-    exchanges.insert(config::kucoin::NAME.to_owned(), kucoin);
-
-    // Gate.io
-    let gate = Exchange::Gate(ExchangeConfig {
-        name: config::gate::NAME.to_owned(),
-        api_key: env::var("GATE_API_KEY")?.to_owned(),
-        secret_key: env::var("GATE_SECRET_KEY")?.to_owned(),
-        http_client: HttpClient::new(config::gate::BASE_URL, GATE_REQUESTS_PER_SECOND)?,
-        websocket_client: None,
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
-    });
-    exchanges.insert(config::gate::NAME.to_owned(), gate);
-
-    let huobi = Exchange::Huobi(ExchangeConfig {
+    }))
+}
+pub fn init_huobi() -> Result<Exchange, Box<dyn Error>> {
+    Ok(Exchange::Huobi(ExchangeConfig {
         name: config::huobi::NAME.to_owned(),
         api_key: env::var("HUOBI_API_KEY")?.to_owned(),
         secret_key: env::var("HUOBI_SECRET_KEY")?.to_owned(),
@@ -259,10 +232,29 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
             ),
         },
-    });
-    exchanges.insert(config::huobi::NAME.to_owned(), huobi);
-
-    let bitmart = Exchange::Bitmart(ExchangeConfig {
+    }))
+}
+pub fn init_gate() -> Result<Exchange, Box<dyn Error>> {
+    Ok(Exchange::Gate(ExchangeConfig {
+        name: config::gate::NAME.to_owned(),
+        api_key: env::var("GATE_API_KEY")?.to_owned(),
+        secret_key: env::var("GATE_SECRET_KEY")?.to_owned(),
+        http_client: HttpClient::new(config::gate::BASE_URL, GATE_REQUESTS_PER_SECOND)?,
+        websocket_client: None,
+        cached_data: CachedConfig {
+            networks: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
+            ),
+            margin_info: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
+            ),
+        },
+    }))
+}
+pub fn init_bitmart() -> Result<Exchange, Box<dyn Error>> {
+    Ok(Exchange::Bitmart(ExchangeConfig {
         name: config::bitmart::NAME.to_owned(),
         api_key: env::var("BITMART_API_KEY")?.to_owned(),
         secret_key: env::var("BITMART_SECRET_KEY")?.to_owned(),
@@ -278,10 +270,10 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
             ),
         },
-    });
-    exchanges.insert(config::bitmart::NAME.to_owned(), bitmart);
-
-    let okx = Exchange::Okx(ExchangeConfig {
+    }))
+}
+pub fn init_okx() -> Result<Exchange, Box<dyn Error>> {
+    Ok(Exchange::Okx(ExchangeConfig {
         name: config::okx::NAME.to_owned(),
         api_key: env::var("OKX_API_KEY")?.to_owned(),
         secret_key: env::var("OKX_SECRET_KEY")?.to_owned(),
@@ -297,7 +289,38 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
                 Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
             ),
         },
-    });
+    }))
+}
+
+pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
+    let mut exchanges: Exchanges = HashMap::new();
+
+    let binance: Exchange = init_binance()?;
+    exchanges.insert(config::binance::NAME.to_owned(), binance);
+
+    let bybit: Exchange = init_bybit()?;
+    exchanges.insert(config::bybit::NAME.to_owned(), bybit);
+
+    let mexc: Exchange = init_mexc()?;
+    exchanges.insert(config::mexc::NAME.to_owned(), mexc);
+
+    let bitget: Exchange = init_bitget()?;
+    exchanges.insert(config::bitget::NAME.to_owned(), bitget);
+
+    let kucoin: Exchange = init_kucoin()?;
+    exchanges.insert(config::kucoin::NAME.to_owned(), kucoin);
+
+    let gate: Exchange = init_gate()?;
+    exchanges.insert(config::gate::NAME.to_owned(), gate);
+
+    let huobi: Exchange = init_huobi()?;
+    exchanges.insert(config::huobi::NAME.to_owned(), huobi);
+
+    let bitmart: Exchange = init_bitmart()?;
+    exchanges.insert(config::bitmart::NAME.to_owned(), bitmart);
+
+    let okx: Exchange = init_okx()?;
     exchanges.insert(config::okx::NAME.to_owned(), okx);
+
     Ok(exchanges)
 }

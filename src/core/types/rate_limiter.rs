@@ -4,11 +4,8 @@ use tokio::time::{Duration, interval};
 
 #[derive(Debug, Clone)]
 pub struct RateLimiter {
-    /// Текущее количество доступных запросов
     available: Arc<Mutex<usize>>,
-    /// Для уведомления о появлении новых запросов
     notify: Arc<Notify>,
-    /// Максимальное количество запросов в секунду
     capacity: usize,
 }
 
@@ -20,7 +17,6 @@ impl RateLimiter {
             capacity,
         };
 
-        // Запускаем поток восстановления
         limiter.start_refill();
 
         limiter
@@ -37,13 +33,10 @@ impl RateLimiter {
             loop {
                 interval.tick().await;
 
-                // Восстанавливаем количество до capacity
                 let mut avail = available.lock().await;
                 if *avail < capacity {
                     *avail = capacity;
-                    println!("🔄 Восстановлено до {} запросов", capacity);
-
-                    // Уведомляем ВСЕХ ожидающих, что появились запросы
+                    // println!("🔄 Восстановлено до {} запросов", capacity);
                     notify.notify_waiters();
                 }
             }

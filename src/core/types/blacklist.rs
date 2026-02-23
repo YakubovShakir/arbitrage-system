@@ -9,6 +9,12 @@ pub struct Blacklist {
 }
 
 impl Blacklist {
+    pub fn new() -> Self {
+        Self {
+            buy_blacklist: DashMap::<TradingPair, HashSet<String>>::new(),
+            sell_blacklist: DashMap::<TradingPair, HashSet<String>>::new(),
+        }
+    }
     pub fn is_buy_blacklisted(&self, pair: &TradingPair, exchange: &str) -> bool {
         self.buy_blacklist
             .get(pair)
