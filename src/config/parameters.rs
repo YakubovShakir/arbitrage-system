@@ -18,7 +18,7 @@ pub const NETWORKS_CACHE_TTL_SECS: u64 = 12000;
 pub const MARGIN_INFO_CACHE_TTL_SECS: u64 = 12000;
 
 // api-client config
-pub const REQUESTS_CHUNK_SIZE: usize = 20;
+pub const REQUESTS_CHUNK_SIZE: usize = 100;
 pub const HTTP_MAX_POOL_IDLE_PER_HOST: usize = 20;
 pub const HTTP_RETRY_AFTER_MILLIS: u64 = 300;
 pub const GLOBAL_HTTP_TIMEOUT_SECS: u64 = 5;
