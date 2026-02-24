@@ -6,30 +6,23 @@ use crate::{
     config::parameters::BASE_BLACKLIST,
     core::{
         traits::{Workable, exchange_service::TickerService},
-        types::{Exchanges, PriceData, TickerPrice, Tickers, TradingPairs, blacklist::Blacklist},
+        types::{Exchanges, PriceData, TickerPrice, Tickers, TradingPairs},
         utils::format_duration,
     },
 };
-use log::{error, info};
+use log::{debug, error, info};
 pub struct TickerWorker {
     id: usize,
     trading_pairs: Arc<TradingPairs>,
     exchanges: Arc<Exchanges>,
-    blacklist: Arc<Blacklist>,
 }
 
 impl TickerWorker {
-    pub fn new(
-        id: usize,
-        trading_pairs: Arc<TradingPairs>,
-        exchanges: Arc<Exchanges>,
-        blacklist: Arc<Blacklist>,
-    ) -> Self {
+    pub fn new(id: usize, trading_pairs: Arc<TradingPairs>, exchanges: Arc<Exchanges>) -> Self {
         Self {
             id,
             trading_pairs,
             exchanges,
-            blacklist,
         }
     }
     async fn fetch_tickers(&self) -> Vec<Tickers> {
@@ -67,9 +60,15 @@ impl TickerWorker {
                     continue;
                 }
                 let ex_name = &price.buy_price.0;
-                let in_buy_blacklist = self.blacklist.is_buy_blacklisted(pair, &ex_name);
-                let in_sell_blacklist = self.blacklist.is_sell_blacklisted(pair, &ex_name);
+                let in_buy_blacklist = pair.blacklist.is_buy_blacklisted(&ex_name);
+                let in_sell_blacklist = pair.blacklist.is_sell_blacklisted(&ex_name);
+                if in_buy_blacklist {
+                    debug!(target: "debug_module", "Exchange {} in buy blacklist of {}/{}", ex_name, pair.base, pair.quote);
+                }
 
+                if in_sell_blacklist {
+                    debug!(target: "debug_module", "Exchange {} in sell blacklist of {}/{}", ex_name, pair.base, pair.quote);
+                }
                 if let Some(filtered_ticker) = filtered.get_mut(pair) {
                     if !in_buy_blacklist {
                         if price.buy_price.1 < filtered_ticker.buy_price.1 {

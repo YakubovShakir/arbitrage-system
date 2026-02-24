@@ -1,16 +1,63 @@
-use crate::config::QUOTE_LIST;
+use std::hash::{Hash, Hasher};
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+use dashmap::DashSet;
+
+use crate::{config::QUOTE_LIST, core::types::ExchangeName};
+
+#[derive(Debug, Clone)]
+pub struct TradingPairBlacklist {
+    pub buy_exchanges: DashSet<ExchangeName>,
+    pub sell_exchanges: DashSet<ExchangeName>,
+}
+
+impl TradingPairBlacklist {
+    pub fn new() -> Self {
+        Self {
+            buy_exchanges: DashSet::<String>::new(),
+            sell_exchanges: DashSet::<String>::new(),
+        }
+    }
+    pub fn is_buy_blacklisted(&self, exchange_name: &str) -> bool {
+        self.buy_exchanges.get(exchange_name).is_some()
+    }
+    pub fn is_sell_blacklisted(&self, exchange_name: &str) -> bool {
+        self.sell_exchanges.get(exchange_name).is_some()
+    }
+    pub fn blacklist_buy(&self, exchange_name: &str) {
+        self.buy_exchanges.insert(exchange_name.to_owned());
+    }
+    pub fn blacklist_sell(&self, exchange_name: &str) {
+        self.sell_exchanges.insert(exchange_name.to_owned());
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct TradingPair {
     pub base: String,
     pub quote: String,
+    pub blacklist: TradingPairBlacklist,
 }
+
+impl Hash for TradingPair {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.base.hash(state);
+        self.quote.hash(state);
+    }
+}
+
+impl PartialEq for TradingPair {
+    fn eq(&self, other: &Self) -> bool {
+        self.base == other.base && self.quote == other.quote
+    }
+}
+impl Eq for TradingPair {}
 
 impl TradingPair {
     pub fn new(base: &str, quote: &str) -> Self {
         Self {
             base: base.to_string().to_uppercase(),
             quote: quote.to_string().to_uppercase(),
+            blacklist: TradingPairBlacklist::new(),
         }
     }
     pub fn get_volume_by_quote(&self) -> Option<f64> {

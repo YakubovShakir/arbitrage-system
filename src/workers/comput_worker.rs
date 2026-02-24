@@ -6,7 +6,6 @@ use crate::{
         traits::{Workable, exchange_service::OrderBookService},
         types::{
             Exchanges, OrderBook, TradingPair, TradingPairs,
-            blacklist::Blacklist,
             exchanges::Exchange,
             network::{DepositNetwork, WithdrawNetwork},
             price_data::TickerSpread,
@@ -36,7 +35,6 @@ pub struct ComputWorker {
     trading_pairs: Arc<TradingPairs>,
     spread_pairs: Arc<TradingPairs>,
     exchanges: Arc<Exchanges>,
-    blacklist: Arc<Blacklist>,
 }
 
 impl ComputWorker {
@@ -45,14 +43,12 @@ impl ComputWorker {
         trading_pairs: Arc<TradingPairs>,
         spread_pairs: Arc<TradingPairs>,
         exchanges: Arc<Exchanges>,
-        blacklist: Arc<Blacklist>,
     ) -> Self {
         Self {
             id,
             trading_pairs,
             spread_pairs,
             exchanges,
-            blacklist,
         }
     }
 }
@@ -119,6 +115,7 @@ impl Workable for ComputWorker {
                 .into_iter()
                 .map(|(pair, spreads)| async move {
                     let mut verified = Vec::new();
+
                     for TickerSpread { buy_ex, sell_ex } in spreads {
                         let (Some(buy_ex), Some(sell_ex)) =
                             (self.exchanges.get(&buy_ex), self.exchanges.get(&sell_ex))
@@ -141,9 +138,9 @@ impl Workable for ComputWorker {
                             Err(failed_exchange) => {
                                 self.trading_pairs.remove(&pair);
                                 if failed_exchange == buy_ex.config().name {
-                                    self.blacklist.blacklist_buy(&pair, failed_exchange);
+                                    pair.blacklist.blacklist_buy(&failed_exchange);
                                 } else {
-                                    self.blacklist.blacklist_sell(&pair, failed_exchange);
+                                    pair.blacklist.blacklist_sell(&failed_exchange);
                                 }
                             }
                         }

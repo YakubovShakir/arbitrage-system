@@ -1,9 +1,6 @@
 use arbitrage_system::{
     // config::parameters::EXCHANGES_PER_TICKER_THREAD,
-    core::{
-        traits::Workable,
-        types::{TradingPairs, blacklist::Blacklist},
-    },
+    core::{traits::Workable, types::TradingPairs},
     init::{exchanges::get_exchanges, load_env::load_env},
     workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
 };
@@ -21,29 +18,20 @@ async fn main() {
     let trading_pairs = Arc::new(TradingPairs::new());
     let spread_pairs = Arc::new(TradingPairs::new());
 
-    // blacklist
-    let tickers_blacklist = Arc::new(Blacklist::new());
-
     // let tickers_produced: Vec<Arc<TradingPairs>> = Vec::from(Arc::new(TradingPairs::new()));
     let mut tasks = Vec::new();
     // ------------
     let comput_exchanges = exchanges.clone();
     let comput_trading_pairs = trading_pairs.clone();
-    let comput_tickers_blacklist = tickers_blacklist.clone();
 
     let ticker_task = tokio::spawn(async move {
-        let worker = TickerWorker::new(0, trading_pairs, exchanges, tickers_blacklist);
+        let worker = TickerWorker::new(0, trading_pairs, exchanges);
         worker.run().await;
     });
 
     let comput_task = tokio::spawn(async move {
-        let computer: ComputWorker = ComputWorker::new(
-            1,
-            comput_trading_pairs,
-            spread_pairs,
-            comput_exchanges,
-            comput_tickers_blacklist,
-        );
+        let computer: ComputWorker =
+            ComputWorker::new(1, comput_trading_pairs, spread_pairs, comput_exchanges);
         computer.run().await;
     });
 

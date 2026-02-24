@@ -43,7 +43,7 @@ pub const HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS: u64 = 30;
 pub const HUOBI_MARGIN_INFO_HTTP_TIMEOUT_SECONDS: u64 = 10;
 
 // rate limits
-pub const BINANCE_REQUESTS_PER_SECOND: usize = 5;
+pub const BINANCE_REQUESTS_PER_SECOND: usize = 4;
 pub const BYBIT_REQUESTS_PER_SECOND: usize = 10;
 pub const BITGET_REQUESTS_PER_SECOND: usize = 10;
 pub const BITMART_REQUESTS_PER_SECOND: usize = 5;
