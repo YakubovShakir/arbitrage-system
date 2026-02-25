@@ -107,7 +107,7 @@ impl TickerWorker {
                 {
                     let in_blacklist = entry.key().blacklist.is_buy_blacklisted(&exchange);
                     if in_blacklist {
-                        debug!(target: "debug_module", "Exchange {} in buy blacklist of {}/{}", exchange, ticker_pair.base, ticker_pair.quote);
+                        // debug!(target: "debug_module", "Exchange {} in buy blacklist of {}/{}", exchange, ticker_pair.base, ticker_pair.quote);
                         continue;
                     }
                     entry
@@ -121,7 +121,7 @@ impl TickerWorker {
                     exchange, price, ..
                 } in ticker_price.sell_price_list
                 {
-                    debug!(target: "debug_module", "Exchange {} in sell blacklist of {}/{}", exchange, ticker_pair.base, ticker_pair.quote);
+                    // debug!(target: "debug_module", "Exchange {} in sell blacklist of {}/{}", exchange, ticker_pair.base, ticker_pair.quote);
                     let in_blacklist = entry.key().blacklist.is_sell_blacklisted(&exchange);
                     if in_blacklist {
                         continue;
@@ -158,6 +158,7 @@ impl Workable for TickerWorker {
 
             // Получение тикеров с бирж
             let raw_tickers: Vec<(ExchangeName, Tickers)> = self.fetch_tickers().await;
+            debug!(target: "debuge_module", "Raw Tickers: {:#?} ",raw_tickers);
             for (ex_name, tickers) in &raw_tickers {
                 if let Some(count) = stat_map.get_mut(ex_name) {
                     *count += tickers.len();
@@ -168,6 +169,8 @@ impl Workable for TickerWorker {
 
             let collected_tickers: HashMap<TradingPair, PriceData> =
                 self.collect_tickers(raw_tickers).await;
+            debug!(target: "debuge_module", "Collected Tickers: {:#?} ",collected_tickers);
+
             self.update_trading_pairs(collected_tickers).await;
 
             loop_count += 1;
