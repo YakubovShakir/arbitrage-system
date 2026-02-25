@@ -136,7 +136,6 @@ impl Workable for ComputWorker {
                                 }
                             }
                             Err(failed_exchange) => {
-                                self.trading_pairs.remove(&pair);
                                 if failed_exchange == buy_ex.config().name {
                                     pair.blacklist.blacklist_buy(&failed_exchange);
                                 } else {

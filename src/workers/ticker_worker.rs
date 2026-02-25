@@ -6,7 +6,10 @@ use crate::{
     config::parameters::BASE_BLACKLIST,
     core::{
         traits::{Workable, exchange_service::TickerService},
-        types::{Exchanges, PriceData, TickerPrice, Tickers, TradingPairs},
+        types::{
+            ExchangeName, Exchanges, PriceData, Tickers, TradingPair, TradingPairs,
+            price_data::ExchangePrice,
+        },
         utils::format_duration,
     },
 };
@@ -25,13 +28,14 @@ impl TickerWorker {
             exchanges,
         }
     }
-    async fn fetch_tickers(&self) -> Vec<Tickers> {
+    // Получение набора тикеров с каждой биржи вектор хеш-мап, где каждая хеш мапа это тикеры с одной биржи
+    async fn fetch_tickers(&self) -> Vec<(ExchangeName, Tickers)> {
         let tickers_futures: Vec<_> = self
             .exchanges
             .iter()
             .map(|(ex_name, exchange)| async move {
                 match exchange.tickers().await {
-                    Ok(tickers) => Some(tickers),
+                    Ok(tickers) => Some((ex_name.clone(), tickers)),
                     Err(e) => {
                         error!(
                             "Не удалось получить тикеры от биржи {}, ошибка - {}",
@@ -51,79 +55,82 @@ impl TickerWorker {
         tickers_results
     }
 
-    async fn filter_tickers(&self, raw_tickers: Vec<Tickers>) -> Tickers {
-        let mut filtered: Tickers = Tickers::new();
+    // Собираем набор уникальных торговых пар с каждого набора со всех бирж в единую хеш мапу
+    // Делается здесь, а не в update_trading_pairs чтобы не брать большое количество блокировок на self.trading_pairs
 
-        raw_tickers.iter().for_each(|tickers| {
-            for (pair, price) in tickers {
+    async fn collect_tickers(
+        &self,
+        ex_tickers: Vec<(ExchangeName, Tickers)>,
+    ) -> HashMap<TradingPair, PriceData> {
+        let mut collection: HashMap<TradingPair, PriceData> = HashMap::new();
+
+        // Проходимся по вектору биржа->тикеры
+        for (ex_name, tickers) in ex_tickers {
+            // Проходимся по тикерам каджой биржи
+            for (pair, ticker_price) in tickers {
+                // Ни с одной биржи не нужен токен из блеклиста
                 if BASE_BLACKLIST.contains(&pair.base.as_str()) {
                     continue;
                 }
-                let ex_name = &price.buy_price.0;
-                let in_buy_blacklist = pair.blacklist.is_buy_blacklisted(&ex_name);
-                let in_sell_blacklist = pair.blacklist.is_sell_blacklisted(&ex_name);
-                if in_buy_blacklist {
-                    debug!(target: "debug_module", "Exchange {} in buy blacklist of {}/{}", ex_name, pair.base, pair.quote);
-                }
-
-                if in_sell_blacklist {
-                    debug!(target: "debug_module", "Exchange {} in sell blacklist of {}/{}", ex_name, pair.base, pair.quote);
-                }
-                if let Some(filtered_ticker) = filtered.get_mut(pair) {
-                    if !in_buy_blacklist {
-                        if price.buy_price.1 < filtered_ticker.buy_price.1 {
-                            filtered_ticker.buy_price = price.buy_price.clone()
-                        }
-                    }
-                    if !in_sell_blacklist {
-                        if price.sell_price.1 > filtered_ticker.sell_price.1 {
-                            filtered_ticker.sell_price = price.sell_price.clone()
-                        }
-                    }
+                if let Some(collection_price_data) = collection.get_mut(&pair) {
+                    collection_price_data
+                        .update_buy_list(&ex_name, ticker_price.buy_price.1)
+                        .await;
+                    collection_price_data
+                        .update_sell_list(&ex_name, ticker_price.sell_price.1)
+                        .await;
                 } else {
-                    // Создаем новый тикер, даже если только одна сторона валидна
-                    let mut new_ticker = TickerPrice {
-                        buy_price: (String::new(), f64::MAX),
-                        sell_price: (String::new(), f64::MIN),
-                    };
-
-                    if !in_buy_blacklist {
-                        new_ticker.buy_price = price.buy_price.clone();
-                    }
-                    if !in_sell_blacklist {
-                        new_ticker.sell_price = price.sell_price.clone();
-                    }
-
-                    // Добавляем только если хотя бы одна сторона валидна
-                    if !new_ticker.buy_price.0.is_empty() || !new_ticker.sell_price.0.is_empty() {
-                        filtered.insert(pair.clone(), new_ticker);
-                    }
+                    collection.insert(
+                        pair,
+                        PriceData::new(
+                            &ex_name,
+                            &ex_name,
+                            &ticker_price.sell_price.1,
+                            &ticker_price.buy_price.1,
+                        ),
+                    );
                 }
             }
-        });
-        filtered
+        }
+        collection
     }
-    async fn update_trading_pairs(&self, tickers: Tickers) {
-        for (pair, price) in tickers {
-            let buy_ex_name = price.buy_price.0;
-            let sell_ex_name = price.sell_price.0;
-            let price_data = PriceData::new(
-                &buy_ex_name,
-                &sell_ex_name,
-                &price.sell_price.1,
-                &price.buy_price.1,
-            );
 
-            if let Some(mut existing_price) = self.trading_pairs.get_mut(&pair) {
-                existing_price
-                    .update_buy_list(&buy_ex_name, price.buy_price.1)
-                    .await;
+    async fn update_trading_pairs(&self, tickers: HashMap<TradingPair, PriceData>) {
+        // Взятие торговую пару из коллекции
+        for (ticker_pair, ticker_price) in tickers {
+            // Проверка на существование в глобальной мапе торговых пар
+            if let Some(mut entry) = self.trading_pairs.get_mut(&ticker_pair) {
+                // Прохождение по тикерам покупки
+                for ExchangePrice {
+                    exchange, price, ..
+                } in ticker_price.buy_price_list
+                {
+                    let in_blacklist = entry.key().blacklist.is_buy_blacklisted(&exchange);
+                    if in_blacklist {
+                        continue;
+                    }
+                    entry
+                        .value_mut()
+                        .update_buy_list(&exchange, *price.read().await)
+                        .await;
+                }
 
-                existing_price
-                    .update_sell_list(&sell_ex_name, price.sell_price.1)
-                    .await;
+                // Прохождение по тикерам продажи
+                for ExchangePrice {
+                    exchange, price, ..
+                } in ticker_price.sell_price_list
+                {
+                    let in_blacklist = entry.key().blacklist.is_sell_blacklisted(&exchange);
+                    if in_blacklist {
+                        continue;
+                    }
+                    entry
+                        .value_mut()
+                        .update_sell_list(&exchange, *price.read().await)
+                        .await;
+                }
             } else {
-                self.trading_pairs.insert(pair, price_data);
+                self.trading_pairs.insert(ticker_pair, ticker_price);
             }
         }
     }
@@ -148,19 +155,18 @@ impl Workable for TickerWorker {
             let start = Instant::now();
 
             // Получение тикеров с бирж
-            let raw_tickers: Vec<Tickers> = self.fetch_tickers().await;
-            for tickers in &raw_tickers {
-                if let Some(pair) = tickers.iter().nth(0) {
-                    if let Some(count) = stat_map.get_mut(&pair.1.buy_price.0) {
-                        *count += tickers.len();
-                    } else {
-                        stat_map.insert(pair.1.buy_price.0.clone(), tickers.len());
-                    };
-                }
+            let raw_tickers: Vec<(ExchangeName, Tickers)> = self.fetch_tickers().await;
+            for (ex_name, tickers) in &raw_tickers {
+                if let Some(count) = stat_map.get_mut(ex_name) {
+                    *count += tickers.len();
+                } else {
+                    stat_map.insert(ex_name.to_owned(), tickers.len());
+                };
             }
 
-            let filtered_tickers: Tickers = self.filter_tickers(raw_tickers).await;
-            self.update_trading_pairs(filtered_tickers).await;
+            let collected_tickers: HashMap<TradingPair, PriceData> =
+                self.collect_tickers(raw_tickers).await;
+            self.update_trading_pairs(collected_tickers).await;
 
             loop_count += 1;
             total_elapsed += start.elapsed().as_nanos();
