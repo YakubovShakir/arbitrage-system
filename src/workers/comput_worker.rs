@@ -143,11 +143,10 @@ impl Workable for ComputWorker {
                             Err(failed_exchange) => {
                                 if failed_exchange == buy_ex {
                                     pair.blacklist.blacklist_buy(&failed_exchange);
-                                    debug!(target: "debug_module", "After blacklist buy {} : {:#?}",failed_exchange, pair);
+                                    // debug!(target: "debug_module", "After blacklist buy {} : {:#?}",failed_exchange, pair);
                                 } else {
                                     pair.blacklist.blacklist_sell(&failed_exchange);
-                                    debug!(target: "debug_module", "After blacklist sell {} : {:#?}",failed_exchange, pair);
-
+                                    // debug!(target: "debug_module", "After blacklist sell {} : {:#?}",failed_exchange, pair);
                                 }
                             }
                         }
