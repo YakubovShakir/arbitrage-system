@@ -1,4 +1,7 @@
-use std::hash::{Hash, Hasher};
+use std::{
+    hash::{Hash, Hasher},
+    sync::Arc,
+};
 
 use dashmap::DashSet;
 
@@ -35,7 +38,7 @@ impl TradingPairBlacklist {
 pub struct TradingPair {
     pub base: String,
     pub quote: String,
-    pub blacklist: TradingPairBlacklist,
+    pub blacklist: Arc<TradingPairBlacklist>,
 }
 
 impl Hash for TradingPair {
@@ -57,7 +60,7 @@ impl TradingPair {
         Self {
             base: base.to_string().to_uppercase(),
             quote: quote.to_string().to_uppercase(),
-            blacklist: TradingPairBlacklist::new(),
+            blacklist: Arc::new(TradingPairBlacklist::new()),
         }
     }
     pub fn get_volume_by_quote(&self) -> Option<f64> {
