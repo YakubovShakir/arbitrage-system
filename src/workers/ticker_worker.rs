@@ -127,7 +127,7 @@ impl TickerWorker {
                     // debug!(target: "debug_module", "Exchange {} in sell blacklist of {}/{}", exchange, ticker_pair.base, ticker_pair.quote);
                     let in_blacklist = entry.key().blacklist.is_sell_blacklisted(&exchange);
                     if in_blacklist {
-                        debug!(target: "debug_module", "From global map trading pairs: {:#?} \n {:#?} ",entry.key(), entry.value());
+                        // debug!(target: "debug_module", "From global map trading pairs: {:#?} \n {:#?} ",entry.key(), entry.value());
 
                         continue;
                     }

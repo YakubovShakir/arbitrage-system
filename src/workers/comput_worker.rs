@@ -16,7 +16,7 @@ use crate::{
         },
     },
 };
-use log::{error, info};
+use log::{debug, error, info};
 use std::{collections::HashMap, sync::Arc, time::Instant};
 
 struct SpreadBundle<'a> {
@@ -117,29 +117,37 @@ impl Workable for ComputWorker {
                     let mut verified = Vec::new();
 
                     for TickerSpread { buy_ex, sell_ex } in spreads {
-                        let (Some(buy_ex), Some(sell_ex)) =
+                        let (Some(buy_exchange), Some(sell_exchange)) =
                             (self.exchanges.get(&buy_ex), self.exchanges.get(&sell_ex))
                         else {
                             continue;
                         };
 
                         match verify_arbitrage_conditions_and_get_networks(
-                            &buy_ex,
-                            &sell_ex,
+                            &buy_exchange,
+                            &sell_exchange,
                             &pair.clone(),
                         )
                         .await
                         {
                             Ok(networks) => {
                                 if networks.len() != 0 {
-                                    verified.push((pair.clone(), buy_ex, sell_ex, networks));
+                                    verified.push((
+                                        pair.clone(),
+                                        buy_exchange,
+                                        sell_exchange,
+                                        networks,
+                                    ));
                                 }
                             }
                             Err(failed_exchange) => {
-                                if failed_exchange == buy_ex.config().name {
+                                if failed_exchange == buy_ex {
                                     pair.blacklist.blacklist_buy(&failed_exchange);
+                                    debug!(target: "debug_module", "After blacklist buy {} : {:#?}",failed_exchange, pair);
                                 } else {
                                     pair.blacklist.blacklist_sell(&failed_exchange);
+                                    debug!(target: "debug_module", "After blacklist sell {} : {:#?}",failed_exchange, pair);
+
                                 }
                             }
                         }
