@@ -107,6 +107,7 @@ impl TickerWorker {
                 {
                     let in_blacklist = entry.key().blacklist.is_buy_blacklisted(&exchange);
                     if in_blacklist {
+                        debug!(target: "debug_module", "Exchange {} in buy blacklist of {}/{}", exchange, ticker_pair.base, ticker_pair.quote);
                         continue;
                     }
                     entry
@@ -120,6 +121,7 @@ impl TickerWorker {
                     exchange, price, ..
                 } in ticker_price.sell_price_list
                 {
+                    debug!(target: "debug_module", "Exchange {} in sell blacklist of {}/{}", exchange, ticker_pair.base, ticker_pair.quote);
                     let in_blacklist = entry.key().blacklist.is_sell_blacklisted(&exchange);
                     if in_blacklist {
                         continue;
