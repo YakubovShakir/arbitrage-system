@@ -160,7 +160,7 @@ impl Workable for TickerWorker {
 
             // Получение тикеров с бирж
             let raw_tickers: Vec<(ExchangeName, Tickers)> = self.fetch_tickers().await;
-            debug!(target: "debug_module", "Raw Tickers: {:#?} ",raw_tickers);
+            // debug!(target: "debug_module", "Raw Tickers: {:#?} ",raw_tickers);
             for (ex_name, tickers) in &raw_tickers {
                 if let Some(count) = stat_map.get_mut(ex_name) {
                     *count += tickers.len();
