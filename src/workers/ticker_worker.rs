@@ -101,7 +101,7 @@ impl TickerWorker {
             // Проверка на существование в глобальной мапе торговых пар
             if let Some(mut entry) = self.trading_pairs.get_mut(&ticker_pair) {
                 // Прохождение по тикерам покупки
-                debug!(target: "debug_module", "From global map Ticker: {:#?} ",entry);
+                debug!(target: "debug_module", "From global map Ticker: {:#?} \n {:#?} ",entry.key(), entry.value());
 
                 for ExchangePrice {
                     exchange, price, ..
