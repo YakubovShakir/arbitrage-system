@@ -61,7 +61,7 @@ impl ComputWorker {
         let comput_time = Instant::now();
 
         for entry in self.trading_pairs.iter() {
-            if let Some(spreads) = entry.detect_spread_pairs().await {
+            if let Some(spreads) = entry.detect_spread_pairs(&entry.key().blacklist).await {
                 total_bundles += spreads.len();
                 ticker_spreads.push((entry.key().clone(), spreads));
             }

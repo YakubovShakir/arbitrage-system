@@ -1,6 +1,9 @@
 use crate::{
     config::parameters::REQUIRED_TICKER_SPREAD_PERCENT,
-    core::{types::ExchangeName, utils::comput_spread_percent},
+    core::{
+        types::{ExchangeName, trading_pair::TradingPairBlacklist},
+        utils::comput_spread_percent,
+    },
 };
 use tokio::sync::RwLock;
 
@@ -88,63 +91,78 @@ impl PriceData {
                 .push(ExchangePrice::new(exchange, &price));
         }
     }
-    pub async fn detect_spread_pairs(&self) -> Option<Vec<TickerSpread>> {
+    pub async fn detect_spread_pairs(
+        &self,
+        blacklist: &TradingPairBlacklist,
+    ) -> Option<Vec<TickerSpread>> {
         let mut spread_pairs: Vec<TickerSpread> = Vec::new();
 
-        let mut updated_buy_prices: Vec<&ExchangePrice> = Vec::new();
-        let mut not_updated_buy_prices: Vec<&ExchangePrice> = Vec::new();
+        // Фильтруем buy_price_list и sell_price_list, исключая заблокированные биржи
+        let active_buy: Vec<_> = self
+            .buy_price_list
+            .iter()
+            .filter(|p| !blacklist.is_buy_blacklisted(&p.exchange))
+            .collect();
 
-        let mut updated_sell_prices: Vec<&ExchangePrice> = Vec::new();
+        let active_sell: Vec<_> = self
+            .sell_price_list
+            .iter()
+            .filter(|p| !blacklist.is_sell_blacklisted(&p.exchange))
+            .collect();
 
-        for price in &self.buy_price_list {
+        let mut updated_buy = Vec::new();
+        let mut not_updated_buy = Vec::new();
+        for price in active_buy {
             if price.check().await {
-                updated_buy_prices.push(price);
+                updated_buy.push(price);
             } else {
-                not_updated_buy_prices.push(price);
+                not_updated_buy.push(price);
             }
         }
 
-        for price in &self.sell_price_list {
+        let mut updated_sell = Vec::new();
+        for price in &active_sell {
             if price.check().await {
-                updated_sell_prices.push(price);
-            };
+                updated_sell.push(price);
+            }
         }
-
-        for updated_buy_price in updated_buy_prices {
-            for sell_price in &self.sell_price_list {
-                if updated_buy_price.exchange == sell_price.exchange
-                    || comput_spread_percent(
-                        &updated_buy_price.get_price().await,
-                        &sell_price.get_price().await,
-                    ) < REQUIRED_TICKER_SPREAD_PERCENT
-                {
+        for buy_price in &updated_buy {
+            for sell_price in &active_sell {
+                if buy_price.exchange == sell_price.exchange {
                     continue;
                 }
-
-                spread_pairs.push(TickerSpread {
-                    buy_ex: updated_buy_price.exchange.clone(),
-                    sell_ex: sell_price.exchange.clone(),
-                });
+                let spread = comput_spread_percent(
+                    &buy_price.get_price().await,
+                    &sell_price.get_price().await,
+                );
+                if spread >= REQUIRED_TICKER_SPREAD_PERCENT {
+                    spread_pairs.push(TickerSpread {
+                        buy_ex: buy_price.exchange.clone(),
+                        sell_ex: sell_price.exchange.clone(),
+                    });
+                }
             }
         }
 
-        for updated_sell_price in updated_sell_prices {
-            for buy_price in not_updated_buy_prices.clone() {
-                if buy_price.exchange == updated_sell_price.exchange
-                    || comput_spread_percent(
-                        &buy_price.get_price().await,
-                        &updated_sell_price.get_price().await,
-                    ) < REQUIRED_TICKER_SPREAD_PERCENT
-                {
+        // Второй проход: updated_sell × not_updated_buy (только активные buy)
+        for sell_price in &updated_sell {
+            for buy_price in &not_updated_buy {
+                if buy_price.exchange == sell_price.exchange {
                     continue;
                 }
-
-                spread_pairs.push(TickerSpread {
-                    buy_ex: buy_price.exchange.clone(),
-                    sell_ex: updated_sell_price.exchange.clone(),
-                });
+                let spread = comput_spread_percent(
+                    &buy_price.get_price().await,
+                    &sell_price.get_price().await,
+                );
+                if spread >= REQUIRED_TICKER_SPREAD_PERCENT {
+                    spread_pairs.push(TickerSpread {
+                        buy_ex: buy_price.exchange.clone(),
+                        sell_ex: sell_price.exchange.clone(),
+                    });
+                }
             }
         }
+
         if spread_pairs.len() > 0 {
             Some(spread_pairs)
         } else {
@@ -175,26 +193,44 @@ impl PriceData {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::types::{PriceData, price_data::ExchangePrice};
+    use crate::core::types::{
+        PriceData, price_data::ExchangePrice, trading_pair::TradingPairBlacklist,
+    };
 
     #[tokio::test]
     async fn test_detect_spread_pairs() {
         let mut mock = PriceData::mock();
-        let spread = mock.detect_spread_pairs().await.unwrap();
+        let spread = mock
+            .detect_spread_pairs(&TradingPairBlacklist::new())
+            .await
+            .unwrap();
         assert!(spread.len() == 8);
-        assert!(mock.detect_spread_pairs().await.is_none());
+        assert!(
+            mock.detect_spread_pairs(&TradingPairBlacklist::new())
+                .await
+                .is_none()
+        );
 
         let _ = mock.update_sell_list("Binance", 101.0).await;
-        let spread = mock.detect_spread_pairs().await.unwrap();
+        let spread = mock
+            .detect_spread_pairs(&TradingPairBlacklist::new())
+            .await
+            .unwrap();
         assert!(spread.len() == 2);
 
         let _ = mock.update_buy_list("Binance", 101.0).await;
-        let spread = mock.detect_spread_pairs().await.unwrap();
+        let spread = mock
+            .detect_spread_pairs(&TradingPairBlacklist::new())
+            .await
+            .unwrap();
         assert!(spread.len() == 2);
 
         let _ = mock.update_buy_list("Bybit", 103.0).await;
         let _ = mock.update_sell_list("Bybit", 103.0).await;
-        let spread = mock.detect_spread_pairs().await.unwrap();
+        let spread = mock
+            .detect_spread_pairs(&TradingPairBlacklist::new())
+            .await
+            .unwrap();
         assert!(spread.len() == 4);
     }
 
