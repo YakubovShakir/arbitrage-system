@@ -101,7 +101,6 @@ impl TickerWorker {
             // Проверка на существование в глобальной мапе торговых пар
             if let Some(mut entry) = self.trading_pairs.get_mut(&ticker_pair) {
                 // Прохождение по тикерам покупки
-                debug!(target: "debug_module", "From global map Ticker: {:#?} \n {:#?} ",entry.key(), entry.value());
 
                 for ExchangePrice {
                     exchange, price, ..
@@ -109,6 +108,8 @@ impl TickerWorker {
                 {
                     let in_blacklist = entry.key().blacklist.is_buy_blacklisted(&exchange);
                     if in_blacklist {
+                        debug!(target: "debug_module", "From global map trading pairs: {:#?} \n {:#?} ",entry.key(), entry.value());
+
                         // debug!(target: "debug_module", "Exchange {} in buy blacklist of {}/{}", exchange, ticker_pair.base, ticker_pair.quote);
                         continue;
                     }
