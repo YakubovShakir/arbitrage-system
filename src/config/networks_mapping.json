@@ -1226,7 +1226,7 @@
   },
   {
     "name": "Manta",
-    "mappings": [" MANTA-ETH", "MANTA", "MANTA NETWORK", "MANTA CHAIN", "MANTA L2", "MANTA PACIFIC", "MANTA MAINNET", "MANTANETWORK"],
+    "mappings": ["MANTA-ETH", "MANTA", "MANTA NETWORK", "MANTA CHAIN", "MANTA L2", "MANTA PACIFIC", "MANTA MAINNET", "MANTANETWORK"],
     "tokens": []
   },
   {
