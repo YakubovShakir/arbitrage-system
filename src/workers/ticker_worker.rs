@@ -101,6 +101,8 @@ impl TickerWorker {
             // Проверка на существование в глобальной мапе торговых пар
             if let Some(mut entry) = self.trading_pairs.get_mut(&ticker_pair) {
                 // Прохождение по тикерам покупки
+                debug!(target: "debug_module", "From global map Ticker: {:#?} ",entry);
+
                 for ExchangePrice {
                     exchange, price, ..
                 } in ticker_price.buy_price_list
@@ -169,7 +171,7 @@ impl Workable for TickerWorker {
 
             let collected_tickers: HashMap<TradingPair, PriceData> =
                 self.collect_tickers(raw_tickers).await;
-            debug!(target: "debug_module", "Collected Tickers: {:#?} ",collected_tickers);
+            // debug!(target: "debug_module", "Collected Tickers: {:#?} ",collected_tickers);
 
             self.update_trading_pairs(collected_tickers).await;
 
