@@ -42,11 +42,13 @@ impl NetworkService for Exchange {
         let mut withdraw_networks: Vec<WithdrawNetwork> = Vec::new();
         let mut deposit_networks: Vec<DepositNetwork> = Vec::new();
 
+        let search_elapsed = Instant::now();
         let cache_data = self.config().cached_data.networks.get().await;
         if cache_data.is_none() {
             debug!(target:"debug_module", "Cache is None for {}. Call API.. ", self.config().name);
         }
-        let search_elapsed = Instant::now();
+        debug!(target: "debug_module", "Networks Service: {} access to cached_data  elapsed {} ", self.config().name, format_duration(search_elapsed.elapsed().as_nanos()));
+
         match self {
             Exchange::Binance(cfg) => {
                 let data = match cache_data {
@@ -698,7 +700,6 @@ impl NetworkService for Exchange {
         //     )
         //     .into());
         // };
-        debug!(target: "debug_module", "Networks Service: search {} networks elapsed {} ", self.config().name, format_duration(search_elapsed.elapsed().as_nanos()));
         Ok((withdraw_networks, deposit_networks))
     }
 }

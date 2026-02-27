@@ -127,6 +127,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
 
         return Ok(Vec::new());
     };
+    debug!(target: "debug_module", "buy_net_el: ({},{}); sell_net_el: ({},{})", buy_exchange_name, format_duration(buy_networks_elapsed), sell_exchange_name, format_duration(sell_networks_elapsed));
 
     Ok(networks)
 }
