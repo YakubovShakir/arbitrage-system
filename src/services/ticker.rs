@@ -329,6 +329,7 @@ fn read_ws_state(
                 "Cannot parse ticker response from {} to JSON",
                 cfg.name
             )))?;
+            //     "q": "18",              // Total traded quote asset volume
 
             for ticker in parsed_tickers.members() {
                 let symbol = &ticker["s"];

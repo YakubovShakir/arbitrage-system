@@ -10,7 +10,7 @@ pub const QUOTE_LIST: &[(&str, f64)] = &[
 ];
 
 pub const QUOTE_RATE: f64 = 1.3;
-pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.4;
+pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.35;
 pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.45;
 
 // cache
