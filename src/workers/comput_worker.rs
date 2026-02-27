@@ -150,7 +150,7 @@ impl Workable for ComputWorker {
                                 }
                             }
                         }
-                        debug!(target: "debug_module", "Verify {}/{} elapsed: {:#?}; buy_ex: {}, sell_ex: {}", pair.base, pair.quote, verify_elapsed.elapsed().as_secs(), buy_ex, sell_ex);
+                        debug!(target: "debug_module", "Verify {}/{} elapsed: {:#?}; buy_ex: {}, sell_ex: {}", pair.base, pair.quote, format_duration(verify_elapsed.elapsed().as_nanos()), buy_ex, sell_ex);
                     }
 
                     verified
