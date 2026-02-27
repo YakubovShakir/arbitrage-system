@@ -1,4 +1,7 @@
-use std::{env, time::Duration};
+use std::{
+    env,
+    time::{Duration, Instant},
+};
 
 use crate::{
     config::parameters::{
@@ -14,7 +17,8 @@ use crate::{
             signature_params::SignatureParams,
         },
         utils::{
-            get_current_timestamp, get_timestamp_iso_8601, get_timestamp_iso_8601_with_ms,
+            format_duration, get_current_timestamp, get_timestamp_iso_8601,
+            get_timestamp_iso_8601_with_ms,
             json_utils::{
                 find_value_from_json_key, parse_json_as_bool, parse_json_as_f64, parse_json_as_str,
                 parse_json_as_u64,
@@ -42,6 +46,7 @@ impl NetworkService for Exchange {
         if cache_data.is_none() {
             debug!(target:"debug_module", "Cache is None for {}. Call API.. ", self.config().name);
         }
+        let search_elapsed = Instant::now();
         match self {
             Exchange::Binance(cfg) => {
                 let data = match cache_data {
@@ -453,7 +458,6 @@ impl NetworkService for Exchange {
                         response
                     }
                 };
-
                 for item in data.members() {
                     if item["coin"] != coin {
                         continue;
@@ -694,6 +698,7 @@ impl NetworkService for Exchange {
         //     )
         //     .into());
         // };
+        debug!(target: "debug_module", "Networks Service: search {} networks elapsed {} ", self.config().name, format_duration(search_elapsed.elapsed().as_nanos()));
         Ok((withdraw_networks, deposit_networks))
     }
 }
