@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use json::JsonValue;
 use log::debug;
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
 use crate::{
     config::parameters::{
@@ -48,7 +48,7 @@ impl MarginInfoService for Exchange {
                             .await?;
 
                         cfg.cached_data.margin_info.set(response.clone()).await;
-                        response
+                        Arc::new(response)
                     }
                 };
 
@@ -74,7 +74,7 @@ impl MarginInfoService for Exchange {
                         if response["result"].has_key("vipCoinList") {
                             cfg.cached_data.margin_info.set(response.clone()).await;
                         };
-                        response
+                        Arc::new(response)
                     }
                 };
 
@@ -129,7 +129,7 @@ impl MarginInfoService for Exchange {
                             .await?;
                         cfg.cached_data.margin_info.set(response.clone()).await;
 
-                        response
+                        Arc::new(response)
                     }
                 };
                 let data = find_value_from_json_key(&data, &["data"])?;
@@ -172,7 +172,7 @@ impl MarginInfoService for Exchange {
                             .into());
                         }
                         cfg.cached_data.margin_info.set(response.clone()).await;
-                        response
+                        Arc::new(response)
                     }
                 };
 
@@ -201,7 +201,7 @@ impl MarginInfoService for Exchange {
                         if response["code"] == "200000" {
                             cfg.cached_data.margin_info.set(response.clone()).await;
                         }
-                        response
+                        Arc::new(response)
                     }
                 };
                 let mut borrowable = JsonValue::Boolean(false);
