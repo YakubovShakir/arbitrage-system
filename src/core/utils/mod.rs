@@ -4,7 +4,7 @@ use log::{debug, error};
 use std::{
     io::Read,
     mem,
-    time::{SystemTime, UNIX_EPOCH},
+    time::{Instant, SystemTime, UNIX_EPOCH},
 };
 
 pub mod crypto;
@@ -73,6 +73,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
     //     return Err(sell_exchange_name.to_string());
     // }
 
+    let buy_networks_start = Instant::now();
     let withdraw_networks = match buy_exchange.networks(&trading_pair_name.base).await {
         Ok(networks) => networks.0,
         Err(e) => {
@@ -83,6 +84,8 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
             return Ok(Vec::new());
         }
     };
+    let buy_networks_elapsed = buy_networks_start.elapsed().as_nanos();
+
     if withdraw_networks.len() == 0 {
         debug!(target: "debug_module",
             "{}/{} verify - failed. REASON: Empty buy networks {}",
@@ -91,6 +94,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         return Err(buy_exchange_name.to_string());
     }
 
+    let sell_networks_start = Instant::now();
     let deposit_networks = match sell_exchange.networks(&trading_pair_name.base).await {
         Ok(networks) => networks.1,
         Err(e) => {
@@ -101,11 +105,15 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
             return Ok(Vec::new());
         }
     };
+
+    let sell_networks_elapsed = sell_networks_start.elapsed().as_nanos();
+
     if deposit_networks.len() == 0 {
         debug!(target: "debug_module", "{}/{} verify - failed. REASON: Empty sell networks {}",  trading_pair_name.base, trading_pair_name.quote, sell_exchange_name );
         return Err(sell_exchange_name.to_string());
     }
 
+    let find_insertsection_el = Instant::now();
     let Some(networks) = find_intersection_from_networks(&withdraw_networks, &deposit_networks)
     else {
         // println!(
@@ -120,6 +128,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
 
         return Ok(Vec::new());
     };
+    debug!(target: "debug_module", "buy_net_el: ({},{}); sell_net_el: ({},{}) find_el: {}", buy_exchange_name, format_duration(buy_networks_elapsed), sell_exchange_name, format_duration(sell_networks_elapsed), format_duration(find_insertsection_el.elapsed().as_nanos()));
 
     Ok(networks)
 }

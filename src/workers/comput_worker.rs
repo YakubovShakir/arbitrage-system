@@ -122,7 +122,6 @@ impl Workable for ComputWorker {
                         else {
                             continue;
                         };
-                        let verify_elapsed = Instant::now();
                         match verify_arbitrage_conditions_and_get_networks(
                             &buy_exchange,
                             &sell_exchange,
@@ -150,7 +149,6 @@ impl Workable for ComputWorker {
                                 }
                             }
                         }
-                        debug!(target: "debug_module", "Verify {}/{} elapsed: {:#?}; buy_ex: {}, sell_ex: {}", pair.base, pair.quote, format_duration(verify_elapsed.elapsed().as_nanos()), buy_ex, sell_ex);
                     }
 
                     verified
