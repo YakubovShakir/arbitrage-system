@@ -1,5 +1,7 @@
 use std::{
     env,
+    ops::Deref,
+    sync::Arc,
     time::{Duration, Instant},
 };
 
@@ -80,7 +82,7 @@ impl NetworkService for Exchange {
                         if response.is_array() {
                             cfg.cached_data.networks.set(response.clone()).await;
                         }
-                        response
+                        Arc::new(response)
                     }
                 };
 
@@ -160,7 +162,7 @@ impl NetworkService for Exchange {
                         if response["retMsg"] == "success" {
                             cfg.cached_data.networks.set(response.clone()).await;
                         }
-                        response
+                        Arc::new(response)
                     }
                 };
 
@@ -236,7 +238,7 @@ impl NetworkService for Exchange {
                         if response["msg"] == "success" {
                             cfg.cached_data.networks.set(response.clone()).await;
                         }
-                        response
+                        Arc::new(response)
                     }
                 };
 
@@ -366,7 +368,7 @@ impl NetworkService for Exchange {
                         if response["code"] == "200000" {
                             cfg.cached_data.networks.set(response.clone()).await;
                         }
-                        response
+                        Arc::new(response)
                     }
                 };
                 for item in data["data"].members() {
@@ -457,7 +459,7 @@ impl NetworkService for Exchange {
                         if response.is_array() {
                             cfg.cached_data.networks.set(response.clone()).await;
                         }
-                        response
+                        Arc::new(response)
                     }
                 };
                 for item in data.members() {
@@ -521,7 +523,7 @@ impl NetworkService for Exchange {
                         if response["code"].to_string() == "200" {
                             cfg.cached_data.networks.set(response.clone()).await;
                         }
-                        response
+                        Arc::new(response)
                     }
                 };
 
@@ -580,7 +582,7 @@ impl NetworkService for Exchange {
                         {
                             cfg.cached_data.networks.set(response.clone()).await;
                         }
-                        response
+                        Arc::new(response)
                     }
                 };
 
@@ -650,7 +652,7 @@ impl NetworkService for Exchange {
                         if !response["data"].is_empty() {
                             cfg.cached_data.networks.set(response.clone()).await;
                         }
-                        response
+                        Arc::new(response)
                     }
                 };
 

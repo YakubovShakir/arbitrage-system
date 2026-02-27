@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 
 use json::JsonValue;
 use tokio::{sync::RwLock, time::Instant};
@@ -6,7 +6,7 @@ use tokio::{sync::RwLock, time::Instant};
 use super::exchanges::Exchange;
 
 pub struct CacheData {
-    value: RwLock<JsonValue>,
+    value: RwLock<Arc<JsonValue>>,
     timestamp: RwLock<Instant>,
     ttl: Duration,
 }
@@ -14,12 +14,12 @@ pub struct CacheData {
 impl CacheData {
     pub fn new(value: JsonValue, ttl: Duration) -> Self {
         Self {
-            value: RwLock::new(value),
+            value: RwLock::new(Arc::new(value)),
             timestamp: RwLock::new(Instant::now()),
             ttl: ttl,
         }
     }
-    pub async fn get(&self) -> Option<JsonValue> {
+    pub async fn get(&self) -> Option<Arc<JsonValue>> {
         // ВСЕГДА сначала timestamp, потом value (как в set)
         let timestamp_guard = self.timestamp.read().await;
         let value_guard = self.value.read().await;
@@ -34,7 +34,7 @@ impl CacheData {
     pub async fn set(&self, value: JsonValue) {
         let mut timestamp_quard = self.timestamp.write().await;
         let mut value_quard = self.value.write().await;
-        *value_quard = value;
+        *value_quard = Arc::new(value);
         *timestamp_quard = Instant::now();
     }
 }
