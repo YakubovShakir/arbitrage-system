@@ -23,7 +23,7 @@ use crate::{
     },
 };
 use async_trait::async_trait;
-use log::error;
+use log::{debug, error};
 
 #[async_trait]
 impl NetworkService for Exchange {
@@ -39,7 +39,9 @@ impl NetworkService for Exchange {
         let mut deposit_networks: Vec<DepositNetwork> = Vec::new();
 
         let cache_data = self.config().cached_data.networks.get().await;
-
+        if cache_data.is_none() {
+            debug!(target:"debug_module", "Cache is None for {}. Call API.. ", self.config().name);
+        }
         match self {
             Exchange::Binance(cfg) => {
                 let data = match cache_data {
