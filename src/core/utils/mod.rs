@@ -113,7 +113,6 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
         return Err(sell_exchange_name.to_string());
     }
 
-    let find_insertsection_el = Instant::now();
     let Some(networks) = find_intersection_from_networks(&withdraw_networks, &deposit_networks)
     else {
         // println!(
@@ -128,7 +127,7 @@ pub async fn verify_arbitrage_conditions_and_get_networks(
 
         return Ok(Vec::new());
     };
-    debug!(target: "debug_module", "buy_net_el: ({},{}); sell_net_el: ({},{}) find_el: {}", buy_exchange_name, format_duration(buy_networks_elapsed), sell_exchange_name, format_duration(sell_networks_elapsed), format_duration(find_insertsection_el.elapsed().as_nanos()));
+    debug!(target: "debug_module", "buy_net_el: ({},{}); sell_net_el: ({},{})", buy_exchange_name, format_duration(buy_networks_elapsed), sell_exchange_name, format_duration(sell_networks_elapsed));
 
     Ok(networks)
 }
