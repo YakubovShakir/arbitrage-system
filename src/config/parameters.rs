@@ -43,13 +43,13 @@ pub const HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS: u64 = 30;
 pub const HUOBI_MARGIN_INFO_HTTP_TIMEOUT_SECONDS: u64 = 10;
 
 // rate limits
-pub const BINANCE_REQUESTS_PER_SECOND: usize = 4;
+pub const BINANCE_REQUESTS_PER_SECOND: usize = 10;
 pub const BYBIT_REQUESTS_PER_SECOND: usize = 10;
 pub const BITGET_REQUESTS_PER_SECOND: usize = 10;
-pub const BITMART_REQUESTS_PER_SECOND: usize = 5;
+pub const BITMART_REQUESTS_PER_SECOND: usize = 10;
 pub const GATE_REQUESTS_PER_SECOND: usize = 50;
 pub const HUOBI_REQUESTS_PER_SECOND: usize = 50;
-pub const MEXC_REQUESTS_PER_SECOND: usize = 7;
+pub const MEXC_REQUESTS_PER_SECOND: usize = 10;
 pub const OKX_REQUESTS_PER_SECOND: usize = 20;
 pub const KUCOIN_REQUESTS_PER_SECOND: usize = 15;
 // camp временно под блокировкой но можно и не вынимать
