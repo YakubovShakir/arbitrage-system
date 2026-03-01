@@ -10,8 +10,8 @@ pub const QUOTE_LIST: &[(&str, f64)] = &[
 ];
 
 pub const QUOTE_RATE: f64 = 1.3;
-pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.35;
-pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.45;
+pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.3;
+pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.4;
 
 // cache
 pub const NETWORKS_CACHE_TTL_SECS: u64 = 12000;
@@ -56,7 +56,7 @@ pub const KUCOIN_REQUESTS_PER_SECOND: usize = 15;
 pub const BASE_BLACKLIST: &[&str] = &["USTC", "LUNC", "RVN", "CAMP", "LUNA"];
 // unused
 pub const SUCCESS_CODE: &str = "\x1b[38;5;48m"; // #00ff87 - яркий мятный ✅
-pub const ERROR_CODE: &str = "\x1b[38;5;203m"; // #ff5f5f - яркий алый ❌  
+pub const ERROR_CODE: &str = "\x1b[38;5;203m"; // #ff5f5f - яркий алый ❌
 pub const WARNING_CODE: &str = "\x1b[38;5;221m"; // #ffd75f - тёплый жёлтый ⚠️
 pub const INFO_CODE: &str = "\x1b[38;5;45m"; // #00d7ff - аквамарин 💎
 pub const DEBUG_CODE: &str = "\x1b[38;5;247m"; // #9e9e9e - средний серый 🔍
