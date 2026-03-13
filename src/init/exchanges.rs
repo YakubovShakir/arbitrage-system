@@ -324,8 +324,8 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     let bybit: Exchange = init_bybit()?;
     exchanges.insert(config::bybit::NAME.to_owned(), bybit);
 
-    // let mexc: Exchange = init_mexc()?;
-    // exchanges.insert(config::mexc::NAME.to_owned(), mexc);
+    let mexc: Exchange = init_mexc()?;
+    exchanges.insert(config::mexc::NAME.to_owned(), mexc);
 
     let bitget: Exchange = init_bitget()?;
     exchanges.insert(config::bitget::NAME.to_owned(), bitget);

@@ -435,8 +435,9 @@ async fn establish_ws_connection_and_sub(
                 client_clone
                     .run_with_reconnect(Some(
                         r#"{
-                                "method": "SUBSCRIPTION",
-                                "params": ["futures@public.miniTickers.v3.api.pb@UTC+0"]}"#,
+    "method": "sub.tickers",
+    "param": {}
+}"#,
                     ))
                     .await;
             });
