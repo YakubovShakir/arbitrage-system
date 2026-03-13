@@ -405,7 +405,7 @@ async fn establish_ws_connection_and_sub(
                         r#"{
                                 "id": 123,
                                 "type": "subscribe",
-                                "topic": "/market/ticker:all",
+                                "topic": "/contractMarket/ticker:all",
                                 "response": true
                                 }"#,
                     ))
