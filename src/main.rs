@@ -29,13 +29,13 @@ async fn main() {
         worker.run().await;
     });
 
-    let comput_task = tokio::spawn(async move {
-        let computer: ComputWorker =
-            ComputWorker::new(1, comput_trading_pairs, spread_pairs, comput_exchanges);
-        computer.run().await;
-    });
+    // let comput_task = tokio::spawn(async move {
+    //     let computer: ComputWorker =
+    //         ComputWorker::new(1, comput_trading_pairs, spread_pairs, comput_exchanges);
+    //     computer.run().await;
+    // });
 
-    tasks.extend([ticker_task, comput_task]);
+    tasks.extend([ticker_task]);
 
     for task in tasks {
         task.await.unwrap();
