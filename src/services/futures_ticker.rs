@@ -216,7 +216,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
             }
         }
         Exchange::Okx(cfg) => {
-            let query = &[("instType", "FUTURES")];
+            let query = &[("instType", "SWAP")];
             let res = cfg
                 .futures_http_client
                 .get(
