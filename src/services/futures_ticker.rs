@@ -429,7 +429,7 @@ async fn establish_ws_connection_and_sub(
                 client_clone
                     .run_with_reconnect(Some(
                         r#"{
-                                "id": 123,
+                                "id": 124,
                                 "type": "subscribe",
                                 "topic": "/contractMarket/ticker:all",
                                 "response": true
