@@ -152,12 +152,20 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                     Some(Duration::from_secs(HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS)),
                 )
                 .await?;
-            let tickers = find_value_from_json_key(&res, &["data"])?;
+
+            if res["status"] != "ok" {
+                return Err(format!(
+                    "{} Invalid response becasuse response.status doesn't 'ok'",
+                    cfg.name
+                )
+                .into());
+            }
+            let tickers = find_value_from_json_key(&res, &["ticks"])?;
 
             for ticker in tickers.members() {
                 let (Ok(ask_price), Ok(bid_price)) = (
-                    parse_json_as_f64(&ticker["ask"]),
-                    parse_json_as_f64(&ticker["bid"]),
+                    parse_json_as_f64(&ticker["ask"][0]),
+                    parse_json_as_f64(&ticker["bid"][0]),
                 ) else {
                     continue;
                 };
@@ -165,7 +173,9 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                     buy_price: (cfg.name.to_owned(), ask_price),
                     sell_price: (cfg.name.to_owned(), bid_price),
                 };
-                if let Some(pair) = TradingPair::from_str(&ticker["symbol"].to_string()) {
+                if let Some(pair) =
+                    TradingPair::from_str_with_separator(&ticker["contract_code"].to_string(), '-')
+                {
                     trading_pairs.insert(pair, price);
                 }
             }
@@ -188,7 +198,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                 .into());
             }
             for ticker in res["data"]["symbols"].members() {
-                if ticker["status"].to_string() == "Delisted".to_string() {
+                if ticker["status"] == "Delisted" {
                     continue;
                 }
 
