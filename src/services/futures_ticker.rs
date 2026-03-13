@@ -248,11 +248,27 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
             }
         }
         Exchange::Kucoin(cfg) => {
-            let response = cfg
+            let res = cfg
                 .futures_http_client
                 .get(&endpoint, None, None, None)
                 .await?;
-            println!("{}", response.pretty(4));
+            for item in res["data"].members() {
+                let (Ok(best_bid), Ok(best_ask)) = (
+                    parse_json_as_f64(&item["bestBidPrice"]),
+                    parse_json_as_f64(&item["bestAskPrice"]),
+                ) else {
+                    continue;
+                };
+                let price: TickerPrice = TickerPrice {
+                    buy_price: (cfg.name.to_owned(), best_ask),
+                    sell_price: (cfg.name.to_owned(), best_bid),
+                };
+                if let Some(trading_pair) =
+                    TradingPair::from_str(&item["symbol"].to_string().replace("USDTM", "USDT"))
+                {
+                    trading_pairs.insert(trading_pair, price);
+                }
+            }
         }
         _ => {
             return Err(format!(
