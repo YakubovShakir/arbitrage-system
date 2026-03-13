@@ -180,17 +180,21 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                 .await?;
             println!("{}", res);
 
-            if res["message"] != "success" {
+            if res["message"] != "Ok" {
                 return Err(format!(
                     "Cannot get tickers from {} because response.message doesn't 'success'",
                     cfg.name
                 )
                 .into());
             }
-            for ticker in res["data"].members() {
+            for ticker in res["data"]["symbols"].members() {
+                if ticker["status"].to_string() == "Delisted".to_string() {
+                    continue;
+                }
+
                 let (Ok(best_bid), Ok(best_ask)) = (
-                    parse_json_as_f64(&ticker[8]),
-                    parse_json_as_f64(&ticker[10]),
+                    parse_json_as_f64(&ticker["last_price"]),
+                    parse_json_as_f64(&ticker["last_price"]),
                 ) else {
                     continue;
                 };
@@ -198,9 +202,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                     buy_price: (cfg.name.to_owned(), best_ask),
                     sell_price: (cfg.name.to_owned(), best_bid),
                 };
-                if let Some(trading_pair) =
-                    TradingPair::from_str_with_separator(&ticker[0].to_string(), '_')
-                {
+                if let Some(trading_pair) = TradingPair::from_str(&ticker["symbol"].to_string()) {
                     trading_pairs.insert(trading_pair, price);
                 }
             }
