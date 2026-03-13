@@ -252,7 +252,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                 .futures_http_client
                 .get(&endpoint, None, None, None)
                 .await?;
-            println!("{:?}", response);
+            println!("{}", response.pretty(4));
         }
         _ => {
             return Err(format!(
