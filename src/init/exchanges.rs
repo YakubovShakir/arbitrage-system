@@ -330,8 +330,8 @@ pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     let bitget: Exchange = init_bitget()?;
     exchanges.insert(config::bitget::NAME.to_owned(), bitget);
 
-    // let kucoin: Exchange = init_kucoin()?;
-    // exchanges.insert(config::kucoin::NAME.to_owned(), kucoin);
+    let kucoin: Exchange = init_kucoin()?;
+    exchanges.insert(config::kucoin::NAME.to_owned(), kucoin);
 
     let gate: Exchange = init_gate()?;
     exchanges.insert(config::gate::NAME.to_owned(), gate);

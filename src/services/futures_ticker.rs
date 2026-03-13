@@ -292,8 +292,6 @@ async fn handle_ws_interface(
         }
     } else {
         if let Some(state) = client.get_state().await {
-            println!("state - {:?}", state);
-
             return Ok(read_ws_state(&state, &exchange)?);
         }
     };
