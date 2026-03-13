@@ -293,7 +293,7 @@ pub fn init_bitmart() -> Result<Exchange, Box<dyn Error>> {
         secret_key: env::var("BITMART_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::bitmart::BASE_URL, BITMART_REQUESTS_PER_SECOND)?,
         futures_http_client: HttpClient::new(
-            config::bitmart::BASE_URL,
+            config::bitmart::FUTURES_BASE_URL,
             BITMART_REQUESTS_PER_SECOND,
         )?,
 
