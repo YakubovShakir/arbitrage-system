@@ -226,7 +226,6 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                     None, // Some(Duration::from_secs(HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS)),
                 )
                 .await?;
-            println!("{}", res);
 
             for item in res["data"].members() {
                 let (Ok(best_bid), Ok(best_ask)) = (
@@ -239,9 +238,10 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                     buy_price: (cfg.name.to_owned(), best_ask),
                     sell_price: (cfg.name.to_owned(), best_bid),
                 };
-                if let Some(trading_pair) =
-                    TradingPair::from_str_with_separator(&item["instId"].to_string(), '-')
-                {
+                if let Some(trading_pair) = TradingPair::from_str_with_separator(
+                    &item["instId"].to_string().replace("-SWAP", ""),
+                    '-',
+                ) {
                     trading_pairs.insert(trading_pair, price);
                 }
             }
