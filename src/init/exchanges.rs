@@ -232,7 +232,10 @@ pub fn init_kucoin() -> Result<Exchange, Box<dyn Error>> {
         api_key: env::var("KUCOIN_API_KEY")?.to_owned(),
         secret_key: env::var("KUCOIN_SECRET_KEY")?.to_owned(),
         http_client: kucoin_http_client.clone(),
-        futures_http_client: kucoin_http_client,
+        futures_http_client: HttpClient::new(
+            config::kucoin::FUTURES_BASE_URL,
+            KUCOIN_REQUESTS_PER_SECOND,
+        )?,
         websocket_client: Some(
             WebSocketClient::new(config::kucoin::BASE_URL)
                 .with_ping_interval(
@@ -242,15 +245,7 @@ pub fn init_kucoin() -> Result<Exchange, Box<dyn Error>> {
                 .with_connection_handler(kucoin_connection_handler) // ← просто передаем замыкание
                 .with_streamed_state(),
         ),
-        futures_websocket_client: Some(
-            WebSocketClient::new(config::kucoin::FUTURES_BASE_URL)
-                .with_ping_interval(
-                    Duration::from_secs(20),
-                    r#"{"id": "124","type": "ping"}"#.to_string(),
-                )
-                .with_connection_handler(futures_connection_handler) // ← просто передаем замыкание
-                .with_streamed_state(),
-        ),
+        futures_websocket_client: None,
         cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
     }))
 }

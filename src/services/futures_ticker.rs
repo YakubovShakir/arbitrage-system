@@ -247,6 +247,10 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                 }
             }
         }
+        Exchange::Kucoin(cfg) => {
+            let response = cfg.http_client.get(&endpoint, None, None, None).await?;
+            println!("{:?}", response);
+        }
         _ => {
             return Err(format!(
                 "HTTP interface is not available for {}",
@@ -424,20 +428,20 @@ async fn establish_ws_connection_and_sub(
                     .await;
             });
         }
-        Exchange::Kucoin(_) => {
-            tokio::spawn(async move {
-                client_clone
-                    .run_with_reconnect(Some(
-                        r#"{
-                                "id": 124,
-                                "type": "subscribe",
-                                "topic": "/contractMarket/ticker:*",
-                                "response": true
-                                }"#,
-                    ))
-                    .await;
-            });
-        }
+        // Exchange::Kucoin(_) => {
+        //     tokio::spawn(async move {
+        //         client_clone
+        //             .run_with_reconnect(Some(
+        //                 r#"{
+        //                         "id": 124,
+        //                         "type": "subscribe",
+        //                         "topic": "/contractMarket/ticker:*",
+        //                         "response": true
+        //                         }"#,
+        //             ))
+        //             .await;
+        //     });
+        // }
         Exchange::Mexc(_) => {
             tokio::spawn(async move {
                 client_clone

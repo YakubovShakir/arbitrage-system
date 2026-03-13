@@ -66,7 +66,7 @@ impl API {
                 Exchange::Bybit(_) => Some("/v5/market/tickers"),
                 Exchange::Bitget(_) => Some("/api/v2/mix/market/tickers"),
                 Exchange::Gate(_) => Some("/api/v4/futures/usdt/contracts"),
-                Exchange::Kucoin(_) => None,
+                Exchange::Kucoin(_) => Some("/api/v1/allTickers"),
                 Exchange::Mexc(_) => None,
                 Exchange::Huobi(_) => Some("/linear-swap-ex/market/detail/batch_merged"),
                 Exchange::Bitmart(_) => Some("/contract/public/details"),
