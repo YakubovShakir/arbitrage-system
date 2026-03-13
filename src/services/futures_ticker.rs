@@ -7,10 +7,11 @@ use crate::{
         net::{http::HttpClient, websocket::WebSocketClient},
         traits::exchange_service::FuturesTickerService,
         types::{API, TickerPrice, Tickers, TradingPair, exchanges::Exchange},
-        utils::json_utils::{find_value_from_json_key, parse_json_as_f64},
+        utils::json_utils::{find_value_from_json_key, parse_json_as_f64, parse_json_as_str},
     },
 };
 use async_trait::async_trait;
+use json::JsonValue;
 use std::{
     collections::{HashMap, VecDeque},
     error::Error,
@@ -372,18 +373,21 @@ fn read_ws_state(
             }
         }
         Exchange::Mexc(cfg) => {
-            for ticker_info in state.split('|') {
-                if let Some((symbol, price_str)) = ticker_info.split_once(':') {
-                    let Ok(parsed_price) = price_str.parse::<f64>() else {
-                        continue;
-                    };
-                    let price = TickerPrice {
-                        buy_price: (cfg.name.to_owned(), parsed_price),
-                        sell_price: (cfg.name.to_owned(), parsed_price),
-                    };
-                    if let Some(pair) = TradingPair::from_str(symbol) {
-                        trading_pairs.insert(pair, price);
-                    }
+            let parsed = json::parse(state)?;
+            for ticker in parsed["data"].members() {
+                let (Ok(symbol), Ok(price)) = (
+                    parse_json_as_str(&ticker["symbol"]),
+                    parse_json_as_f64(&ticker["lastPrice"]),
+                ) else {
+                    continue;
+                };
+
+                let price = TickerPrice {
+                    buy_price: (cfg.name.to_owned(), price),
+                    sell_price: (cfg.name.to_owned(), price),
+                };
+                if let Some(pair) = TradingPair::from_str_with_separator(&symbol, '_') {
+                    trading_pairs.insert(pair, price);
                 }
             }
         }
