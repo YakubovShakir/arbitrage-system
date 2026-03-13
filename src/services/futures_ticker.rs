@@ -135,7 +135,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                     sell_price: (cfg.name.to_owned(), highest_bid),
                 };
                 if let Some(pair) =
-                    TradingPair::from_str_with_separator(&ticker["currency_pair"].to_string(), '_')
+                    TradingPair::from_str_with_separator(&ticker["name"].to_string(), '_')
                 {
                     trading_pairs.insert(pair, price);
                 }
