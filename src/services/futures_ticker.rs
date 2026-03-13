@@ -248,7 +248,10 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
             }
         }
         Exchange::Kucoin(cfg) => {
-            let response = cfg.http_client.get(&endpoint, None, None, None).await?;
+            let response = cfg
+                .futures_http_client
+                .get(&endpoint, None, None, None)
+                .await?;
             println!("{:?}", response);
         }
         _ => {
