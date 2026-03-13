@@ -176,6 +176,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                     None, // Some(Duration::from_secs(HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS)),
                 )
                 .await?;
+            println!("{}", res);
             if res["message"] != "success" {
                 return Err(format!(
                     "Cannot get tickers from {} because response.message doesn't 'success'",
