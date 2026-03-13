@@ -27,6 +27,10 @@ pub fn init_binance() -> Result<Exchange, Box<dyn Error>> {
         api_key: env::var("BINANCE_API_KEY")?.to_owned(),
         secret_key: env::var("BINANCE_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::binance::BASE_URL, BINANCE_REQUESTS_PER_SECOND)?,
+        futures_http_client: HttpClient::new(
+            config::binance::BASE_URL,
+            BINANCE_REQUESTS_PER_SECOND,
+        )?,
         websocket_client: Some(WebSocketClient::new(config::binance::WEBSOCKET_URL)),
         futures_websocket_client: Some(WebSocketClient::new(
             config::binance::FUTURES_WEBSOCKET_URL,
@@ -40,6 +44,8 @@ pub fn init_bybit() -> Result<Exchange, Box<dyn Error>> {
         api_key: env::var("BYBIT_API_KEY")?.to_owned(),
         secret_key: env::var("BYBIT_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::bybit::BASE_URL, BYBIT_REQUESTS_PER_SECOND)?,
+        futures_http_client: HttpClient::new(config::bybit::BASE_URL, BYBIT_REQUESTS_PER_SECOND)?,
+
         websocket_client: None,
         futures_websocket_client: None,
         cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
@@ -75,6 +81,8 @@ pub fn init_mexc() -> Result<Exchange, Box<dyn Error>> {
         api_key: env::var("MEXC_API_KEY")?.to_owned(),
         secret_key: env::var("MEXC_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::mexc::BASE_URL, MEXC_REQUESTS_PER_SECOND)?,
+        futures_http_client: HttpClient::new(config::mexc::BASE_URL, MEXC_REQUESTS_PER_SECOND)?,
+
         websocket_client: Some(
             WebSocketClient::new(config::mexc::WEBSOCKET_URL)
                 .with_ping_interval(Duration::from_secs(20), r#"{"method": "PING"}"#.to_string())
@@ -93,6 +101,7 @@ pub fn init_bitget() -> Result<Exchange, Box<dyn Error>> {
         api_key: env::var("BITGET_API_KEY")?.to_owned(),
         secret_key: env::var("BITGET_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::bitget::BASE_URL, BITGET_REQUESTS_PER_SECOND)?,
+        futures_http_client: HttpClient::new(config::bitget::BASE_URL, BITGET_REQUESTS_PER_SECOND)?,
         websocket_client: None,
         futures_websocket_client: None,
         cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
@@ -222,7 +231,8 @@ pub fn init_kucoin() -> Result<Exchange, Box<dyn Error>> {
         name: kucoin_name.to_owned(),
         api_key: env::var("KUCOIN_API_KEY")?.to_owned(),
         secret_key: env::var("KUCOIN_SECRET_KEY")?.to_owned(),
-        http_client: kucoin_http_client,
+        http_client: kucoin_http_client.clone(),
+        futures_http_client: kucoin_http_client,
         websocket_client: Some(
             WebSocketClient::new(config::kucoin::BASE_URL)
                 .with_ping_interval(
@@ -251,6 +261,10 @@ pub fn init_huobi() -> Result<Exchange, Box<dyn Error>> {
         api_key: env::var("HUOBI_API_KEY")?.to_owned(),
         secret_key: env::var("HUOBI_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::huobi::BASE_URL, HUOBI_REQUESTS_PER_SECOND)?,
+        futures_http_client: HttpClient::new(
+            config::huobi::FUTURES_BASE_URL,
+            HUOBI_REQUESTS_PER_SECOND,
+        )?,
         // websocket_client: Some(
         //     WebSocketClient::new(config::huobi::WEBSOCKET_URL)
         //         .with_binary_handler(huobi_binary_handler),
@@ -266,6 +280,7 @@ pub fn init_gate() -> Result<Exchange, Box<dyn Error>> {
         api_key: env::var("GATE_API_KEY")?.to_owned(),
         secret_key: env::var("GATE_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::gate::BASE_URL, GATE_REQUESTS_PER_SECOND)?,
+        futures_http_client: HttpClient::new(config::gate::BASE_URL, GATE_REQUESTS_PER_SECOND)?,
         websocket_client: None,
         futures_websocket_client: None,
         cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
@@ -277,6 +292,11 @@ pub fn init_bitmart() -> Result<Exchange, Box<dyn Error>> {
         api_key: env::var("BITMART_API_KEY")?.to_owned(),
         secret_key: env::var("BITMART_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::bitmart::BASE_URL, BITMART_REQUESTS_PER_SECOND)?,
+        futures_http_client: HttpClient::new(
+            config::bitmart::BASE_URL,
+            BITMART_REQUESTS_PER_SECOND,
+        )?,
+
         websocket_client: None,
         futures_websocket_client: None,
         cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
@@ -288,6 +308,7 @@ pub fn init_okx() -> Result<Exchange, Box<dyn Error>> {
         api_key: env::var("OKX_API_KEY")?.to_owned(),
         secret_key: env::var("OKX_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::okx::BASE_URL, OKX_REQUESTS_PER_SECOND)?,
+        futures_http_client: HttpClient::new(config::okx::BASE_URL, OKX_REQUESTS_PER_SECOND)?,
         websocket_client: None,
         futures_websocket_client: None,
         cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),

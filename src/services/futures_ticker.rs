@@ -1,7 +1,10 @@
 use crate::{
-    config::parameters::{GATE_TICKERS_HTTP_TIMEOUT_SECONDS, HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS},
+    config::parameters::{
+        GATE_TICKERS_HTTP_TIMEOUT_SECONDS, HUOBI_REQUESTS_PER_SECOND,
+        HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS,
+    },
     core::{
-        net::websocket::WebSocketClient,
+        net::{http::HttpClient, websocket::WebSocketClient},
         traits::exchange_service::FuturesTickerService,
         types::{API, TickerPrice, Tickers, TradingPair, exchanges::Exchange},
         utils::json_utils::{find_value_from_json_key, parse_json_as_f64},
@@ -39,7 +42,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
         Exchange::Bybit(cfg) => {
             let query = &[("category", "linear")];
             let response = cfg
-                .http_client
+                .futures_http_client
                 .get(endpoint, Some(query), None, None)
                 .await?;
             let tickers = find_value_from_json_key(&response, &["result", "list"])?;
@@ -65,7 +68,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
         Exchange::Bitget(cfg) => {
             // Просто запускаем, игнорируем ошибки соединения
             let response = cfg
-                .http_client
+                .futures_http_client
                 .get(
                     endpoint,
                     Some(&[("productType", "USDT-FUTURES")]),
@@ -103,7 +106,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
             ];
 
             let tickers = cfg
-                .http_client
+                .futures_http_client
                 .get(
                     endpoint,
                     None,
@@ -138,9 +141,8 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
         }
         Exchange::Huobi(cfg) => {
             let headers = &[("Content-Type", "application/json")];
-
             let res = cfg
-                .http_client
+                .futures_http_client
                 .get(
                     endpoint,
                     None,
@@ -168,7 +170,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
         }
         Exchange::Bitmart(cfg) => {
             let res = cfg
-                .http_client
+                .futures_http_client
                 .get(
                     endpoint, None, None,
                     None, // Some(Duration::from_secs(HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS)),
@@ -202,7 +204,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
         Exchange::Okx(cfg) => {
             let query = &[("instType", "FUTURES")];
             let res = cfg
-                .http_client
+                .futures_http_client
                 .get(
                     endpoint,
                     Some(query),

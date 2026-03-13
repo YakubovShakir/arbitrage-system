@@ -34,6 +34,7 @@ pub struct ExchangeConfig {
     pub api_key: String,
     pub secret_key: String,
     pub http_client: HttpClient,
+    pub futures_http_client: HttpClient,
     pub websocket_client: Option<WebSocketClient>,
     pub futures_websocket_client: Option<WebSocketClient>,
     pub cached_data: CachedConfig,
