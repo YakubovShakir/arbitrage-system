@@ -114,7 +114,6 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                     Some(Duration::from_secs(GATE_TICKERS_HTTP_TIMEOUT_SECONDS)),
                 )
                 .await?;
-            println!("{}", tickers);
 
             if tickers.is_empty() {
                 return Err(
@@ -123,6 +122,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
             }
 
             for ticker in tickers.members() {
+                println!("{}", ticker);
                 let (Ok(lowest_ask), Ok(highest_bid)) = (
                     parse_json_as_f64(&ticker["last_price"]),
                     parse_json_as_f64(&ticker["last_price"]),
