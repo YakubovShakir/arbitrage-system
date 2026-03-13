@@ -214,6 +214,8 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
                     None, // Some(Duration::from_secs(HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS)),
                 )
                 .await?;
+            println!("{}", res);
+
             for item in res["data"].members() {
                 let (Ok(best_bid), Ok(best_ask)) = (
                     parse_json_as_f64(&item["bidPx"]),
