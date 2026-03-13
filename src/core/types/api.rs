@@ -70,7 +70,7 @@ impl API {
                 Exchange::Mexc(_) => None,
                 Exchange::Huobi(_) => Some("/linear-swap-ex/market/detail/batch_merged"),
                 Exchange::Bitmart(_) => Some("/contract/public/details"),
-                Exchange::Okx(_) => Some("/api/v5/public/instruments"),
+                Exchange::Okx(_) => Some("/api/v5/market/tickers"),
             },
             API::GetMarginInfo => match exchange {
                 Exchange::Binance(_) => Some("/sapi/v1/margin/allAssets"),
