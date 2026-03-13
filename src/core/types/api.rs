@@ -41,6 +41,7 @@ impl CacheData {
 
 pub enum API {
     GetTickers,
+    GetFuturesTickers,
     GetNetworks,
     GetMarginInfo,
     GetOrderBook,
@@ -58,6 +59,17 @@ impl API {
                 Exchange::Mexc(_) => None,
                 Exchange::Huobi(_) => Some("/market/tickers"),
                 Exchange::Bitmart(_) => Some("/spot/quotation/v3/tickers"),
+                Exchange::Okx(_) => Some("/api/v5/market/tickers"),
+            },
+            API::GetFuturesTickers => match exchange {
+                Exchange::Binance(_) => None,
+                Exchange::Bybit(_) => Some("/v5/market/tickers"),
+                Exchange::Bitget(_) => Some("/api/v2/mix/market/tickers"),
+                Exchange::Gate(_) => Some("/futures/usdt/contracts"),
+                Exchange::Kucoin(_) => None,
+                Exchange::Mexc(_) => None,
+                Exchange::Huobi(_) => Some("/linear-swap-ex/market/detail/batch_merged"),
+                Exchange::Bitmart(_) => Some("/contract/public/details"),
                 Exchange::Okx(_) => Some("/api/v5/market/tickers"),
             },
             API::GetMarginInfo => match exchange {

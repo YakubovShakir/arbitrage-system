@@ -2,7 +2,7 @@ use crate::{
     config::parameters::{GATE_TICKERS_HTTP_TIMEOUT_SECONDS, HUOBI_TICKERS_HTTP_TIMEOUT_SECONDS},
     core::{
         net::websocket::WebSocketClient,
-        traits::exchange_service::TickerService,
+        traits::exchange_service::FuturesTickerService,
         types::{API, TickerPrice, Tickers, TradingPair, exchanges::Exchange},
         utils::json_utils::{find_value_from_json_key, parse_json_as_f64},
     },
@@ -15,10 +15,10 @@ use std::{
 };
 
 #[async_trait]
-impl TickerService for Exchange {
-    async fn tickers(&self) -> Result<Tickers, Box<dyn std::error::Error>> {
+impl FuturesTickerService for Exchange {
+    async fn futures_tickers(&self) -> Result<Tickers, Box<dyn std::error::Error>> {
         // Checking is WebSocket interface available
-        match &self.config().websocket_client {
+        match &self.config().futures_websocket_client {
             Some(ws_client) => Ok(handle_ws_interface(ws_client, self).await?),
             None => Ok(handle_http_interface(self).await?),
         }
@@ -26,7 +26,7 @@ impl TickerService for Exchange {
 }
 
 async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn std::error::Error>> {
-    let Some(endpoint) = API::GetTickers.endpoint(exchange) else {
+    let Some(endpoint) = API::GetFuturesTickers.endpoint(exchange) else {
         return Err(format!(
             "Error: GetTickers endpoint is not set for the exchange {}",
             exchange.config().name
@@ -37,7 +37,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
 
     match exchange {
         Exchange::Bybit(cfg) => {
-            let query = &[("category", "spot")];
+            let query = &[("category", "linear")];
             let response = cfg
                 .http_client
                 .get(endpoint, Some(query), None, None)
@@ -64,7 +64,15 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
 
         Exchange::Bitget(cfg) => {
             // Просто запускаем, игнорируем ошибки соединения
-            let response = cfg.http_client.get(endpoint, None, None, None).await?;
+            let response = cfg
+                .http_client
+                .get(
+                    endpoint,
+                    Some(&[("productType", "USDT-FUTURES")]),
+                    None,
+                    None,
+                )
+                .await?;
             let data = find_value_from_json_key(&response, &["data"])?;
             if data.is_empty() {
                 return Err(format!("{} Invalid response: 'data' is empty array", cfg.name).into());
@@ -111,8 +119,8 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
 
             for ticker in tickers.members() {
                 let (Ok(lowest_ask), Ok(highest_bid)) = (
-                    parse_json_as_f64(&ticker["lowest_ask"]),
-                    parse_json_as_f64(&ticker["highest_bid"]),
+                    parse_json_as_f64(&ticker["last_price"]),
+                    parse_json_as_f64(&ticker["last_price"]),
                 ) else {
                     continue;
                 };
@@ -192,7 +200,7 @@ async fn handle_http_interface(exchange: &Exchange) -> Result<Tickers, Box<dyn s
             }
         }
         Exchange::Okx(cfg) => {
-            let query = &[("instType", "SPOT")];
+            let query = &[("instType", "FUTURES")];
             let res = cfg
                 .http_client
                 .get(
@@ -410,7 +418,7 @@ async fn establish_ws_connection_and_sub(
                     .run_with_reconnect(Some(
                         r#"{
                                 "method": "SUBSCRIPTION",
-                                "params": ["spot@public.miniTickers.v3.api.pb@UTC+0"]}"#,
+                                "params": ["futures@public.miniTickers.v3.api.pb@UTC+0"]}"#,
                     ))
                     .await;
             });

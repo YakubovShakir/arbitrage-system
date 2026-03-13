@@ -1,16 +1,33 @@
-use crate::core::{
-    net::{http::HttpClient, websocket::WebSocketClient},
-    types::{api::CacheData, signature_params::SignatureParams},
-    utils::crypto::{
-        base64_encode, encrypt_hmac_sha256, encrypt_hmac_sha512, hex_encode,
-        sha512_with_ring_return_hex,
+use crate::{
+    config::parameters::{MARGIN_INFO_CACHE_TTL_SECS, NETWORKS_CACHE_TTL_SECS},
+    core::{
+        net::{http::HttpClient, websocket::WebSocketClient},
+        types::{api::CacheData, signature_params::SignatureParams},
+        utils::crypto::{
+            base64_encode, encrypt_hmac_sha256, encrypt_hmac_sha512, hex_encode,
+            sha512_with_ring_return_hex,
+        },
     },
 };
-use std::error::Error;
+use std::{error::Error, time::Duration};
 
 pub struct CachedConfig {
     pub networks: CacheData,
     pub margin_info: CacheData,
+}
+impl CachedConfig {
+    pub fn new(networks_ttl_secs: u64, margin_info_ttl_secs: u64) -> Self {
+        Self {
+            networks: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(networks_ttl_secs),
+            ),
+            margin_info: CacheData::new(
+                json::JsonValue::Null,
+                Duration::from_secs(margin_info_ttl_secs),
+            ),
+        }
+    }
 }
 pub struct ExchangeConfig {
     pub name: String,
@@ -18,6 +35,7 @@ pub struct ExchangeConfig {
     pub secret_key: String,
     pub http_client: HttpClient,
     pub websocket_client: Option<WebSocketClient>,
+    pub futures_websocket_client: Option<WebSocketClient>,
     pub cached_data: CachedConfig,
 }
 

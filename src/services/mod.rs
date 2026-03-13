@@ -1,3 +1,4 @@
+pub mod futures_ticker;
 pub mod margin_info;
 pub mod network;
 pub mod orderbook;

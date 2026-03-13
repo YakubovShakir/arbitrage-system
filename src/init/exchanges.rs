@@ -28,16 +28,10 @@ pub fn init_binance() -> Result<Exchange, Box<dyn Error>> {
         secret_key: env::var("BINANCE_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::binance::BASE_URL, BINANCE_REQUESTS_PER_SECOND)?,
         websocket_client: Some(WebSocketClient::new(config::binance::WEBSOCKET_URL)),
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
+        futures_websocket_client: Some(WebSocketClient::new(
+            config::binance::FUTURES_WEBSOCKET_URL,
+        )),
+        cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
     }))
 }
 pub fn init_bybit() -> Result<Exchange, Box<dyn Error>> {
@@ -47,16 +41,8 @@ pub fn init_bybit() -> Result<Exchange, Box<dyn Error>> {
         secret_key: env::var("BYBIT_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::bybit::BASE_URL, BYBIT_REQUESTS_PER_SECOND)?,
         websocket_client: None,
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
+        futures_websocket_client: None,
+        cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
     }))
 }
 pub fn init_mexc() -> Result<Exchange, Box<dyn Error>> {
@@ -94,16 +80,11 @@ pub fn init_mexc() -> Result<Exchange, Box<dyn Error>> {
                 .with_ping_interval(Duration::from_secs(20), r#"{"method": "PING"}"#.to_string())
                 .with_binary_handler(mexc_binary_handler),
         ),
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
+        futures_websocket_client: Some(
+            WebSocketClient::new(config::mexc::FUTUTES_WEBSOCKET_URL)
+                .with_ping_interval(Duration::from_secs(20), r#"{"method": "ping"}"#.to_string()),
+        ),
+        cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
     }))
 }
 pub fn init_bitget() -> Result<Exchange, Box<dyn Error>> {
@@ -113,16 +94,8 @@ pub fn init_bitget() -> Result<Exchange, Box<dyn Error>> {
         secret_key: env::var("BITGET_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::bitget::BASE_URL, BITGET_REQUESTS_PER_SECOND)?,
         websocket_client: None,
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
+        futures_websocket_client: None,
+        cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
     }))
 }
 pub fn init_kucoin() -> Result<Exchange, Box<dyn Error>> {
@@ -185,6 +158,66 @@ pub fn init_kucoin() -> Result<Exchange, Box<dyn Error>> {
             })
         }
     });
+
+    let futures_connection_handler: ConnectionHandler = Arc::new({
+        let http_client =
+            HttpClient::new(config::kucoin::FUTURES_BASE_URL, KUCOIN_REQUESTS_PER_SECOND)?;
+        let name = kucoin_name.to_string();
+
+        move || {
+            let http_client = http_client.clone();
+            let name = name.clone();
+
+            Box::pin(async move {
+                // Вся логика подключения
+                let response = match http_client
+                    .post("/api/v1/bullet-public", None, None, None)
+                    .await
+                {
+                    Ok(res) => res,
+                    Err(e) => {
+                        return Err(format!("{} error in ConnectionHandler - {}", name, e).into());
+                    }
+                };
+
+                if response["code"] != "200000" {
+                    return Err(format!("API error from {}", name).into());
+                }
+
+                let token = match find_value_from_json_key(&response, &["data", "token"]) {
+                    Ok(token) => token,
+                    Err(e) => {
+                        return Err(format!("{} error in ConnectionHandler - {}", name, e).into());
+                    }
+                };
+
+                let servers =
+                    match find_value_from_json_key(&response, &["data", "instanceServers"]) {
+                        Ok(servers) => servers,
+                        Err(e) => {
+                            return Err(
+                                format!("{} error in ConnectionHandler - {}", name, e).into()
+                            );
+                        }
+                    };
+
+                let endpoint = match find_value_from_json_key(&servers[0], &["endpoint"]) {
+                    Ok(endpoint) => endpoint,
+                    Err(e) => {
+                        return Err(format!("{} error in ConnectionHandler - {}", name, e).into());
+                    }
+                };
+
+                let url = format!("{}?token={}", endpoint, token);
+
+                let result = connect_async(&url).await?;
+                info!(target: "info_module", "🔗 WebSocket соединение c {} установлено", endpoint);
+
+                Ok(result)
+            })
+        }
+    });
+
     Ok(Exchange::Kucoin(ExchangeConfig {
         name: kucoin_name.to_owned(),
         api_key: env::var("KUCOIN_API_KEY")?.to_owned(),
@@ -199,18 +232,19 @@ pub fn init_kucoin() -> Result<Exchange, Box<dyn Error>> {
                 .with_connection_handler(kucoin_connection_handler) // ← просто передаем замыкание
                 .with_streamed_state(),
         ),
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
+        futures_websocket_client: Some(
+            WebSocketClient::new(config::kucoin::FUTURES_BASE_URL)
+                .with_ping_interval(
+                    Duration::from_secs(20),
+                    r#"{"id": "124","type": "ping"}"#.to_string(),
+                )
+                .with_connection_handler(futures_connection_handler) // ← просто передаем замыкание
+                .with_streamed_state(),
+        ),
+        cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
     }))
 }
+
 pub fn init_huobi() -> Result<Exchange, Box<dyn Error>> {
     Ok(Exchange::Huobi(ExchangeConfig {
         name: config::huobi::NAME.to_owned(),
@@ -222,16 +256,8 @@ pub fn init_huobi() -> Result<Exchange, Box<dyn Error>> {
         //         .with_binary_handler(huobi_binary_handler),
         // ),
         websocket_client: None,
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
+        futures_websocket_client: None,
+        cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
     }))
 }
 pub fn init_gate() -> Result<Exchange, Box<dyn Error>> {
@@ -241,16 +267,8 @@ pub fn init_gate() -> Result<Exchange, Box<dyn Error>> {
         secret_key: env::var("GATE_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::gate::BASE_URL, GATE_REQUESTS_PER_SECOND)?,
         websocket_client: None,
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
+        futures_websocket_client: None,
+        cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
     }))
 }
 pub fn init_bitmart() -> Result<Exchange, Box<dyn Error>> {
@@ -260,16 +278,8 @@ pub fn init_bitmart() -> Result<Exchange, Box<dyn Error>> {
         secret_key: env::var("BITMART_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::bitmart::BASE_URL, BITMART_REQUESTS_PER_SECOND)?,
         websocket_client: None,
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
+        futures_websocket_client: None,
+        cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
     }))
 }
 pub fn init_okx() -> Result<Exchange, Box<dyn Error>> {
@@ -279,16 +289,8 @@ pub fn init_okx() -> Result<Exchange, Box<dyn Error>> {
         secret_key: env::var("OKX_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::okx::BASE_URL, OKX_REQUESTS_PER_SECOND)?,
         websocket_client: None,
-        cached_data: CachedConfig {
-            networks: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(NETWORKS_CACHE_TTL_SECS),
-            ),
-            margin_info: CacheData::new(
-                json::JsonValue::Null,
-                Duration::from_secs(MARGIN_INFO_CACHE_TTL_SECS),
-            ),
-        },
+        futures_websocket_client: None,
+        cached_data: CachedConfig::new(NETWORKS_CACHE_TTL_SECS, MARGIN_INFO_CACHE_TTL_SECS),
     }))
 }
 

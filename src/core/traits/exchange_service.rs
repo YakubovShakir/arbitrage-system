@@ -6,6 +6,11 @@ pub trait TickerService {
     async fn tickers(&self) -> Result<Tickers, Box<dyn std::error::Error>>;
 }
 #[async_trait]
+pub trait FuturesTickerService {
+    async fn futures_tickers(&self) -> Result<Tickers, Box<dyn std::error::Error>>;
+}
+
+#[async_trait]
 pub trait OrderBookService {
     async fn orderbook(
         &self,
