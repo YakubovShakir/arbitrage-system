@@ -2,7 +2,7 @@ use arbitrage_system::{
     // config::parameters::EXCHANGES_PER_TICKER_THREAD,
     core::{traits::Workable, types::TradingPairs},
     init::{exchanges::get_exchanges, load_env::load_env},
-    workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
+    workers::{comput_worker_old::ComputWorker, ticker_worker::TickerWorker},
 };
 
 use std::sync::Arc;
@@ -29,13 +29,13 @@ async fn main() {
         worker.run().await;
     });
 
-    // let comput_task = tokio::spawn(async move {
-    //     let computer: ComputWorker =
-    //         ComputWorker::new(1, comput_trading_pairs, spread_pairs, comput_exchanges);
-    //     computer.run().await;
-    // });
+    let comput_task = tokio::spawn(async move {
+        let computer: ComputWorker =
+            ComputWorker::new(1, comput_trading_pairs, spread_pairs, comput_exchanges);
+        computer.run().await;
+    });
 
-    tasks.extend([ticker_task]);
+    tasks.extend([ticker_task, comput_task]);
 
     for task in tasks {
         task.await.unwrap();
