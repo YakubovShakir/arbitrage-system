@@ -2,7 +2,7 @@ use arbitrage_system::{
     // config::parameters::EXCHANGES_PER_TICKER_THREAD,
     core::{traits::Workable, types::TradingPairs},
     init::{exchanges::get_exchanges, load_env::load_env},
-    workers::{comput_worker_old::ComputWorker, ticker_worker::TickerWorker},
+    workers::{comput_worker::ComputWorker, ticker_worker::TickerWorker},
 };
 
 use std::sync::Arc;
