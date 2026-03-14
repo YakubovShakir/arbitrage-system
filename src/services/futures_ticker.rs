@@ -294,12 +294,10 @@ async fn handle_ws_interface(
 
     if is_streamed_state {
         if let Some(streamed_state) = client.get_streamed_state().await {
-            println!("streamed state - {:?}", streamed_state);
             return Ok(read_streamed_ws_state(&streamed_state, &exchange)?);
         }
     } else {
         if let Some(state) = client.get_state().await {
-            println!("state - {:?}", state);
             return Ok(read_ws_state(&state, &exchange)?);
         }
     };
@@ -311,8 +309,6 @@ async fn handle_ws_interface(
 
     if is_streamed_state {
         if let Some(streamed_state) = client.get_streamed_state().await {
-            println!("streamed state - {:?}", streamed_state);
-
             return Ok(read_streamed_ws_state(&streamed_state, &exchange)?);
         }
     } else {
