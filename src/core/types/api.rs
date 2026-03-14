@@ -45,6 +45,7 @@ pub enum API {
     GetNetworks,
     GetMarginInfo,
     GetOrderBook,
+    GetFuturesOrderBook,
 }
 
 impl API {
@@ -103,6 +104,17 @@ impl API {
                 Exchange::Mexc(_) => Some("/api/v3/depth"),
                 Exchange::Huobi(_) => Some("/market/depth"),
                 Exchange::Bitmart(_) => Some("/spot/quotation/v3/books"),
+                Exchange::Okx(_) => Some("/api/v5/market/books"),
+            },
+            API::GetFuturesOrderBook => match exchange {
+                Exchange::Binance(_) => Some("/fapi/v1/depth"),
+                Exchange::Bybit(_) => Some("/v5/market/orderbook"),
+                Exchange::Bitget(_) => Some("/api/v2/mix/market/merge-depth"),
+                Exchange::Gate(_) => Some("/api/v4/futures/usdt/order_book"),
+                Exchange::Kucoin(_) => Some("/api/v1/level2/depth"), //100
+                Exchange::Mexc(_) => Some("/api/v1/contract/depth"),
+                Exchange::Huobi(_) => Some("/linear-swap-ex/market/depth"),
+                Exchange::Bitmart(_) => Some("/contract/public/depth"),
                 Exchange::Okx(_) => Some("/api/v5/market/books"),
             },
         }

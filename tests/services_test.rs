@@ -2,8 +2,8 @@ use arbitrage_system::{
     config::parameters::{INFO_CODE, RESET_CODE},
     core::{
         traits::exchange_service::{
-            FuturesTickerService, MarginInfoService, NetworkService, OrderBookService,
-            TickerService,
+            FuturesOrderBookService, FuturesTickerService, MarginInfoService, NetworkService,
+            OrderBookService, TickerService,
         },
         types::{API, TradingPair},
     },
@@ -141,6 +141,60 @@ async fn test_orderbook_service() -> Result<(), Box<dyn std::error::Error>> {
                         exchange_name
                     );
                     // println!("{:#?}", orderbook);
+                    break;
+                }
+                Err(e) => {
+                    println!(
+                        "❗ {} attempt failed for {} - {}. Retry after 2 secs.",
+                        attempt, exchange_name, e
+                    );
+                    attempt += 1;
+                    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+                }
+            }
+        }
+
+        if attempt > attempts {
+            panic!(
+                "❌ Cannot get orderbook from {} for {} attempts",
+                exchange_name, attempts
+            );
+        } else {
+            println!(
+                "🟢 Receive orderbook {} for {} attempt",
+                exchange_name, attempt
+            );
+        }
+    }
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_futures_orderbook_service() -> Result<(), Box<dyn std::error::Error>> {
+    load_env();
+    let _ = log4rs::init_file("./src/config/log4rs.yaml", Default::default());
+
+    let exchanges = get_exchanges()?;
+
+    for (exchange_name, exchange) in exchanges {
+        let mut attempt = 1;
+        let attempts = 5;
+
+        while attempt <= attempts {
+            match exchange.futures_orderbook("XRP", "USDT").await {
+                Ok(orderbook) => {
+                    assert!(
+                        orderbook.0.len() > 0,
+                        "❗ Empty ASKS from {}",
+                        exchange_name
+                    );
+                    assert!(
+                        orderbook.1.len() > 0,
+                        "❗ Empty BIDS tickers from {}",
+                        exchange_name
+                    );
+                    println!("{:#?}", orderbook);
                     break;
                 }
                 Err(e) => {

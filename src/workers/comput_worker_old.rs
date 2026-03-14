@@ -3,10 +3,7 @@ use futures_util::future::join_all;
 use crate::{
     config::parameters::{QUOTE_RATE, REQUESTS_CHUNK_SIZE, REQUIRED_ORDERBOOK_SPREAD_PERCENT},
     core::{
-        traits::{
-            Workable,
-            exchange_service::{FuturesOrderBookService, OrderBookService},
-        },
+        traits::{Workable, exchange_service::OrderBookService},
         types::{
             Exchanges, OrderBook, TradingPair, TradingPairs,
             exchanges::Exchange,
@@ -26,6 +23,7 @@ struct SpreadBundle<'a> {
     pair: TradingPair,
     buy_ex: &'a Exchange,
     sell_ex: &'a Exchange,
+    networks: Vec<(WithdrawNetwork, DepositNetwork)>,
     buy_price: f64,
     sell_price: f64,
     base_profit: f64,
@@ -83,6 +81,9 @@ impl Workable for ComputWorker {
         let mut ticker_spread_passed = 0;
         let mut ticker_spread_total_elapsed: u128 = 0;
 
+        let mut verify_passed = 0;
+        let mut verify_total_elapsed: u128 = 0;
+
         let mut orderbook_passed = 0;
         let mut orderbook_total_elapsed: u128 = 0;
 
@@ -109,25 +110,68 @@ impl Workable for ComputWorker {
             ticker_spread_total_elapsed += elapsed;
             ticker_spread_passed += total_bundles;
 
-            let normalized_pairs = pairs
+            // Параллельное выполнение верификации
+            let verify_futures: Vec<_> = pairs
                 .into_iter()
-                .map(|(pair, spreads)| {
-                    let mut normalized: Vec<(TradingPair, &Exchange, &Exchange)> = Vec::new();
+                .map(|(pair, spreads)| async move {
+                    let mut verified = Vec::new();
+
                     for TickerSpread { buy_ex, sell_ex } in spreads {
                         let (Some(buy_exchange), Some(sell_exchange)) =
                             (self.exchanges.get(&buy_ex), self.exchanges.get(&sell_ex))
                         else {
                             continue;
                         };
-                        normalized.push((pair.clone(), buy_exchange, sell_exchange));
+                        match verify_arbitrage_conditions_and_get_networks(
+                            &buy_exchange,
+                            &sell_exchange,
+                            &pair.clone(),
+                        )
+                        .await
+                        {
+                            Ok(networks) => {
+                                if networks.len() != 0 {
+                                    verified.push((
+                                        pair.clone(),
+                                        buy_exchange,
+                                        sell_exchange,
+                                        networks,
+                                    ));
+                                }
+                            }
+                            Err(failed_exchange) => {
+                                if failed_exchange == buy_ex {
+                                    pair.blacklist.blacklist_buy(&failed_exchange);
+                                    // debug!(target: "debug_module", "After blacklist buy {} : {:#?}",failed_exchange, pair);
+                                } else {
+                                    pair.blacklist.blacklist_sell(&failed_exchange);
+                                    // debug!(target: "debug_module", "After blacklist sell {} : {:#?}",failed_exchange, pair);
+                                }
+                            }
+                        }
                     }
-                    normalized
-                })
-                .flatten();
 
-            let mut orderbook_futures: Vec<_> = normalized_pairs
+                    verified
+                })
+                .collect();
+
+            let verify_time = Instant::now();
+            let verify_results: Vec<(
+                TradingPair,
+                &Exchange,
+                &Exchange,
+                Vec<(WithdrawNetwork, DepositNetwork)>,
+            )> = join_all(verify_futures)
+                .await
                 .into_iter()
-                .map(|(pair, buy_exchange, sell_exchange)| async move {
+                .flatten()
+                .collect();
+            verify_total_elapsed += verify_time.elapsed().as_nanos();
+            verify_passed += verify_results.len();
+
+            let mut orderbook_futures: Vec<_> = verify_results
+                .into_iter()
+                .map(|(pair, buy_exchange, sell_exchange, networks)| async move {
                     let (buy_book, sell_book) = tokio::join!(
                         async {
                             match buy_exchange.orderbook(&pair.base, &pair.quote).await {
@@ -143,10 +187,7 @@ impl Workable for ComputWorker {
                             }
                         },
                         async {
-                            match sell_exchange
-                                .futures_orderbook(&pair.base, &pair.quote)
-                                .await
-                            {
+                            match sell_exchange.orderbook(&pair.base, &pair.quote).await {
                                 Ok(book) => Ok(book),
                                 Err(e) => {
                                     error!(
@@ -159,7 +200,14 @@ impl Workable for ComputWorker {
                             }
                         }
                     );
-                    (pair, buy_exchange, sell_exchange, buy_book, sell_book)
+                    (
+                        pair,
+                        buy_exchange,
+                        sell_exchange,
+                        networks,
+                        buy_book,
+                        sell_book,
+                    )
                 })
                 .collect();
 
@@ -169,6 +217,7 @@ impl Workable for ComputWorker {
                 TradingPair,
                 &Exchange,
                 &Exchange,
+                Vec<(WithdrawNetwork, DepositNetwork)>,
                 Result<OrderBook, ()>,
                 Result<OrderBook, ()>,
             )> = Vec::new();
@@ -187,6 +236,7 @@ impl Workable for ComputWorker {
                 TradingPair,
                 &Exchange,
                 &Exchange,
+                Vec<(WithdrawNetwork, DepositNetwork)>,
                 OrderBook,
                 OrderBook,
             )> = orderbook_results
@@ -196,6 +246,7 @@ impl Workable for ComputWorker {
                         pair,
                         buy_exchange,
                         sell_exchange,
+                        networks,
                         buy_orderbook_result,
                         sell_orderbook_result,
                     )| {
@@ -204,6 +255,7 @@ impl Workable for ComputWorker {
                                 pair,
                                 buy_exchange,
                                 sell_exchange,
+                                networks,
                                 buy_orderbook,
                                 sell_orderbook,
                             )),
@@ -216,7 +268,7 @@ impl Workable for ComputWorker {
 
             let mut spread_pairs: HashMap<TradingPair, Vec<SpreadBundle>> = HashMap::new();
 
-            for (pair, buy_exchange, sell_exchange, buy_orderbook, sell_orderbook) in
+            for (pair, buy_exchange, sell_exchange, networks, buy_orderbook, sell_orderbook) in
                 orderbook_passed_pairs
             {
                 // Получение объема квота
@@ -255,6 +307,7 @@ impl Workable for ComputWorker {
                     pair: pair.clone(),
                     buy_ex: buy_exchange,
                     sell_ex: sell_exchange,
+                    networks,
                     buy_price: calculated_buy_price,
                     sell_price: calculated_sell_price,
                     base_profit: base_profit,
@@ -274,18 +327,74 @@ impl Workable for ComputWorker {
 
                 message += &("\n┌".to_owned() + &horizontal_line + "┐\n");
                 message += &format!(
-                    "│ {:<9} │ {:<9} │ {:<10} │ {:<12} │ {:<12} │ {:<13} │",
-                    "Buy Ex", "Sell Ex", "Quote Vol.", "Buy Price", "Sell Price", "Base Profit",
+                    "│ {:<9} │ {:<9} │ {:<10} │ {:<12} │ {:<12} │ {:<13} │ {:<90} │",
+                    "Buy Ex",
+                    "Sell Ex",
+                    "Quote Vol.",
+                    "Buy Price",
+                    "Sell Price",
+                    "Base Profit",
+                    "Networks"
                 );
                 for bundle in spread_pair.1 {
+                    let mut network_message = format!("");
+
+                    for (withdraw_network, deposit_network) in bundle.networks {
+                        let fee_quote_volume =
+                            withdraw_network.withdraw_fee.unwrap_or(0.0) * bundle.sell_price;
+                        let profit_with_fee = bundle.base_profit - fee_quote_volume;
+                        let final_spread_percent = profit_with_fee / bundle.quote_volume * 100.0;
+
+                        let fee_message = match withdraw_network.withdraw_fee {
+                            Some(fee) => format!(
+                                "{:.2} {} ~ {:.2} {}",
+                                fee, bundle.pair.base, fee_quote_volume, bundle.pair.quote
+                            ),
+                            None => String::from("∅"),
+                        };
+                        let num_of_conf_message = match deposit_network.number_of_confirmation {
+                            Some(number) => number.to_string(),
+                            None => String::from("∅"),
+                        };
+                        let contract_message = match withdraw_network
+                            .base
+                            .config
+                            .contract_address
+                            .or_else(|| deposit_network.base.config.contract_address)
+                        {
+                            Some(contract_address) => {
+                                if contract_address.len() > 8 {
+                                    let start = &contract_address[0..4];
+                                    let end = &contract_address[contract_address.len() - 4..];
+                                    format!("{}..{}", start, end)
+                                } else {
+                                    contract_address
+                                }
+                            }
+                            None => String::from("∅"),
+                        };
+
+                        let message = format!(
+                            "[{}|Fee:{}|C-ct.:{}|Conf-s.:{}|Income:{:.2}~{:.2}%] ",
+                            withdraw_network.base.network_type,
+                            fee_message,
+                            contract_message,
+                            num_of_conf_message,
+                            profit_with_fee,
+                            final_spread_percent
+                        );
+                        network_message += &message;
+                    }
+
                     let bundle_line = format!(
-                        "│ {:<9} │ {:<9} │ {:<10} │ {:<12.5} │ {:<12.5} │ {:<13.2} │",
+                        "│ {:<9} │ {:<9} │ {:<10} │ {:<12.5} │ {:<12.5} │ {:<13.2} │ {:<90} │",
                         bundle.buy_ex.config().name,
                         bundle.sell_ex.config().name,
                         bundle.quote_volume,
                         bundle.buy_price,
                         bundle.sell_price,
                         bundle.base_profit,
+                        network_message
                     );
 
                     message += &("\n├".to_owned() + &horizontal_line + "┤\n");
@@ -301,6 +410,7 @@ impl Workable for ComputWorker {
             if loop_count == loop_to_update_stat {
                 // let formated_total_prices = format_duration(prices_quard_total_elapsed);
                 let formated_total_ticker = format_duration(ticker_spread_total_elapsed);
+                let formated_total_verify = format_duration(verify_total_elapsed);
                 let formated_total_orderbook = format_duration(orderbook_total_elapsed);
                 let formated_total_calc_books = format_duration(calc_books_total_elapsed);
                 let formated_total_final = format_duration(orderbook_spread_total_elapsed);
@@ -310,13 +420,16 @@ impl Workable for ComputWorker {
                 stat_info += &format!("├──── Ticker spread stat\n");
                 stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_ticker);
                 stat_info += &format!("│        └─ Total passed: {}\n", ticker_spread_passed);
+                stat_info += &format!("├──── Verify stat\n");
+                stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_verify);
+                stat_info += &format!("│        └─ Total passed: {}\n", verify_passed);
                 stat_info += &format!("├──── Orderbook stat\n");
                 stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_orderbook);
                 stat_info += &format!("│        └─ Total passed: {}\n", orderbook_passed);
                 stat_info += &format!("├──── Calculated Books stat\n");
                 stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_calc_books);
                 stat_info += &format!("│        └─ Total passed: {}\n", calc_books_passed);
-                stat_info += &format!("├──── Final SPOT-FUTURES spread stat\n");
+                stat_info += &format!("├──── Final spread stat\n");
                 stat_info += &format!("│        ├─ Total elapsed: {}\n", formated_total_final);
                 stat_info += &format!("│        └─ Total passed: {}\n", orderbook_spread_passed);
                 stat_info += &format!("└── Total elapsed: {}\n", formated_total_loop);
@@ -327,6 +440,8 @@ impl Workable for ComputWorker {
                     loop_count,
                     ticker_spread_passed,
                     ticker_spread_total_elapsed,
+                    verify_passed,
+                    verify_total_elapsed,
                     orderbook_passed,
                     orderbook_total_elapsed,
                     calc_books_passed,
@@ -334,7 +449,7 @@ impl Workable for ComputWorker {
                     orderbook_spread_passed,
                     orderbook_spread_total_elapsed,
                     loop_elapsed,
-                ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
                 stat_info = format!(
                     "┌── СomputWorker:{} Statistics for {} iteration\n",

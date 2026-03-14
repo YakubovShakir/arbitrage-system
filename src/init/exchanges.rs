@@ -28,7 +28,7 @@ pub fn init_binance() -> Result<Exchange, Box<dyn Error>> {
         secret_key: env::var("BINANCE_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::binance::BASE_URL, BINANCE_REQUESTS_PER_SECOND)?,
         futures_http_client: HttpClient::new(
-            config::binance::BASE_URL,
+            config::binance::FUTURES_BASE_URL,
             BINANCE_REQUESTS_PER_SECOND,
         )?,
         websocket_client: Some(WebSocketClient::new(config::binance::WEBSOCKET_URL)),
@@ -81,7 +81,10 @@ pub fn init_mexc() -> Result<Exchange, Box<dyn Error>> {
         api_key: env::var("MEXC_API_KEY")?.to_owned(),
         secret_key: env::var("MEXC_SECRET_KEY")?.to_owned(),
         http_client: HttpClient::new(config::mexc::BASE_URL, MEXC_REQUESTS_PER_SECOND)?,
-        futures_http_client: HttpClient::new(config::mexc::BASE_URL, MEXC_REQUESTS_PER_SECOND)?,
+        futures_http_client: HttpClient::new(
+            config::mexc::FUTURES_BASE_URL,
+            MEXC_REQUESTS_PER_SECOND,
+        )?,
 
         websocket_client: Some(
             WebSocketClient::new(config::mexc::WEBSOCKET_URL)
@@ -313,32 +316,32 @@ pub fn init_okx() -> Result<Exchange, Box<dyn Error>> {
 pub fn get_exchanges() -> Result<Exchanges, Box<dyn Error>> {
     let mut exchanges: Exchanges = HashMap::new();
 
-    // let binance: Exchange = init_binance()?;
-    // exchanges.insert(config::binance::NAME.to_owned(), binance);
+    let binance: Exchange = init_binance()?;
+    exchanges.insert(config::binance::NAME.to_owned(), binance);
 
-    // let bybit: Exchange = init_bybit()?;
-    // exchanges.insert(config::bybit::NAME.to_owned(), bybit);
+    let bybit: Exchange = init_bybit()?;
+    exchanges.insert(config::bybit::NAME.to_owned(), bybit);
 
-    // let mexc: Exchange = init_mexc()?;
-    // exchanges.insert(config::mexc::NAME.to_owned(), mexc);
+    let mexc: Exchange = init_mexc()?;
+    exchanges.insert(config::mexc::NAME.to_owned(), mexc);
 
-    // let bitget: Exchange = init_bitget()?;
-    // exchanges.insert(config::bitget::NAME.to_owned(), bitget);
+    let bitget: Exchange = init_bitget()?;
+    exchanges.insert(config::bitget::NAME.to_owned(), bitget);
 
     let kucoin: Exchange = init_kucoin()?;
     exchanges.insert(config::kucoin::NAME.to_owned(), kucoin);
 
-    // let gate: Exchange = init_gate()?;
-    // exchanges.insert(config::gate::NAME.to_owned(), gate);
+    let gate: Exchange = init_gate()?;
+    exchanges.insert(config::gate::NAME.to_owned(), gate);
 
-    // let huobi: Exchange = init_huobi()?;
-    // exchanges.insert(config::huobi::NAME.to_owned(), huobi);
+    let huobi: Exchange = init_huobi()?;
+    exchanges.insert(config::huobi::NAME.to_owned(), huobi);
 
-    // let bitmart: Exchange = init_bitmart()?;
-    // exchanges.insert(config::bitmart::NAME.to_owned(), bitmart);
+    let bitmart: Exchange = init_bitmart()?;
+    exchanges.insert(config::bitmart::NAME.to_owned(), bitmart);
 
-    // let okx: Exchange = init_okx()?;
-    // exchanges.insert(config::okx::NAME.to_owned(), okx);
+    let okx: Exchange = init_okx()?;
+    exchanges.insert(config::okx::NAME.to_owned(), okx);
 
     Ok(exchanges)
 }

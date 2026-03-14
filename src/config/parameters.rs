@@ -4,9 +4,9 @@ pub const EXCHANGES_PER_TICKER_THREAD: usize = 4;
 // filter parameters
 pub const QUOTE_LIST: &[(&str, f64)] = &[
     ("USDT", 900.0),
-    ("USDC", 900.0),
-    ("DAI", 900.0),
-    ("TUSD", 900.0),
+    // ("USDC", 900.0),  // Закомменчено потому что текущая реализация фьючерсов идет толко к паре USDT!
+    // ("DAI", 900.0),
+    // ("TUSD", 900.0),
 ];
 
 pub const QUOTE_RATE: f64 = 1.3;

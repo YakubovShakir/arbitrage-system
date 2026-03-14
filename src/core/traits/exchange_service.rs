@@ -20,6 +20,15 @@ pub trait OrderBookService {
 }
 
 #[async_trait]
+pub trait FuturesOrderBookService {
+    async fn futures_orderbook(
+        &self,
+        base: &str,
+        quote: &str,
+    ) -> Result<OrderBook, Box<dyn std::error::Error>>;
+}
+
+#[async_trait]
 pub trait NetworkService {
     async fn networks(&self, coin: &str) -> Result<ExchangeNetworks, Box<dyn std::error::Error>>;
 }
