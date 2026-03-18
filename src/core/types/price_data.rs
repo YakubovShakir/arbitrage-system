@@ -1,5 +1,5 @@
 use crate::{
-    config::parameters::REQUIRED_TICKER_SPREAD_PERCENT,
+    config::parameters::{MAX_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT},
     core::{
         types::{ExchangeName, trading_pair::TradingPairBlacklist},
         utils::comput_spread_percent,

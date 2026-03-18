@@ -1,7 +1,10 @@
 use futures_util::future::join_all;
 
 use crate::{
-    config::parameters::{QUOTE_RATE, REQUESTS_CHUNK_SIZE, REQUIRED_ORDERBOOK_SPREAD_PERCENT},
+    config::parameters::{
+        MAX_ORDERBOOK_SPREAD_PERCENT, QUOTE_RATE, REQUESTS_CHUNK_SIZE,
+        REQUIRED_ORDERBOOK_SPREAD_PERCENT,
+    },
     core::{
         traits::{
             Workable,
@@ -245,7 +248,9 @@ impl Workable for ComputWorker {
                     comput_spread_percent(&calculated_buy_price, &calculated_sell_price);
                 orderbook_spread_total_elapsed += orderbook_spread_time.elapsed().as_nanos();
 
-                if orderbook_spread < REQUIRED_ORDERBOOK_SPREAD_PERCENT {
+                if orderbook_spread < REQUIRED_ORDERBOOK_SPREAD_PERCENT
+                    || orderbook_spread > MAX_ORDERBOOK_SPREAD_PERCENT
+                {
                     continue;
                 }
                 orderbook_spread_passed += 1;
