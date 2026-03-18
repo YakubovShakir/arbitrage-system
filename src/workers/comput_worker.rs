@@ -275,7 +275,7 @@ impl Workable for ComputWorker {
 
             for spread_pair in spread_pairs {
                 let mut message = format!(" ✅ {}/{}", spread_pair.0.base, spread_pair.0.quote);
-                let horizontal_line = format!("{}", "─".repeat(156));
+                let horizontal_line = format!("{}", "─".repeat(84));
 
                 message += &("\n┌".to_owned() + &horizontal_line + "┐\n");
                 message += &format!(
