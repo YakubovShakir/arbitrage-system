@@ -11,7 +11,7 @@ pub const QUOTE_LIST: &[(&str, f64)] = &[
 
 pub const QUOTE_RATE: f64 = 1.0;
 pub const REQUIRED_TICKER_SPREAD_PERCENT: f64 = 0.25;
-pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 0.5;
+pub const REQUIRED_ORDERBOOK_SPREAD_PERCENT: f64 = 1.0;
 
 // cache
 pub const NETWORKS_CACHE_TTL_SECS: u64 = 12000;
