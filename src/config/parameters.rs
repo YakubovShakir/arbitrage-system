@@ -53,7 +53,9 @@ pub const MEXC_REQUESTS_PER_SECOND: usize = 10;
 pub const OKX_REQUESTS_PER_SECOND: usize = 20;
 pub const KUCOIN_REQUESTS_PER_SECOND: usize = 15;
 // camp временно под блокировкой но можно и не вынимать
-pub const BASE_BLACKLIST: &[&str] = &["USTC", "LUNC", "RVN", "CAMP", "LUNA", "VANRY", "AIA", "4"];
+pub const BASE_BLACKLIST: &[&str] = &[
+    "USTC", "LUNC", "RVN", "CAMP", "LUNA", "VANRY", "AIA", "4", "SAHARA", "BARD",
+];
 // unused
 pub const SUCCESS_CODE: &str = "\x1b[38;5;48m"; // #00ff87 - яркий мятный ✅
 pub const ERROR_CODE: &str = "\x1b[38;5;203m"; // #ff5f5f - яркий алый ❌
