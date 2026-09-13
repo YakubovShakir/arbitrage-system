@@ -1,7 +1,23 @@
+# build
 /target
 main
-.vscode
-.DS_Store
+
+# secrets
 .env
+.env.*
+!.env.example
+
+# logs
 *.log
+logs/*
+!logs/.gitkeep
+
+# editor / os
+.vscode
+.claude
+.DS_Store
+**/.DS_Store
 .prettierrc
+
+# scratch
+*.ods

@@ -26,8 +26,6 @@ pub type HmacSha256 = Hmac<Sha256>;
 pub type HmacSha512 = Hmac<Sha512>;
 pub type ExchangeName = String;
 
-pub type Exchanges = HashMap<ExchangeName, Exchange>;
-
 pub type TradingPairs = DashMap<TradingPair, PriceData>;
 pub type Tickers = HashMap<TradingPair, TickerPrice>;
 

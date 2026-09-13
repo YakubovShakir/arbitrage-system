@@ -67,7 +67,7 @@ impl FuturesOrderBookService for Exchange {
                 ];
                 let symbol = base.to_string() + quote;
                 let query = &[
-                    ("category", "spot"),
+                    ("category", "linear"),
                     ("symbol", symbol.as_str()),
                     ("limit", order_book_limit),
                 ];

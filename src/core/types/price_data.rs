@@ -1,5 +1,5 @@
 use crate::{
-    config::parameters::{MAX_ORDERBOOK_SPREAD_PERCENT, REQUIRED_TICKER_SPREAD_PERCENT},
+    config::parameters::REQUIRED_TICKER_SPREAD_PERCENT,
     core::{
         types::{ExchangeName, trading_pair::TradingPairBlacklist},
         utils::comput_spread_percent,
@@ -45,20 +45,20 @@ impl ExchangePrice {
 
 #[derive(Debug)]
 pub struct PriceData {
-    pub sell_price_list: Vec<ExchangePrice>,
-    pub buy_price_list: Vec<ExchangePrice>,
+    pub bids: Vec<ExchangePrice>,
+    pub asks: Vec<ExchangePrice>,
 }
 
 impl PriceData {
     pub fn new(buy_ex_name: &str, sell_ex_name: &str, sell_price: &f64, buy_price: &f64) -> Self {
         Self {
-            sell_price_list: vec![ExchangePrice::new(sell_ex_name, sell_price)],
-            buy_price_list: vec![ExchangePrice::new(buy_ex_name, buy_price)],
+            bids: vec![ExchangePrice::new(sell_ex_name, sell_price)],
+            asks: vec![ExchangePrice::new(buy_ex_name, buy_price)],
         }
     }
     pub async fn update_buy_list(&mut self, exchange: &str, price: f64) {
         let mut finded = false;
-        for exchange_price in &self.buy_price_list {
+        for exchange_price in &self.asks {
             if exchange_price.exchange == exchange {
                 let mut price_quard = exchange_price.price.write().await;
                 let mut checked_quard = exchange_price.checked.write().await;
@@ -69,14 +69,13 @@ impl PriceData {
             }
         }
         if !finded {
-            self.buy_price_list
-                .push(ExchangePrice::new(exchange, &price));
+            self.asks.push(ExchangePrice::new(exchange, &price));
         }
     }
 
     pub async fn update_sell_list(&mut self, exchange: &str, price: f64) {
         let mut finded = false;
-        for exchange_price in &self.sell_price_list {
+        for exchange_price in &self.bids {
             if exchange_price.exchange == exchange {
                 let mut price_quard = exchange_price.price.write().await;
                 let mut checked_quard = exchange_price.checked.write().await;
@@ -87,8 +86,7 @@ impl PriceData {
             }
         }
         if !finded {
-            self.sell_price_list
-                .push(ExchangePrice::new(exchange, &price));
+            self.bids.push(ExchangePrice::new(exchange, &price));
         }
     }
     pub async fn detect_spread_pairs(
@@ -99,13 +97,13 @@ impl PriceData {
 
         // Фильтруем buy_price_list и sell_price_list, исключая заблокированные биржи
         let active_buy: Vec<_> = self
-            .buy_price_list
+            .asks
             .iter()
             .filter(|p| !blacklist.is_buy_blacklisted(&p.exchange))
             .collect();
 
         let active_sell: Vec<_> = self
-            .sell_price_list
+            .bids
             .iter()
             .filter(|p| !blacklist.is_sell_blacklisted(&p.exchange))
             .collect();
@@ -185,8 +183,8 @@ impl PriceData {
             ExchangePrice::new("Huobi", &102.0),
         ];
         PriceData {
-            buy_price_list: buy_list,
-            sell_price_list: sell_list,
+            asks: buy_list,
+            bids: sell_list,
         }
     }
 }
@@ -237,17 +235,17 @@ mod tests {
     #[tokio::test]
     async fn test_update_buy_list() {
         let mut mock = PriceData::mock();
-        let buy_list_len = mock.buy_price_list.len();
+        let buy_list_len = mock.asks.len();
 
         // add existing exchange price
         mock.update_buy_list("Binance", 101.0).await;
-        assert!(mock.buy_price_list.len() == buy_list_len);
+        assert!(mock.asks.len() == buy_list_len);
 
         for ExchangePrice {
             exchange,
             price,
             checked,
-        } in &mock.buy_price_list
+        } in &mock.asks
         {
             if exchange == "Binance" {
                 assert!(*price.read().await == 101.0);
@@ -257,23 +255,23 @@ mod tests {
 
         // add new exchange price
         mock.update_buy_list("OKX", 103.1).await;
-        assert!(mock.buy_price_list.len() == buy_list_len + 1);
+        assert!(mock.asks.len() == buy_list_len + 1);
     }
 
     #[tokio::test]
     async fn test_update_sell_list() {
         let mut mock = PriceData::mock();
-        let sell_list_len = mock.sell_price_list.len();
+        let sell_list_len = mock.bids.len();
 
         // add existing exchange price
         mock.update_sell_list("Binance", 101.0).await;
-        assert!(mock.sell_price_list.len() == sell_list_len);
+        assert!(mock.bids.len() == sell_list_len);
 
         for ExchangePrice {
             exchange,
             price,
             checked,
-        } in &mock.sell_price_list
+        } in &mock.bids
         {
             if exchange == "Binance" {
                 assert!(*price.read().await == 101.0);
@@ -282,6 +280,6 @@ mod tests {
         }
         // add new exchange price
         mock.update_sell_list("OKX", 103.1).await;
-        assert!(mock.sell_price_list.len() == sell_list_len + 1);
+        assert!(mock.bids.len() == sell_list_len + 1);
     }
 }

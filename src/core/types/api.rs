@@ -9,7 +9,7 @@ pub struct CacheData {
     value: RwLock<Arc<JsonValue>>,
     timestamp: RwLock<Instant>,
     ttl: Duration,
-}
+} 
 
 impl CacheData {
     pub fn new(value: JsonValue, ttl: Duration) -> Self {

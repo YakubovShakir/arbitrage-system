@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+cache-data= { path = "./libs/cache-data"}
+exchange = {path = "./libs/exchange"}
 async-trait = "0.1.89"
 prost = "0.12.6"
 data-encoding = "2.9.0"
